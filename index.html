@@ -2518,9 +2518,24 @@ async function loginWithPasskey() {
       username = idx[credId] || null;
     }
     if (!username) { alert('Could not identify your account. Please sign in with your password.'); return; }
-    const user = loadUser(username);
-    if (!user) { alert('Account not found. Please sign in with your password.'); return; }
+    let user = loadUser(username);
+    if (!user) {
+      // Passkey authenticated but no local account — auto-create one
+      // This happens when opening from Dock icon or "Add to Home Screen"
+      // because standalone web apps have separate localStorage
+      user = {
+        username: username,
+        password: '',
+        name: username,
+        targetDate: '',
+        history: [],
+        createdAt: new Date().toISOString(),
+        weekProgress: {},
+        passkeyId: bufferToBase64url(assertion.rawId)
+      };
+    }
     currentUser = user;
+    saveUser();
     showDashboard();
   } catch(e) {
     if (e.name !== 'NotAllowedError') alert('Sign in failed: ' + e.message);
