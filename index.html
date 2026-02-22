@@ -2497,22 +2497,27 @@ async function setupPasskey() {
 }
 async function loginWithPasskey() {
   if (!window.PublicKeyCredential) { alert('Passkeys are not supported on this browser.'); return; }
-  const idx = JSON.parse(localStorage.getItem('gre_passkey_index') || '{}');
-  const ids = Object.keys(idx);
-  if (!ids.length) {
-    alert('No passkey set up yet.\n\nPlease sign in with your username and password first, then tap "🔑 Set up Face ID" on your dashboard.');
-    return;
-  }
   try {
+    // Empty allowCredentials = discoverable/resident key mode
+    // iCloud Keychain will find the synced passkey automatically on any Apple device
     const assertion = await navigator.credentials.get({ publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: ids.map(id => ({ id: base64urlToBuffer(id), type: 'public-key' })),
+      allowCredentials: [],
       userVerification: 'required',
       timeout: 60000
     }});
-    const credId = bufferToBase64url(assertion.rawId);
-    const username = idx[credId];
-    if (!username) { alert('Passkey not recognised. Please sign in with your password.'); return; }
+    // Get username from userHandle (stored as TextEncoder(username) during setup)
+    let username = null;
+    if (assertion.response.userHandle) {
+      username = new TextDecoder().decode(assertion.response.userHandle);
+    }
+    // Fallback: check local index by credential ID
+    if (!username) {
+      const credId = bufferToBase64url(assertion.rawId);
+      const idx = JSON.parse(localStorage.getItem('gre_passkey_index') || '{}');
+      username = idx[credId] || null;
+    }
+    if (!username) { alert('Could not identify your account. Please sign in with your password.'); return; }
     const user = loadUser(username);
     if (!user) { alert('Account not found. Please sign in with your password.'); return; }
     currentUser = user;
