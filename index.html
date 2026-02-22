@@ -2504,20 +2504,37 @@ async function loginWithPasskey() {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
       allowCredentials: [],
       userVerification: 'required',
+      rpId: location.hostname,
       timeout: 60000
     }});
-    // Get username from userHandle (stored as TextEncoder(username) during setup)
+    const credId = bufferToBase64url(assertion.rawId);
+    // Try to get username from userHandle (set during registration)
     let username = null;
-    if (assertion.response.userHandle) {
+    if (assertion.response.userHandle && assertion.response.userHandle.byteLength > 0) {
       username = new TextDecoder().decode(assertion.response.userHandle);
     }
     // Fallback: check local index by credential ID
     if (!username) {
-      const credId = bufferToBase64url(assertion.rawId);
       const idx = JSON.parse(localStorage.getItem('gre_passkey_index') || '{}');
       username = idx[credId] || null;
     }
-    if (!username) { alert('Could not identify your account. Please sign in with your password.'); return; }
+    // Fallback: scan all localStorage for any gre_user_ account with matching passkeyId
+    if (!username) {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('gre_user_')) {
+          try {
+            const u = JSON.parse(localStorage.getItem(key));
+            if (u && u.passkeyId === credId) { username = u.username; break; }
+          } catch(ex) {}
+        }
+      }
+    }
+    // Final fallback: if passkey authenticated but we truly can't find any username,
+    // use credential ID as a unique identifier to create an account
+    if (!username) {
+      username = 'user_' + credId.substring(0, 8);
+    }
     let user = loadUser(username);
     if (!user) {
       // Passkey authenticated but no local account — auto-create one
@@ -2531,7 +2548,7 @@ async function loginWithPasskey() {
         history: [],
         createdAt: new Date().toISOString(),
         weekProgress: {},
-        passkeyId: bufferToBase64url(assertion.rawId)
+        passkeyId: credId
       };
     }
     currentUser = user;
