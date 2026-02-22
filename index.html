@@ -92,7 +92,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--da
 .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
 .sync-dot-green{background:var(--green);}
 .sync-dot-orange{background:var(--warn);}
-/* sync-file-input styled inline */
+#sync-file-input{display:none;}
+
+/* PASSKEY */
+.btn-passkey{background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:13px 20px;font-size:15px;font-weight:600;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;transition:background .2s;}
+.btn-passkey:hover{background:#333;}
+.passkey-divider{text-align:center;color:#aaa;font-size:13px;margin:8px 0 16px;position:relative;}
+.passkey-divider::before,.passkey-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:#e0e0e0;}
+.passkey-divider::before{left:0;}.passkey-divider::after{right:0;}
+.passkey-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.passkey-modal-box{background:#fff;border-radius:20px;padding:36px 28px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.passkey-modal-box h3{margin:0 0 10px;font-size:20px;color:var(--dark);}
+.passkey-modal-box p{color:#666;font-size:14px;margin:0 0 24px;line-height:1.5;}
+.passkey-modal-btns{display:flex;flex-direction:column;gap:10px;}
 
 /* DASHBOARD */
 #page-dashboard{background:#f4f6fa;}
@@ -355,6 +367,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--da
     <div class="login-body">
       <!-- Login Form -->
       <div id="form-login">
+        <button class="btn-passkey" onclick="loginWithPasskey()" id="btn-passkey-login">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M16 16c0-2.21-1.79-4-4-4s-4 1.79-4 4"/><rect x="15" y="13" width="6" height="8" rx="1"/><line x1="18" y1="13" x2="18" y2="11"/><circle cx="18" cy="17" r="1" fill="white" stroke="none"/></svg>
+          Sign in with Face ID / Touch ID
+        </button>
+        <div class="passkey-divider">or use password</div>
         <div class="form-group">
           <label>Username</label>
           <input type="text" id="login-user" placeholder="Enter your username" autocomplete="username">
@@ -426,9 +443,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--da
       </div>
       <div class="sync-btns">
         <button class="btn-sync btn-sync-save" onclick="exportProgress()" id="btn-sync-save">Save to Cloud</button>
-        <label class="btn-sync btn-sync-load" for="sync-file-input">Load from Cloud</label>
+        <button class="btn-sync btn-sync-load" onclick="document.getElementById('sync-file-input').click()">Load from Cloud</button>
+        <button class="btn-sync btn-sync-load" onclick="setupPasskey()" id="btn-setup-passkey" style="display:none;background:#1a1a1a;">🔑 Set up Face ID</button>
       </div>
-      <input type="file" id="sync-file-input" accept=".json" onchange="importProgress(event)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+      <input type="file" id="sync-file-input" accept=".json" onchange="importProgress(event)">
     </div>
 
     <!-- Stats Row -->
@@ -1076,6 +1094,12 @@ function doRegister() {
   };
   saveUser();
   showInstructions('welcome');
+  // Offer passkey setup after registration
+  setTimeout(() => {
+    if (window.PublicKeyCredential) {
+      document.getElementById('passkey-setup-modal').classList.remove('hidden');
+    }
+  }, 900);
 }
 function logout() {
   currentUser = null;
@@ -1094,6 +1118,11 @@ function showDashboard() {
   renderWeekPlan();
   renderHistory();
   updateSyncIndicator();
+  // Show passkey setup button if not yet set up
+  const passkeyBtn = document.getElementById('btn-setup-passkey');
+  if (passkeyBtn) {
+    passkeyBtn.style.display = (window.PublicKeyCredential && !currentUser.passkeyId) ? '' : 'none';
+  }
 }
 function renderStats() {
   const h = currentUser.history || [];
@@ -2412,6 +2441,106 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 // Enter key on login
 document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ============================================================
+// PASSKEY / WEBAUTHN (Face ID & Touch ID)
+// ============================================================
+function bufferToBase64url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function base64urlToBuffer(b64) {
+  b64 = b64.replace(/-/g,'+').replace(/_/g,'/');
+  while(b64.length%4) b64+='=';
+  return Uint8Array.from(atob(b64), c=>c.charCodeAt(0)).buffer;
+}
+function dismissPasskeySetup() {
+  document.getElementById('passkey-setup-modal').classList.add('hidden');
+}
+async function setupPasskey() {
+  dismissPasskeySetup();
+  if (!window.PublicKeyCredential) { alert('Passkeys are not supported on this browser. Please use Safari on iPhone/Mac or Chrome on Mac.'); return; }
+  try {
+    const credential = await navigator.credentials.create({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'GRE Practice Exam', id: location.hostname },
+      user: {
+        id: new TextEncoder().encode(currentUser.username),
+        name: currentUser.username,
+        displayName: currentUser.name
+      },
+      pubKeyCredParams: [
+        { alg: -7, type: 'public-key' },
+        { alg: -257, type: 'public-key' }
+      ],
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        userVerification: 'required',
+        residentKey: 'required'
+      },
+      timeout: 60000
+    }});
+    const credId = bufferToBase64url(credential.rawId);
+    currentUser.passkeyId = credId;
+    saveUser();
+    // Store global index: credId → username
+    const idx = JSON.parse(localStorage.getItem('gre_passkey_index') || '{}');
+    idx[credId] = currentUser.username;
+    localStorage.setItem('gre_passkey_index', JSON.stringify(idx));
+    // Hide setup button on dashboard now that passkey is set
+    const setupBtn = document.getElementById('btn-setup-passkey');
+    if (setupBtn) setupBtn.style.display = 'none';
+    alert('✅ Face ID / Touch ID set up successfully!\n\nNext time you visit, just tap "Sign in with Face ID / Touch ID" — no password needed.');
+  } catch(e) {
+    if (e.name !== 'NotAllowedError') alert('Setup failed: ' + e.message);
+  }
+}
+async function loginWithPasskey() {
+  if (!window.PublicKeyCredential) { alert('Passkeys are not supported on this browser.'); return; }
+  const idx = JSON.parse(localStorage.getItem('gre_passkey_index') || '{}');
+  const ids = Object.keys(idx);
+  if (!ids.length) {
+    alert('No passkey set up yet.\n\nPlease sign in with your username and password first, then tap "🔑 Set up Face ID" on your dashboard.');
+    return;
+  }
+  try {
+    const assertion = await navigator.credentials.get({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: ids.map(id => ({ id: base64urlToBuffer(id), type: 'public-key' })),
+      userVerification: 'required',
+      timeout: 60000
+    }});
+    const credId = bufferToBase64url(assertion.rawId);
+    const username = idx[credId];
+    if (!username) { alert('Passkey not recognised. Please sign in with your password.'); return; }
+    const user = loadUser(username);
+    if (!user) { alert('Account not found. Please sign in with your password.'); return; }
+    currentUser = user;
+    showDashboard();
+  } catch(e) {
+    if (e.name !== 'NotAllowedError') alert('Sign in failed: ' + e.message);
+  }
+}
+// Hide passkey button if WebAuthn not available
+if (!window.PublicKeyCredential) {
+  const btn = document.getElementById('btn-passkey-login');
+  if (btn) btn.style.display = 'none';
+  const div = btn && btn.nextElementSibling;
+  if (div && div.classList.contains('passkey-divider')) div.style.display = 'none';
+}
 </script>
+
+<!-- Passkey Setup Modal -->
+<div id="passkey-setup-modal" class="passkey-modal hidden">
+  <div class="passkey-modal-box">
+    <div style="font-size:52px;margin-bottom:12px">🔑</div>
+    <h3>Enable Face ID / Touch ID?</h3>
+    <p>Log in instantly on all your Apple devices without ever typing a password again.</p>
+    <div class="passkey-modal-btns">
+      <button class="btn btn-primary" onclick="setupPasskey()">Set Up Now</button>
+      <button class="btn" style="background:#f0f0f0;color:#555;" onclick="dismissPasskeySetup()">Maybe Later</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
