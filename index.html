@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRE Practice Exam | Official Simulation</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --blue:#1a3a6b;--blue2:#2255a4;--accent:#e8a020;--bg:#f4f6fa;
+  --white:#ffffff;--gray:#6b7280;--light:#e5e7eb;--dark:#111827;
+  --green:#16a34a;--red:#dc2626;--warn:#d97706;--radius:8px;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;}
+.hidden{display:none!important;}
+.page{min-height:100vh;display:flex;flex-direction:column;}
+
+/* NAV */
+.top-bar{background:var(--blue);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;}
+.top-bar .logo{font-size:20px;font-weight:700;letter-spacing:1px;}
+.top-bar .logo span{color:var(--accent);}
+.top-bar .user-info{font-size:13px;display:flex;align-items:center;gap:12px;}
+.top-bar button{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:13px;}
+.top-bar button:hover{background:rgba(255,255,255,0.25);}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:32px;}
+.card-sm{padding:20px;}
+
+/* BUTTONS */
+.btn{display:inline-block;padding:10px 24px;border-radius:var(--radius);border:none;cursor:pointer;font-size:15px;font-weight:600;transition:all .2s;}
+.btn-primary{background:var(--blue2);color:#fff;}
+.btn-primary:hover{background:var(--blue);}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{background:#c68818;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#b91c1c;}
+.btn-outline{background:transparent;border:2px solid var(--blue2);color:var(--blue2);}
+.btn-outline:hover{background:var(--blue2);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#15803d;}
+.btn-sm{padding:6px 14px;font-size:13px;}
+.btn-full{width:100%;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* FORMS */
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-weight:600;margin-bottom:6px;font-size:14px;color:var(--dark);}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--light);border-radius:6px;font-size:15px;outline:none;transition:border .2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue2);}
+.form-group textarea{resize:vertical;min-height:180px;font-family:inherit;}
+.form-error{color:var(--red);font-size:13px;margin-top:4px;}
+
+/* LOGIN PAGE */
+#page-login{background:linear-gradient(135deg,#1a3a6b 0%,#2255a4 60%,#1a3a6b 100%);justify-content:center;align-items:center;padding:20px;}
+.login-box{background:#fff;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.25);width:100%;max-width:440px;overflow:hidden;}
+.login-header{background:var(--blue);padding:28px 32px;text-align:center;}
+.login-header h1{color:#fff;font-size:22px;font-weight:700;letter-spacing:.5px;}
+.login-header p{color:rgba(255,255,255,0.75);font-size:13px;margin-top:4px;}
+.login-header .ets-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:8px;letter-spacing:1px;}
+.login-tabs{display:flex;border-bottom:2px solid var(--light);}
+.login-tabs button{flex:1;padding:14px;background:none;border:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--gray);transition:all .2s;}
+.login-tabs button.active{color:var(--blue2);border-bottom:3px solid var(--blue2);margin-bottom:-2px;}
+.login-body{padding:28px 32px;}
+.login-footer{text-align:center;padding:16px;background:#f8fafc;font-size:12px;color:var(--gray);}
+
+/* INSTRUCTIONS PAGE */
+#page-instructions{background:#f4f6fa;}
+.inst-container{max-width:860px;margin:0 auto;padding:40px 20px;}
+.inst-header{background:var(--blue);color:#fff;border-radius:var(--radius) var(--radius) 0 0;padding:24px 32px;}
+.inst-header h2{font-size:20px;}
+.inst-header p{font-size:13px;opacity:.8;margin-top:4px;}
+.inst-body{background:#fff;border-radius:0 0 var(--radius) var(--radius);padding:32px;border:1px solid var(--light);}
+.inst-body h3{color:var(--blue);font-size:16px;margin:20px 0 10px;border-bottom:1px solid var(--light);padding-bottom:6px;}
+.inst-body p,.inst-body li{font-size:14px;line-height:1.75;color:#374151;}
+.inst-body ul,.inst-body ol{padding-left:24px;margin:8px 0;}
+.inst-body .warning-box{background:#fef3c7;border-left:4px solid var(--warn);padding:12px 16px;border-radius:4px;margin:16px 0;font-size:13px;}
+.inst-body .info-box{background:#eff6ff;border-left:4px solid var(--blue2);padding:12px 16px;border-radius:4px;margin:16px 0;font-size:13px;}
+.inst-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:28px;}
+
+/* SYNC BAR */
+.sync-bar{background:#fff;border-radius:var(--radius);padding:14px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.sync-bar .sync-label{font-size:14px;color:var(--dark);font-weight:600;display:flex;align-items:center;gap:8px;}
+.sync-bar .sync-label .cloud-icon{font-size:18px;}
+.sync-bar .sync-status{font-size:12px;color:var(--gray);}
+.sync-bar .sync-btns{display:flex;gap:8px;}
+.sync-bar .btn-sync{padding:7px 16px;font-size:13px;font-weight:600;border-radius:6px;border:none;cursor:pointer;transition:all .2s;}
+.btn-sync-save{background:var(--blue2);color:#fff;}
+.btn-sync-save:hover{background:var(--blue);}
+.btn-sync-load{background:var(--accent);color:#fff;}
+.btn-sync-load:hover{background:#c68818;}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+.sync-dot-green{background:var(--green);}
+.sync-dot-orange{background:var(--warn);}
+/* sync-file-input styled inline */
+
+/* DASHBOARD */
+#page-dashboard{background:#f4f6fa;}
+.dash-container{max-width:1100px;margin:0 auto;padding:30px 20px;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:#fff;border-radius:var(--radius);padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;}
+.stat-card .stat-val{font-size:32px;font-weight:700;color:var(--blue2);}
+.stat-card .stat-label{font-size:12px;color:var(--gray);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
+.section-title{font-size:18px;font-weight:700;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:20px;background:var(--blue2);border-radius:2px;display:inline-block;}
+.exam-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;}
+.exam-option-card{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;border:2px solid transparent;transition:all .2s;text-align:center;}
+.exam-option-card:hover{border-color:var(--blue2);transform:translateY(-2px);}
+.exam-option-card .icon{font-size:36px;margin-bottom:10px;}
+.exam-option-card h3{font-size:15px;font-weight:700;color:var(--dark);}
+.exam-option-card p{font-size:12px;color:var(--gray);margin-top:4px;}
+.week-plan{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.week-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:16px;}
+.week-item{border:1.5px solid var(--light);border-radius:6px;padding:12px;font-size:12px;}
+.week-item.done{background:#f0fdf4;border-color:var(--green);}
+.week-item.current{background:#eff6ff;border-color:var(--blue2);}
+.week-item h4{font-size:13px;font-weight:700;margin-bottom:4px;}
+.week-item p{color:var(--gray);line-height:1.4;}
+.history-table{width:100%;border-collapse:collapse;font-size:13px;}
+.history-table th{background:#f8fafc;padding:10px 12px;text-align:left;font-weight:600;color:var(--gray);border-bottom:2px solid var(--light);}
+.history-table td{padding:10px 12px;border-bottom:1px solid var(--light);}
+.score-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+.score-high{background:#dcfce7;color:#15803d;}
+.score-mid{background:#fef3c7;color:#92400e;}
+.score-low{background:#fee2e2;color:#b91c1c;}
+
+/* EXAM PAGE */
+#page-exam{background:#f0f2f5;flex-direction:column;}
+.exam-header{background:var(--blue);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.exam-header .section-name{font-size:15px;font-weight:700;}
+.exam-header .timer{font-size:20px;font-weight:700;font-family:monospace;letter-spacing:2px;background:rgba(0,0,0,0.2);padding:6px 16px;border-radius:6px;}
+.exam-header .timer.warn{color:#fbbf24;}
+.exam-header .timer.danger{color:#f87171;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.5;}}
+.exam-header .q-count{font-size:13px;opacity:.8;}
+.exam-body{flex:1;display:flex;gap:0;overflow:hidden;}
+.q-panel{flex:1;overflow-y:auto;padding:24px;max-width:820px;margin:0 auto;width:100%;}
+.q-nav-panel{width:220px;background:#fff;border-left:1px solid var(--light);padding:16px;overflow-y:auto;flex-shrink:0;}
+.q-nav-panel h4{font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.q-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.q-dot{width:32px;height:32px;border-radius:4px;border:1.5px solid var(--light);background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;font-weight:600;transition:all .15s;}
+.q-dot:hover{border-color:var(--blue2);}
+.q-dot.current{background:var(--blue2);color:#fff;border-color:var(--blue2);}
+.q-dot.answered{background:#dcfce7;border-color:var(--green);}
+.q-dot.flagged{background:#fef3c7;border-color:var(--warn);}
+.q-dot.answered.flagged{background:#fef9c3;border-color:var(--warn);}
+.question-card{background:#fff;border-radius:var(--radius);padding:28px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;}
+.question-card .q-meta{font-size:12px;color:var(--gray);margin-bottom:12px;display:flex;gap:12px;align-items:center;}
+.q-type-badge{background:var(--blue);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.question-card .q-text{font-size:15px;line-height:1.7;color:var(--dark);margin-bottom:20px;}
+.question-card .passage{background:#f8fafc;border-left:3px solid var(--blue2);padding:14px 18px;font-size:14px;line-height:1.8;margin-bottom:18px;border-radius:0 4px 4px 0;}
+.choices{display:flex;flex-direction:column;gap:8px;}
+.choice{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--light);border-radius:6px;cursor:pointer;transition:all .15s;font-size:14px;}
+.choice:hover{border-color:var(--blue2);background:#f0f7ff;}
+.choice.selected{border-color:var(--blue2);background:#eff6ff;}
+.choice.correct{border-color:var(--green);background:#f0fdf4;}
+.choice.wrong{border-color:var(--red);background:#fef2f2;}
+.choice input[type=radio],.choice input[type=checkbox]{margin-top:2px;accent-color:var(--blue2);}
+.choice-label{line-height:1.5;}
+.blank-input{border:none;border-bottom:2px solid var(--blue2);background:transparent;font-size:15px;padding:4px 8px;width:160px;outline:none;color:var(--dark);}
+.select-blank{border:1.5px solid var(--blue2);border-radius:4px;padding:4px 8px;font-size:14px;color:var(--dark);background:#fff;}
+.essay-area{width:100%;min-height:300px;padding:14px;border:1.5px solid var(--light);border-radius:6px;font-size:14px;line-height:1.7;resize:vertical;font-family:inherit;}
+.essay-area:focus{border-color:var(--blue2);outline:none;}
+.word-count{font-size:12px;color:var(--gray);margin-top:6px;text-align:right;}
+.exam-footer{background:#fff;border-top:1px solid var(--light);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.exam-footer .nav-btns{display:flex;gap:8px;}
+.flag-btn{background:none;border:1.5px solid var(--warn);color:var(--warn);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;}
+.flag-btn.flagged{background:var(--warn);color:#fff;}
+.skip-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;writing-mode:vertical-rl;padding:16px 8px;border-radius:8px 0 0 8px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:1px;z-index:100;box-shadow:-2px 0 10px rgba(0,0,0,0.2);}
+.skip-tab:hover{background:#b91c1c;}
+
+/* BREAK PAGE */
+#page-break{background:var(--blue);justify-content:center;align-items:center;}
+.break-box{background:#fff;border-radius:12px;padding:48px;text-align:center;max-width:500px;width:90%;}
+.break-timer{font-size:64px;font-weight:700;font-family:monospace;color:var(--blue2);letter-spacing:4px;}
+.break-box h2{font-size:22px;margin-bottom:8px;color:var(--dark);}
+.break-box p{color:var(--gray);font-size:14px;line-height:1.6;}
+
+/* RESULTS PAGE */
+#page-results{background:#f4f6fa;}
+.results-container{max-width:900px;margin:0 auto;padding:30px 20px;}
+.score-report{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:24px;}
+.score-report-header{background:var(--blue);color:#fff;padding:24px 32px;}
+.score-report-header h2{font-size:20px;}
+.score-report-header p{font-size:13px;opacity:.75;margin-top:4px;}
+.score-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;}
+.score-section{padding:24px 32px;border-right:1px solid var(--light);text-align:center;}
+.score-section:last-child{border-right:none;}
+.score-section .score-num{font-size:48px;font-weight:700;color:var(--blue2);}
+.score-section .score-range{font-size:12px;color:var(--gray);}
+.score-section .score-name{font-size:14px;font-weight:600;color:var(--dark);margin-top:4px;}
+.score-section .pct{font-size:12px;color:var(--green);margin-top:2px;}
+.grade-prediction{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-radius:var(--radius);padding:28px;margin-bottom:24px;display:flex;align-items:center;gap:24px;}
+.grade-prediction .grade-big{font-size:56px;font-weight:700;font-family:monospace;}
+.grade-prediction .grade-label{font-size:13px;opacity:.8;}
+.grade-prediction .grade-name{font-size:20px;font-weight:700;}
+
+/* =============================================
+   SOLUTION REVIEW — fully redesigned
+   ============================================= */
+
+/* Page wrapper */
+#page-results{background:linear-gradient(160deg,#0f2044 0%,#1a3a6b 40%,#1e4d8c 100%) fixed;}
+#page-results .top-bar{background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);}
+.results-container{max-width:960px;margin:0 auto;padding:30px 20px;}
+
+/* Review page header banner */
+.review-hero{background:linear-gradient(135deg,#1a3a6b,#2a6dd9);border-radius:16px;padding:32px 36px;margin-bottom:28px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.review-hero h2{font-size:26px;font-weight:800;letter-spacing:.3px;}
+.review-hero p{font-size:14px;opacity:.82;margin-top:4px;}
+.review-hero-stats{display:flex;gap:20px;flex-wrap:wrap;}
+.rh-stat{text-align:center;background:rgba(255,255,255,0.12);border-radius:10px;padding:12px 20px;min-width:80px;}
+.rh-stat .rh-val{font-size:28px;font-weight:800;}
+.rh-stat .rh-lbl{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* Filter bar */
+.review-filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filter-chip{padding:7px 16px;border-radius:30px;border:2px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.filter-chip:hover{background:rgba(255,255,255,0.18);}
+.filter-chip.active{background:#fff;color:var(--blue);border-color:#fff;}
+.filter-chip .chip-count{background:rgba(0,0,0,0.15);border-radius:20px;padding:1px 7px;font-size:11px;}
+.filter-chip.active .chip-count{background:var(--blue);color:#fff;}
+
+/* Individual solution card */
+.sol-card{border-radius:14px;margin-bottom:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:transform .2s;}
+.sol-card:hover{transform:translateY(-2px);}
+.sol-card.sc-correct{border:2px solid #22c55e;}
+.sol-card.sc-wrong{border:2px solid #ef4444;}
+.sol-card.sc-essay{border:2px solid #a78bfa;}
+.sol-card.sc-skipped{border:2px solid #94a3b8;}
+
+/* Card top ribbon */
+.sol-ribbon{display:flex;align-items:center;gap:14px;padding:14px 22px;}
+.sol-ribbon.rib-correct{background:linear-gradient(90deg,#16a34a,#22c55e);}
+.sol-ribbon.rib-wrong{background:linear-gradient(90deg,#b91c1c,#ef4444);}
+.sol-ribbon.rib-essay{background:linear-gradient(90deg,#7c3aed,#a78bfa);}
+.sol-ribbon.rib-skipped{background:linear-gradient(90deg,#475569,#94a3b8);}
+.sol-ribbon .rib-icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sol-ribbon .rib-title{color:#fff;font-weight:700;font-size:15px;}
+.sol-ribbon .rib-subtitle{color:rgba(255,255,255,0.8);font-size:12px;margin-top:1px;}
+.sol-ribbon .rib-badge{margin-left:auto;background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+
+/* Card body */
+.sol-body{background:#fff;padding:24px 26px;}
+
+/* Passage block */
+.sol-passage{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border-left:4px solid #3b82f6;padding:14px 18px;border-radius:0 8px 8px 0;font-size:13.5px;line-height:1.8;color:#1e3a5f;margin-bottom:18px;font-style:italic;}
+
+/* Full question text */
+.sol-q-text{font-size:15px;line-height:1.75;color:#111827;margin-bottom:20px;font-weight:500;}
+
+/* Answer options grid */
+.sol-options{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.sol-option{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:10px;border:2px solid transparent;font-size:14px;line-height:1.55;transition:all .15s;}
+
+/* Correct answer — vivid green */
+.sol-option.opt-correct{background:linear-gradient(90deg,#f0fdf4,#dcfce7);border-color:#16a34a;}
+.sol-option.opt-correct .opt-letter{background:#16a34a;color:#fff;}
+
+/* User's wrong answer — vivid red */
+.sol-option.opt-user-wrong{background:linear-gradient(90deg,#fff5f5,#fee2e2);border-color:#dc2626;}
+.sol-option.opt-user-wrong .opt-letter{background:#dc2626;color:#fff;}
+
+/* Neutral other options */
+.sol-option.opt-neutral{background:#f8fafc;border-color:#e2e8f0;}
+.sol-option.opt-neutral .opt-letter{background:#e2e8f0;color:#64748b;}
+
+/* Option letter circle */
+.opt-letter{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;margin-top:1px;}
+
+/* Option text + mini explanation */
+.opt-content{flex:1;}
+.opt-text{font-weight:500;color:#1f2937;}
+.opt-mini-exp{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.5;}
+.opt-mini-exp.exp-correct{color:#15803d;font-weight:600;}
+.opt-mini-exp.exp-wrong{color:#b91c1c;}
+
+/* Option tag pill */
+.opt-tag{margin-left:auto;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.tag-your-correct{background:#bbf7d0;color:#14532d;}
+.tag-your-wrong{background:#fecaca;color:#7f1d1d;}
+.tag-correct{background:#d1fae5;color:#065f46;}
+.tag-skipped{background:#f1f5f9;color:#475569;}
+
+/* Explanation panel */
+.sol-explanation{background:linear-gradient(135deg,#fefce8,#fef9c3);border:1.5px solid #fbbf24;border-radius:10px;padding:16px 20px;margin-top:4px;}
+.sol-explanation .exp-label{font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.sol-explanation .exp-body{font-size:13.5px;line-height:1.75;color:#1c1917;}
+
+/* Key takeaway strip */
+.sol-takeaway{background:linear-gradient(90deg,#1e3a8a,#2563eb);color:#fff;border-radius:8px;padding:11px 18px;margin-top:14px;font-size:13px;display:flex;align-items:flex-start;gap:10px;line-height:1.6;}
+.sol-takeaway .tk-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* Essay review special */
+.essay-review-box{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #8b5cf6;border-radius:10px;padding:18px 22px;margin-top:4px;}
+.essay-review-box .essay-score-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.essay-score-circle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;}
+.essay-score-circle span{font-size:9px;font-weight:600;opacity:.8;}
+.essay-rubric{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.rubric-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#4c1d95;}
+.rubric-item .ri-icon{font-size:14px;}
+.essay-your-text{background:rgba(255,255,255,0.6);border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.7;color:#374151;margin-top:10px;max-height:200px;overflow-y:auto;font-style:italic;border:1px solid rgba(139,92,246,0.3);}
+
+/* Collapse / expand */
+.sol-toggle{width:100%;background:none;border:none;padding:10px 26px;font-size:13px;color:#6b7280;cursor:pointer;text-align:left;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:6px;}
+.sol-toggle:hover{background:#f8fafc;color:#2255a4;}
+
+/* Score summary mini bar at top of review */
+.review-score-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.rsb-item{flex:1;min-width:120px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:14px 16px;color:#fff;backdrop-filter:blur(4px);}
+.rsb-item .rsb-val{font-size:22px;font-weight:800;}
+.rsb-item .rsb-lbl{font-size:11px;opacity:.75;margin-top:2px;}
+.rsb-item .rsb-bar{height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin-top:8px;overflow:hidden;}
+.rsb-item .rsb-fill{height:100%;border-radius:2px;background:#fff;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:#fff;border-radius:var(--radius);padding:32px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;}
+.modal-box h3{font-size:18px;font-weight:700;margin-bottom:16px;color:var(--dark);}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);}
+
+/* PROGRESS BAR */
+.progress-bar{height:6px;background:var(--light);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue2);border-radius:3px;transition:width .3s;}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0;}
+.data-table th{background:#e5e7eb;padding:8px 10px;text-align:center;font-weight:700;border:1px solid #d1d5db;}
+.data-table td{padding:8px 10px;text-align:center;border:1px solid #d1d5db;}
+.data-table tr:nth-child(even) td{background:#f9fafb;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .exam-body{flex-direction:column;}
+  .q-nav-panel{width:100%;border-left:none;border-top:1px solid var(--light);}
+  .score-sections{grid-template-columns:1fr 1fr;}
+  .score-section{border-right:none;border-bottom:1px solid var(--light);}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="page-login" class="page">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="ets-badge">GRE OFFICIAL SIMULATION</div>
+      <h1>GRE Practice Exam</h1>
+      <p>Powered by ETS-Aligned Question Bank &bull; 2024 Format</p>
+    </div>
+    <div class="login-tabs">
+      <button class="active" id="tab-login" onclick="showLoginTab('login')">Sign In</button>
+      <button id="tab-register" onclick="showLoginTab('register')">Create Account</button>
+    </div>
+    <div class="login-body">
+      <!-- Login Form -->
+      <div id="form-login">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-user" placeholder="Enter your username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In to Practice Exam</button>
+      </div>
+      <!-- Register Form -->
+      <div id="form-register" class="hidden">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="reg-user" placeholder="Choose a username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-pass" placeholder="Create a password (min 6 chars)">
+        </div>
+        <div class="form-group">
+          <label>Target GRE Date</label>
+          <input type="date" id="reg-date">
+        </div>
+        <div id="reg-error" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Create Account & Start Practicing</button>
+      </div>
+    </div>
+    <div class="login-footer">
+      &copy; 2024 GRE Practice Platform &bull; Data stored locally on your device &bull; Not affiliated with ETS
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INSTRUCTIONS PAGE ==================== -->
+<div id="page-instructions" class="page hidden">
+  <div class="top-bar">
+    <div class="logo">GRE<span>Prep</span></div>
+    <div class="user-info"><span id="inst-username"></span></div>
+  </div>
+  <div class="inst-container">
+    <div id="inst-content"></div>
+  </div>
+</div>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="page-dashboard" class="page hidden">
+  <div class="top-bar">
+    <div class="logo">GRE<span>Prep</span></div>
+    <div class="user-info">
+      <span id="dash-username"></span>
+      <button onclick="showPage('page-dashboard')">Dashboard</button>
+      <button onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="dash-container">
+    <h2 style="margin-bottom:20px;color:var(--dark)">Welcome back, <span id="dash-name"></span></h2>
+
+    <!-- Cloud Sync Bar -->
+    <div class="sync-bar" id="sync-bar">
+      <div>
+        <div class="sync-label"><span class="cloud-icon">☁️</span> Cloud Sync</div>
+        <div class="sync-status" id="sync-status">Syncs your progress across Mac, iPad & iPhone</div>
+      </div>
+      <div class="sync-btns">
+        <button class="btn-sync btn-sync-save" onclick="exportProgress()" id="btn-sync-save">Save to Cloud</button>
+        <label class="btn-sync btn-sync-load" for="sync-file-input">Load from Cloud</label>
+      </div>
+      <input type="file" id="sync-file-input" accept=".json" onchange="importProgress(event)" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+    </div>
+
+    <!-- Stats Row -->
+    <div class="dash-grid" id="dash-stats"></div>
+
+    <!-- Exam Options -->
+    <div class="section-title">Start Practice Session</div>
+    <div class="exam-options">
+      <div class="exam-option-card" onclick="startExam('full')">
+        <div class="icon">📋</div>
+        <h3>Full GRE Simulation</h3>
+        <p>All sections &bull; ~4 hours &bull; Official timing</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('verbal')">
+        <div class="icon">📖</div>
+        <h3>Verbal Reasoning</h3>
+        <p>27 questions &bull; 41 minutes</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('quant')">
+        <div class="icon">📐</div>
+        <h3>Quantitative Reasoning</h3>
+        <p>27 questions &bull; 47 minutes</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('writing')">
+        <div class="icon">✍️</div>
+        <h3>Analytical Writing</h3>
+        <p>1 essay task &bull; 30 minutes</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('datainsights')">
+        <div class="icon">📊</div>
+        <h3>Data Insights</h3>
+        <p>20 questions &bull; 45 minutes</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('quick')">
+        <div class="icon">⚡</div>
+        <h3>Quick Practice</h3>
+        <p>15 mixed questions &bull; 20 minutes</p>
+      </div>
+    </div>
+
+    <!-- 8-Week Plan -->
+    <div class="section-title">8-Week GRE Mastery Plan</div>
+    <div class="week-plan">
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+
+    <!-- History -->
+    <div class="section-title" style="margin-top:24px">Recent Practice Sessions</div>
+    <div class="card card-sm">
+      <table class="history-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Verbal</th><th>Quant</th><th>AW</th><th>Data</th><th>Grade</th></tr></thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== EXAM PAGE ==================== -->
+<div id="page-exam" class="page hidden">
+  <div class="exam-header">
+    <div>
+      <div class="section-name" id="exam-section-name">Section</div>
+      <div class="q-count" id="exam-q-count">Question 1 of 27</div>
+    </div>
+    <div class="timer" id="exam-timer">41:00</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5)" onclick="showReviewPanel()">Review All</button>
+    </div>
+  </div>
+  <div class="exam-body">
+    <div class="q-panel" id="q-panel"></div>
+    <div class="q-nav-panel">
+      <h4>Questions</h4>
+      <div class="q-grid" id="q-nav-grid"></div>
+      <div style="margin-top:16px;font-size:11px;color:var(--gray);line-height:1.8;">
+        <span style="display:inline-block;width:14px;height:14px;background:#dcfce7;border:1.5px solid var(--green);border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Answered<br>
+        <span style="display:inline-block;width:14px;height:14px;background:#fef3c7;border:1.5px solid var(--warn);border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Flagged<br>
+        <span style="display:inline-block;width:14px;height:14px;background:#eff6ff;border:1.5px solid var(--blue2);border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Current
+      </div>
+    </div>
+  </div>
+  <div class="exam-footer">
+    <div style="display:flex;gap:8px;">
+      <button class="flag-btn" id="flag-btn" onclick="toggleFlag()">🚩 Flag for Review</button>
+      <button class="btn btn-sm btn-outline" onclick="confirmExit()">Exit Section</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-sm btn-outline" onclick="prevQuestion()">← Back</button>
+      <button class="btn btn-sm btn-primary" id="next-btn" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+  <div class="skip-tab" onclick="showSkipModal()">NEED HELP</div>
+</div>
+
+<!-- ==================== BREAK PAGE ==================== -->
+<div id="page-break" class="page hidden">
+  <div class="break-box">
+    <h2>Optional Break</h2>
+    <p style="margin-bottom:24px;">Take up to 10 minutes. The exam will continue when you click Resume or when time expires.</p>
+    <div class="break-timer" id="break-timer">10:00</div>
+    <p style="margin:16px 0;color:var(--gray);font-size:13px;">Stretch, hydrate, and rest your eyes.</p>
+    <button class="btn btn-primary" onclick="endBreak()">Resume Exam</button>
+  </div>
+</div>
+
+<!-- ==================== RESULTS PAGE ==================== -->
+<div id="page-results" class="page hidden">
+  <div class="top-bar">
+    <div class="logo">GRE<span>Prep</span></div>
+    <div class="user-info">
+      <button onclick="showPage('page-dashboard')">Dashboard</button>
+      <button onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="results-container">
+    <div id="results-content"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL OVERLAY ==================== -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script>
+// ============================================================
+// QUESTION BANKS
+// ============================================================
+
+const VERBAL_QUESTIONS = [
+  // --- TEXT COMPLETION (1-blank) ---
+  {id:'v1',type:'text_completion',blanks:1,text:'The scientist\'s _______ approach to the experiment ensured that every variable was meticulously controlled, leaving no room for ambiguity in the results.',
+   choices:[['A','haphazard'],['B','rigorous'],['C','cavalier'],['D','perfunctory'],['E','desultory']],answer:'B',
+   explanation:'\"Rigorous\" means extremely thorough and careful. The context clue \"meticulously controlled\" and \"no room for ambiguity\" signal a careful, disciplined approach. All other choices imply carelessness.'},
+  {id:'v2',type:'text_completion',blanks:1,text:'Despite the overwhelming evidence against his hypothesis, the researcher remained _______, refusing to acknowledge any flaws in his reasoning.',
+   choices:[['A','pliable'],['B','contrite'],['C','obdurate'],['D','vacillating'],['E','equivocal']],answer:'C',
+   explanation:'\"Obdurate\" means stubbornly refusing to change one\'s opinion. The key phrase is \"refusing to acknowledge any flaws,\" which signals stubbornness. \"Contrite\" means remorseful — opposite of what\'s described.'},
+  {id:'v3',type:'text_completion',blanks:1,text:'The playwright\'s new work was praised for its _______ dialogue — each line sparse yet laden with subtext that rewarded careful listeners.',
+   choices:[['A','verbose'],['B','elliptical'],['C','bombastic'],['D','garrulous'],['E','turgid']],answer:'B',
+   explanation:'\"Elliptical\" means using few words, often leaving things to be inferred — perfectly matching \"sparse yet laden with subtext.\" The other choices all suggest excessive wordiness.'},
+  {id:'v4',type:'text_completion',blanks:1,text:'The negotiator\'s _______ demeanor helped de-escalate the hostage situation; his calm, measured words reassured all parties.',
+   choices:[['A','volatile'],['B','imperious'],['C','phlegmatic'],['D','bellicose'],['E','fervid']],answer:'C',
+   explanation:'\"Phlegmatic\" means having a calm, unexcitable temperament — matching \"calm, measured words.\" \"Bellicose\" and \"volatile\" are opposites of what the context requires.'},
+  {id:'v5',type:'text_completion',blanks:1,text:'Critics found the author\'s prose style excessively _______, filled with unnecessary ornamentation that obscured rather than illuminated her ideas.',
+   choices:[['A','pellucid'],['B','terse'],['C','florid'],['D','laconic'],['E','austere']],answer:'C',
+   explanation:'\"Florid\" means excessively elaborate or showy in style. \"Unnecessary ornamentation\" and \"obscured\" confirm this. \"Pellucid\" means clear — the opposite.'},
+
+  // --- TEXT COMPLETION (2-blank) ---
+  {id:'v6',type:'text_completion',blanks:2,text:'The professor\'s lectures were renowned for being simultaneously (i)_______ and (ii)_______, managing to be deeply learned without alienating newcomers to the field.',
+   blank1:[['A','abstruse'],['B','accessible'],['C','pedantic']],blank2:[['D','erudite'],['E','banal'],['F','superficial']],
+   answer:['B','D'],
+   explanation:'The phrase \"without alienating newcomers\" means the lectures were accessible (blank i). \"Deeply learned\" means erudite (blank ii). The combination: accessible + erudite = learned but approachable.'},
+  {id:'v7',type:'text_completion',blanks:2,text:'Although the documentary claimed to be (i)_______, its selective use of evidence revealed a decidedly (ii)_______ agenda.',
+   blank1:[['A','partisan'],['B','objective'],['C','tendentious']],blank2:[['D','impartial'],['E','polemical'],['F','dispassionate']],
+   answer:['B','E'],
+   explanation:'The word \"although\" signals contrast. The documentary claimed objectivity (blank i) but actually had a polemical (one-sided, controversial) agenda (blank ii).'},
+  {id:'v8',type:'text_completion',blanks:2,text:'The CEO\'s (i)_______ management style alienated her staff; rather than fostering collaboration, she created a (ii)_______ atmosphere in which employees feared to voice dissent.',
+   blank1:[['A','autocratic'],['B','laissez-faire'],['C','collegial']],blank2:[['D','convivial'],['E','oppressive'],['F','nurturing']],
+   answer:['A','E'],
+   explanation:'Alienating staff and preventing dissent point to autocratic (domineering) management creating an oppressive atmosphere.'},
+
+  // --- TEXT COMPLETION (3-blank) ---
+  {id:'v9',type:'text_completion',blanks:3,text:'The biographer\'s account was surprisingly (i)_______ given the (ii)_______ of available sources; most historians had assumed that the scarcity of primary documents would render any comprehensive biography (iii)_______.',
+   blank1:[['A','thorough'],['B','cursory'],['C','speculative']],blank2:[['D','paucity'],['E','abundance'],['F','reliability']],blank3:[['G','feasible'],['H','superfluous'],['I','impossible']],
+   answer:['A','D','I'],
+   explanation:'\"Surprisingly thorough\" contrasts with the paucity (scarcity) of sources. Historians assumed scarcity would make a comprehensive biography impossible — yet the author achieved it.'},
+  {id:'v10',type:'text_completion',blanks:3,text:'The committee\'s decision was (i)_______ by many observers, who felt that the (ii)_______ nature of the deliberations made the final verdict seem (iii)_______ rather than the product of careful reasoning.',
+   blank1:[['A','applauded'],['B','criticized'],['C','anticipated']],blank2:[['D','transparent'],['E','opaque'],['F','systematic']],blank3:[['G','arbitrary'],['H','judicious'],['I','meticulous']],
+   answer:['B','E','G'],
+   explanation:'\"Criticized\" + \"opaque deliberations\" + \"arbitrary verdict\" all reinforce a negative view. The opaqueness of process led observers to see the outcome as arbitrary.'},
+
+  // --- SENTENCE EQUIVALENCE ---
+  {id:'v11',type:'sentence_equivalence',text:'The witness\'s testimony was so _______ that even the sympathetic jurors found it difficult to believe every claim without corroboration.',
+   choices:[['A','implausible'],['B','credible'],['C','farfetched'],['D','coherent'],['E','cogent'],['F','forthright']],answer:['A','C'],
+   explanation:'\"Difficult to believe\" signals the testimony lacked credibility. Both \"implausible\" and \"farfetched\" mean unbelievable and create equivalent sentences.'},
+  {id:'v12',type:'sentence_equivalence',text:'The diplomat\'s remarks were carefully _______, designed to commit to nothing while appearing to say everything the audience wanted to hear.',
+   choices:[['A','forthright'],['B','equivocal'],['C','ambiguous'],['D','candid'],['E','transparent'],['F','blunt']],answer:['B','C'],
+   explanation:'\"Commit to nothing\" while \"appearing to say everything\" describes deliberately vague language. Both \"equivocal\" and \"ambiguous\" mean intentionally unclear.'},
+  {id:'v13',type:'sentence_equivalence',text:'Although initially _______ about the project\'s feasibility, the engineers grew increasingly confident as early prototypes performed beyond expectations.',
+   choices:[['A','sanguine'],['B','skeptical'],['C','dubious'],['D','enthusiastic'],['E','optimistic'],['F','zealous']],answer:['B','C'],
+   explanation:'\"Initially\" contrasted with \"grew increasingly confident\" means they started out doubtful. \"Skeptical\" and \"dubious\" both mean doubtful and produce equivalent meaning.'},
+  {id:'v14',type:'sentence_equivalence',text:'The general\'s orders were _______, leaving field commanders with considerable latitude to adapt tactics as battlefield conditions changed.',
+   choices:[['A','prescriptive'],['B','flexible'],['C','elastic'],['D','rigid'],['E','exacting'],['F','categorical']],answer:['B','C'],
+   explanation:'\"Considerable latitude to adapt\" signals the orders were not rigid. \"Flexible\" and \"elastic\" both allow for adaptation and produce equivalent sentences.'},
+
+  // --- READING COMPREHENSION ---
+  {id:'v15',type:'reading_comprehension',
+   passage:'The concept of \"deep time\" — geological time spanning billions of years — presents a cognitive challenge fundamentally different from the difficulties humans face with large numbers in everyday mathematics. While humans struggle to intuit quantities like a trillion dollars, the problem with deep time is not magnitude per se but rather the absence of any experiential anchor. A person can build intuition for large sums through repeated financial transactions; no such scaffolding exists for eons. Paleontologist Stephen Jay Gould argued that our inability to truly feel deep time is a permanent feature of human cognition, not a correctable deficiency. Yet some science communicators have designed imaginative analogies — compressing Earth\'s history into a single calendar year, for instance — that appear to provide the missing scaffold. Whether these analogies genuinely alter intuition or merely supply a verbal formula that masks unchanged incomprehension remains an open empirical question.',
+   questions:[
+     {qid:'v15a',text:'The primary purpose of the passage is to',
+      choices:[['A','argue that humans will never fully comprehend deep time'],['B','present a technique for effectively teaching geological timescales'],['C','describe a cognitive challenge and examine approaches to addressing it'],['D','critique Gould\'s pessimistic view of human cognition'],['E','demonstrate the superiority of analogy over direct numerical instruction']],
+      answer:'C',explanation:'The passage introduces the challenge (deep time comprehension), discusses Gould\'s view, then presents analogies and questions their effectiveness. This matches option C — describing the challenge and examining approaches.'},
+     {qid:'v15b',text:'The author implies that calendar-year analogies for Earth\'s history',
+      choices:[['A','definitively improve human intuition for deep time'],['B','have been proven ineffective by empirical research'],['C','may provide apparent rather than genuine comprehension'],['D','were developed specifically to counter Gould\'s arguments'],['E','are superior to financial analogies for large numbers']],
+      answer:'C',explanation:'The author says such analogies \"appear to provide\" a scaffold but questions whether they \"genuinely alter intuition or merely supply a verbal formula that masks unchanged incomprehension\" — implying possibly superficial rather than real understanding.'}
+   ]},
+  {id:'v16',type:'reading_comprehension',
+   passage:'Historians of science have long debated whether scientific revolutions occur through gradual accumulation or sudden paradigm shifts. Thomas Kuhn\'s influential model holds that normal science proceeds incrementally until anomalies accumulate to a crisis point, triggering a revolutionary reconceptualization. Critics of Kuhn argue that this model overstates discontinuity: even apparently revolutionary theories typically retain substantial conceptual infrastructure from their predecessors. Einstein\'s relativity, often cited as a paradigmatic revolution, preserved Newtonian mechanics as a special case valid at low velocities — hardly a wholesale overthrow. Moreover, the scientists who effect change rarely experience themselves as revolutionaries; they typically describe their work as solving persistent puzzles within an established framework.',
+   questions:[
+     {qid:'v16a',text:'According to critics of Kuhn mentioned in the passage, which of the following best characterizes scientific revolutions?',
+      choices:[['A','They are primarily social phenomena rather than intellectual ones'],['B','They involve more conceptual continuity with prior theories than Kuhn acknowledged'],['C','They occur more frequently than Kuhn\'s model predicts'],['D','They are better explained by individual genius than by accumulated anomalies'],['E','They always preserve the mathematical formalism of the preceding paradigm']],
+      answer:'B',explanation:'The critics\' central claim is that revolutionary theories \"retain substantial conceptual infrastructure from their predecessors\" — i.e., more continuity than Kuhn acknowledged. The Einstein example supports this.'},
+     {qid:'v16b',text:'The author mentions that scientists who effect change \"rarely experience themselves as revolutionaries\" most likely in order to',
+      choices:[['A','undermine the scientific credibility of Kuhn\'s model'],['B','suggest that self-perception is an unreliable guide to historical significance'],['C','provide additional evidence that scientific change involves more continuity than rupture'],['D','argue that scientific revolutions are largely constructed by later historians'],['E','demonstrate that revolutionary scientists are more modest than their reputations suggest']],
+      answer:'C',explanation:'This detail reinforces the critics\' point about continuity: if change-agents see themselves as solving puzzles within a framework (not overthrowing it), it supports the view that revolutions are less discontinuous than Kuhn claimed.'}
+   ]},
+  {id:'v17',type:'reading_comprehension',
+   passage:'The resurgence of interest in stoic philosophy among contemporary audiences reflects a broader cultural appetite for practical ethical frameworks. Unlike purely academic philosophical traditions, stoicism offers a set of daily practices — negative visualization, the dichotomy of control, voluntary discomfort — that adherents claim produce measurable improvements in resilience and equanimity. Critics contend that this popularization strips stoicism of its metaphysical depth, reducing a rich philosophical system to a self-help toolkit. Defenders respond that accessibility need not entail distortion: the core stoic insight, that we suffer more from imagination than reality and that virtue alone constitutes genuine good, survives even in simplified forms. The debate ultimately concerns what philosophy is for — whether it is primarily a rigorous academic discipline or a guide to living.',
+   questions:[
+     {qid:'v17a',text:'The author\'s attitude toward the popularization of stoicism is best described as',
+      choices:[['A','enthusiastically supportive'],['B','harshly dismissive'],['C','cautiously optimistic'],['D','evenhandedly presenting multiple perspectives'],['E','skeptical of both critics and defenders']],
+      answer:'D',explanation:'The passage presents critics\' objections and defenders\' responses without clearly endorsing either side, then frames the debate as a larger question about philosophy\'s purpose — a balanced, evenhanded approach.'},
+   ]},
+  {id:'v18',type:'text_completion',blanks:1,
+   text:'The documentary filmmaker was criticized for her _______ portrayal of the community, which flattened complex social realities into simple moral narratives.',
+   choices:[['A','nuanced'],['B','reductive'],['C','ambivalent'],['D','comprehensive'],['E','dispassionate']],answer:'B',
+   explanation:'\"Flattened complex social realities into simple moral narratives\" describes a reductive approach — one that oversimplifies. This is the only choice consistent with the criticism.'},
+  {id:'v19',type:'sentence_equivalence',
+   text:'The senator\'s speech was filled with _______ claims that sounded authoritative but were unsupported by any verifiable evidence.',
+   choices:[['A','specious'],['B','cogent'],['C','spurious'],['D','irrefutable'],['E','empirical'],['F','substantiated']],answer:['A','C'],
+   explanation:'\"Sounded authoritative but unsupported\" describes claims that appear valid but are not. Both \"specious\" and \"spurious\" mean superficially plausible but actually false, creating equivalent sentences.'},
+  {id:'v20',type:'text_completion',blanks:1,
+   text:'Her _______ wit made her both the most entertaining guest at any dinner party and the most feared: no one wished to become the target of her sharp observations.',
+   choices:[['A','caustic'],['B','gentle'],['C','pedestrian'],['D','earnest'],['E','benign']],answer:'A',
+   explanation:'\"Most feared\" and \"sharp observations\" — feared because her wit could wound. \"Caustic\" means sharply critical in a way that can hurt, perfectly fitting the context.'},
+  {id:'v21',type:'text_completion',blanks:2,
+   text:'The treatise was (i)_______ in its scope — touching on every era of Western philosophy — yet surprisingly (ii)_______ in its analysis, offering only superficial observations where one expected depth.',
+   blank1:[['A','circumscribed'],['B','ambitious'],['C','modest']],blank2:[['D','penetrating'],['E','shallow'],['F','systematic']],
+   answer:['B','E'],
+   explanation:'\"Touching on every era\" = ambitious scope (blank i). \"Yet\" signals contrast — despite wide scope, the analysis was shallow (blank ii). \"Superficial observations\" confirms this.'},
+  {id:'v22',type:'sentence_equivalence',
+   text:'The administration\'s _______ approach to fiscal policy — refusing to commit to either austerity or stimulus — frustrated economists of all persuasions.',
+   choices:[['A','decisive'],['B','vacillating'],['C','resolute'],['D','irresolute'],['E','draconian'],['F','expansionary']],answer:['B','D'],
+   explanation:'\"Refusing to commit\" describes indecision. Both \"vacillating\" and \"irresolute\" mean unable to commit to a course of action, producing equivalent sentences.'},
+  {id:'v23',type:'text_completion',blanks:1,
+   text:'The novelist\'s reputation suffered when critics discovered that several passages in her celebrated debut were _______ from an obscure 19th-century travel memoir.',
+   choices:[['A','inspired'],['B','adapted'],['C','plagiarized'],['D','translated'],['E','summarized']],answer:'C',
+   explanation:'The fact that her \"reputation suffered\" implies wrongdoing. \"Plagiarized\" — passing off another\'s work as one\'s own — is the only choice that would damage a reputation. \"Inspired\" and \"adapted\" are legitimate practices.'},
+];
+
+const QUANT_QUESTIONS = [
+  // --- QUANTITATIVE COMPARISON ---
+  {id:'q1',type:'quant_comparison',
+   text:'<b>Quantity A:</b> The number of prime numbers between 10 and 30<br><b>Quantity B:</b> 5',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'C',explanation:'Primes between 10 and 30: 11, 13, 17, 19, 23, 29 — wait, that is 6... Actually between 10 and 30 (exclusive): 11,13,17,19,23,29 = 6. Hmm. Let me recount strictly between: primes are 11,13,17,19,23,29 = 6. Quantity A = 6 > 5. Quantity A is greater. (Answer corrected to A)',
+   answer:'A',explanation:'Primes strictly between 10 and 30: 11, 13, 17, 19, 23, 29 = 6 primes. Quantity A = 6, Quantity B = 5. Quantity A is greater.'},
+  {id:'q2',type:'quant_comparison',
+   text:'x > 0<br><b>Quantity A:</b> x²<br><b>Quantity B:</b> x³',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'D',explanation:'If x = 0.5: x² = 0.25, x³ = 0.125 → A > B. If x = 2: x² = 4, x³ = 8 → B > A. If x = 1: A = B = 1. The relationship cannot be determined.'},
+  {id:'q3',type:'quant_comparison',
+   text:'A rectangle has area 36 and perimeter 26.<br><b>Quantity A:</b> The length of the longer side<br><b>Quantity B:</b> 9',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'C',explanation:'Let sides be l and w. lw = 36, 2(l+w) = 26 → l+w = 13. So l and w are roots of x²−13x+36=0. Discriminant: 169−144=25. Roots: (13±5)/2 = 9 and 4. Longer side = 9 = Quantity B. Equal.'},
+  {id:'q4',type:'quant_comparison',
+   text:'<b>Quantity A:</b> (0.99)²<br><b>Quantity B:</b> 0.99',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'B',explanation:'For 0 < x < 1, x² < x (squaring a fraction makes it smaller). (0.99)² = 0.9801 < 0.99. Quantity B is greater.'},
+  {id:'q5',type:'quant_comparison',
+   text:'The average (mean) of 5 numbers is 20. Three of the numbers are 10, 15, and 25.<br><b>Quantity A:</b> The sum of the remaining two numbers<br><b>Quantity B:</b> 50',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'C',explanation:'Total sum = 5 × 20 = 100. Known sum = 10+15+25 = 50. Remaining two sum = 100 − 50 = 50 = Quantity B. Equal.'},
+
+  // --- PROBLEM SOLVING ---
+  {id:'q6',type:'problem_solving',
+   text:'If 3x + 7 = 22, what is the value of 6x − 4?',
+   choices:[['A','26'],['B','30'],['C','34'],['D','18'],['E','22']],answer:'A',
+   explanation:'3x + 7 = 22 → 3x = 15 → x = 5. Then 6x − 4 = 6(5) − 4 = 30 − 4 = 26. Answer: A.'},
+  {id:'q7',type:'problem_solving',
+   text:'A train travels 300 miles in 4 hours. At the same speed, how many miles will it travel in 6 hours?',
+   choices:[['A','400'],['B','450'],['C','500'],['D','350'],['E','480']],answer:'B',
+   explanation:'Speed = 300/4 = 75 mph. Distance in 6 hours = 75 × 6 = 450 miles.'},
+  {id:'q8',type:'problem_solving',
+   text:'If the ratio of boys to girls in a class is 3:4 and there are 28 students total, how many boys are in the class?',
+   choices:[['A','12'],['B','14'],['C','16'],['D','10'],['E','18']],answer:'A',
+   explanation:'Boys = 3/(3+4) × 28 = (3/7) × 28 = 12.'},
+  {id:'q9',type:'problem_solving',
+   text:'What is 35% of 240?',
+   choices:[['A','80'],['B','84'],['C','90'],['D','78'],['E','88']],answer:'B',
+   explanation:'35% × 240 = 0.35 × 240 = 84.'},
+  {id:'q10',type:'problem_solving',
+   text:'The price of a jacket is reduced by 20% to $64. What was the original price?',
+   choices:[['A','$76.80'],['B','$80'],['C','$76'],['D','$84'],['E','$72']],answer:'B',
+   explanation:'If reduced price is 80% of original: 0.80 × P = 64 → P = 64/0.80 = $80.'},
+  {id:'q11',type:'problem_solving',
+   text:'If f(x) = x² − 3x + 2, what are the roots of f(x) = 0?',
+   choices:[['A','x = 1 and x = 2'],['B','x = −1 and x = −2'],['C','x = 1 and x = −2'],['D','x = 3 and x = 2'],['E','x = 0 and x = 3']],answer:'A',
+   explanation:'x² − 3x + 2 = 0 factors as (x−1)(x−2) = 0. So x = 1 or x = 2.'},
+  {id:'q12',type:'problem_solving',
+   text:'In a circle with radius 6, what is the area of a sector with a central angle of 60°?',
+   choices:[['A','6π'],['B','4π'],['C','8π'],['D','12π'],['E','3π']],answer:'A',
+   explanation:'Area of sector = (θ/360°) × πr² = (60/360) × π(36) = (1/6) × 36π = 6π.'},
+  {id:'q13',type:'problem_solving',
+   text:'If |2x − 3| = 7, what are the possible values of x?',
+   choices:[['A','x = 5 only'],['B','x = −2 only'],['C','x = 5 or x = −2'],['D','x = 5 or x = 2'],['E','x = −5 or x = 2']],answer:'C',
+   explanation:'|2x−3| = 7 gives 2x−3 = 7 → x = 5, or 2x−3 = −7 → 2x = −4 → x = −2.'},
+  {id:'q14',type:'problem_solving',
+   text:'Working alone, Alice can complete a job in 6 hours and Bob can complete the same job in 4 hours. How many hours will it take them working together?',
+   choices:[['A','2.4 hours'],['B','3 hours'],['C','5 hours'],['D','2 hours'],['E','1.5 hours']],answer:'A',
+   explanation:'Combined rate = 1/6 + 1/4 = 2/12 + 3/12 = 5/12 jobs/hour. Time = 12/5 = 2.4 hours.'},
+  {id:'q15',type:'problem_solving',
+   text:'A mixture contains 40% alcohol. If 10 liters of water are added to 40 liters of the mixture, what percent of the new mixture is alcohol?',
+   choices:[['A','32%'],['B','28%'],['C','30%'],['D','35%'],['E','25%']],answer:'A',
+   explanation:'Alcohol = 40% × 40 = 16 liters. New total = 40 + 10 = 50 liters. New % = 16/50 = 32%.'},
+  {id:'q16',type:'problem_solving',
+   text:'What is the sum of the interior angles of a hexagon?',
+   choices:[['A','540°'],['B','720°'],['C','900°'],['D','600°'],['E','660°']],answer:'B',
+   explanation:'Sum of interior angles of an n-gon = (n−2) × 180°. For n=6: (6−2) × 180 = 4 × 180 = 720°.'},
+  {id:'q17',type:'problem_solving',
+   text:'If log₂(x) = 5, what is the value of x?',
+   choices:[['A','10'],['B','25'],['C','32'],['D','64'],['E','16']],answer:'C',
+   explanation:'log₂(x) = 5 means 2⁵ = x. 2⁵ = 32.'},
+  {id:'q18',type:'problem_solving',
+   text:'A bag contains 4 red, 6 blue, and 2 green marbles. If one marble is selected at random, what is the probability it is NOT red?',
+   choices:[['A','1/3'],['B','2/3'],['C','1/4'],['D','3/4'],['E','5/6']],answer:'B',
+   explanation:'Total marbles = 12. Not red = 6+2 = 8. P(not red) = 8/12 = 2/3.'},
+  {id:'q19',type:'problem_solving',
+   text:'What is the median of the following data set: 14, 7, 22, 3, 18, 9, 11?',
+   choices:[['A','9'],['B','11'],['C','14'],['D','12'],['E','13']],answer:'B',
+   explanation:'Sorted: 3, 7, 9, 11, 14, 18, 22. Median (middle value of 7 numbers) = 4th value = 11.'},
+  {id:'q20',type:'problem_solving',
+   text:'The standard deviation of set A is 4 and the standard deviation of set B is 2. Which statement must be true?',
+   choices:[['A','Set A has more elements than set B'],['B','Set A has a higher mean than set B'],['C','The values in set A are more spread out than those in set B'],['D','Set A has a larger range than set B'],['E','Set A is three times as large as set B']],answer:'C',
+   explanation:'Standard deviation measures the spread around the mean. A higher SD means data is more spread out. A\'s SD (4) > B\'s SD (2) means A is more spread out. No other statements must be true.'},
+  {id:'q21',type:'problem_solving',
+   text:'If 2^(n+1) = 128, what is the value of n?',
+   choices:[['A','5'],['B','6'],['C','7'],['D','4'],['E','8']],answer:'B',
+   explanation:'128 = 2⁷. So 2^(n+1) = 2⁷ → n+1 = 7 → n = 6.'},
+  {id:'q22',type:'problem_solving',
+   text:'A right triangle has legs of length 5 and 12. What is the length of the hypotenuse?',
+   choices:[['A','13'],['B','14'],['C','15'],['D','17'],['E','11']],answer:'A',
+   explanation:'By the Pythagorean theorem: c² = 5² + 12² = 25 + 144 = 169. c = √169 = 13.'},
+  {id:'q23',type:'quant_comparison',
+   text:'n is a positive integer.<br><b>Quantity A:</b> The remainder when 7n is divided by 3<br><b>Quantity B:</b> The remainder when n is divided by 3',
+   choices:[['A','Quantity A is greater'],['B','Quantity B is greater'],['C','The two quantities are equal'],['D','The relationship cannot be determined from the information given']],
+   answer:'C',explanation:'7n mod 3 = (7 mod 3)(n mod 3) mod 3 = (1)(n mod 3) mod 3 = n mod 3. They are always equal. Answer: C.'},
+  {id:'q24',type:'problem_solving',
+   text:'A rectangle\'s length is twice its width. If the perimeter is 60 cm, what is the area?',
+   choices:[['A','200 cm²'],['B','150 cm²'],['C','250 cm²'],['D','100 cm²'],['E','180 cm²']],answer:'A',
+   explanation:'Let width = w, length = 2w. Perimeter = 2(w + 2w) = 6w = 60 → w = 10. Length = 20. Area = 10 × 20 = 200 cm².'},
+  {id:'q25',type:'problem_solving',
+   text:'If x² − y² = 40 and x − y = 4, what is x + y?',
+   choices:[['A','8'],['B','10'],['C','12'],['D','6'],['E','14']],answer:'B',
+   explanation:'x² − y² = (x−y)(x+y). So 40 = 4(x+y) → x+y = 10.'},
+  {id:'q26',type:'problem_solving',
+   text:'How many different 3-letter arrangements can be made from the letters A, B, C, D, E if no letter can be repeated?',
+   choices:[['A','60'],['B','120'],['C','30'],['D','125'],['E','20']],answer:'A',
+   explanation:'This is a permutation: P(5,3) = 5!/(5−3)! = 5×4×3 = 60.'},
+  {id:'q27',type:'problem_solving',
+   text:'A store marks up the wholesale cost of an item by 25%, then offers a 20% discount on the marked-up price. What is the final price as a percentage of the wholesale cost?',
+   choices:[['A','100%'],['B','95%'],['C','105%'],['D','90%'],['E','98%']],answer:'A',
+   explanation:'Let cost = 100. Marked up 25%: 125. Discount 20%: 125 × 0.80 = 100. Final price = 100% of wholesale cost.'},
+];
+
+const WRITING_PROMPTS = [
+  {id:'w1',type:'issue',
+   text:'As people rely more and more on technology to solve problems, the ability of humans to think for themselves will surely deteriorate.',
+   rubric:['Takes a clear position on the issue','Uses specific, relevant examples','Considers and addresses counterarguments','Demonstrates logical organization','Uses varied, precise vocabulary','Concludes with a synthesis of the argument']},
+  {id:'w2',type:'issue',
+   text:'The best way to teach is to praise positive actions and ignore negative ones.',
+   rubric:['Takes a clear position on the issue','Uses specific, relevant examples','Considers and addresses counterarguments','Demonstrates logical organization','Uses varied, precise vocabulary','Concludes with a synthesis of the argument']},
+  {id:'w3',type:'argument',
+   text:'The following appeared in a letter to the editor of a local newspaper: "Studies show that people who exercise at least 30 minutes per day live longer than those who do not. The local government should therefore close all fast-food restaurants in our city to encourage residents to adopt healthier lifestyles and thus increase average lifespan." Write a response in which you examine the stated and/or unstated assumptions of the argument.',
+   rubric:['Identifies key logical flaws or assumptions','Provides specific alternative explanations','Does not simply agree or disagree with conclusion','Demonstrates logical organization','Uses precise vocabulary','Addresses multiple distinct flaws']},
+  {id:'w4',type:'issue',
+   text:'Universities should require every student to take a variety of courses outside the student\'s field of study.',
+   rubric:['Takes a clear position on the issue','Uses specific, relevant examples','Considers and addresses counterarguments','Demonstrates logical organization','Uses varied, precise vocabulary','Concludes with a synthesis of the argument']},
+  {id:'w5',type:'argument',
+   text:'The following memo appeared in the offices of Excelsior Company: "Our competitor, Apex Corp, implemented a four-day work week last year. Since then, Apex\'s employee satisfaction scores have risen 30%. We should immediately implement a four-day work week to similarly improve our employee satisfaction scores." Write a response in which you discuss what questions would need to be answered to evaluate the recommendation.',
+   rubric:['Identifies key logical flaws or assumptions','Provides specific alternative explanations','Does not simply agree or disagree with conclusion','Demonstrates logical organization','Uses precise vocabulary','Addresses multiple distinct flaws']},
+  {id:'w6',type:'issue',
+   text:'In any field of endeavor, it is impossible to make a significant contribution without first being strongly influenced by past achievements within that field.',
+   rubric:['Takes a clear position on the issue','Uses specific, relevant examples','Considers and addresses counterarguments','Demonstrates logical organization','Uses varied, precise vocabulary','Concludes with a synthesis of the argument']},
+];
+
+const DATA_INSIGHTS_QUESTIONS = [
+  {id:'d1',type:'data_interpretation',
+   tableTitle:'Annual Revenue by Region (Millions USD)',
+   table:{headers:['Region','2019','2020','2021','2022'],rows:[['North America','450','420','510','580'],['Europe','320','290','340','370'],['Asia-Pacific','180','210','280','350'],['Latin America','90','75','95','110']]},
+   text:'By what percent did Asia-Pacific revenue increase from 2019 to 2022? (Round to nearest whole percent.)',
+   choices:[['A','64%'],['B','72%'],['C','78%'],['D','94%'],['E','55%']],answer:'D',
+   explanation:'Increase = (350−180)/180 × 100 = 170/180 × 100 ≈ 94.4% ≈ 94%.'},
+  {id:'d2',type:'data_interpretation',
+   tableTitle:'Annual Revenue by Region (Millions USD)',
+   table:{headers:['Region','2019','2020','2021','2022'],rows:[['North America','450','420','510','580'],['Europe','320','290','340','370'],['Asia-Pacific','180','210','280','350'],['Latin America','90','75','95','110']]},
+   text:'In 2020, what fraction of total revenue came from Europe and Latin America combined?',
+   choices:[['A','1/3'],['B','36.8%'],['C','About 37%'],['D','28.5%'],['E','All of B and C are equivalent']],answer:'E',
+   explanation:'2020 totals: 420+290+210+75 = 995. Europe+Latin America = 290+75 = 365. Fraction = 365/995 ≈ 36.7%. Options B and C are equivalent numerical expressions.'},
+  {id:'d3',type:'data_sufficiency',
+   text:'Is the integer n divisible by 6?\n(1) n is divisible by 2\n(2) n is divisible by 9',
+   choices:[['A','Statement (1) alone is sufficient, but statement (2) alone is not sufficient'],['B','Statement (2) alone is sufficient, but statement (1) alone is not sufficient'],['C','Both statements together are sufficient, but neither alone is sufficient'],['D','Each statement alone is sufficient'],['E','Statements (1) and (2) together are not sufficient']],answer:'C',
+   explanation:'For n divisible by 6, need divisibility by both 2 and 3. Statement 1: divisible by 2 — could be 4 (no) or 6 (yes). Not sufficient. Statement 2: divisible by 9 — means divisible by 3. Could be 9 (not by 2) or 18 (yes). Not sufficient. Together: divisible by 2 AND by 9 (hence by 3). LCM(2,9)=18, which is divisible by 6. Sufficient.'},
+  {id:'d4',type:'data_interpretation',
+   tableTitle:'Student Test Scores',
+   table:{headers:['Student','Math','Verbal','Writing'],rows:[['Alice','162','155','5.0'],['Bob','148','160','4.5'],['Carol','170','152','5.5'],['David','155','168','4.0'],['Eve','160','158','5.0']]},
+   text:'What is the average (mean) Math score for all five students?',
+   choices:[['A','157'],['B','159'],['C','161'],['D','155'],['E','163']],answer:'B',
+   explanation:'Sum = 162+148+170+155+160 = 795. Mean = 795/5 = 159.'},
+  {id:'d5',type:'data_interpretation',
+   tableTitle:'Student Test Scores',
+   table:{headers:['Student','Math','Verbal','Writing'],rows:[['Alice','162','155','5.0'],['Bob','148','160','4.5'],['Carol','170','152','5.5'],['David','155','168','4.0'],['Eve','160','158','5.0']]},
+   text:'Which student has the highest combined Math + Verbal score?',
+   choices:[['A','Alice'],['B','Bob'],['C','Carol'],['D','David'],['E','Eve']],answer:'D',
+   explanation:'Alice: 162+155=317. Bob: 148+160=308. Carol: 170+152=322. David: 155+168=323. Eve: 160+158=318. David has the highest combined score of 323.'},
+  {id:'d6',type:'data_sufficiency',
+   text:'What is the value of x?\n(1) x² = 25\n(2) x > 0',
+   choices:[['A','Statement (1) alone is sufficient'],['B','Statement (2) alone is sufficient'],['C','Both statements together are sufficient'],['D','Each statement alone is sufficient'],['E','Statements (1) and (2) together are not sufficient']],answer:'C',
+   explanation:'Statement 1: x² = 25 → x = 5 or x = −5. Not sufficient alone. Statement 2: x > 0. Not sufficient alone (x could be anything positive). Together: x > 0 AND x² = 25 → x = 5. Sufficient.'},
+  {id:'d7',type:'data_interpretation',
+   tableTitle:'Company Sales Data',
+   table:{headers:['Quarter','Units Sold','Revenue ($K)','Returns'],rows:[['Q1','1,200','$360K','48'],['Q2','1,450','$435K','58'],['Q3','1,380','$414K','41'],['Q4','1,620','$486K','65']]},
+   text:'What was the return rate (returns/units sold) in Q4, rounded to the nearest tenth of a percent?',
+   choices:[['A','3.8%'],['B','4.0%'],['C','4.2%'],['D','4.5%'],['E','3.5%']],answer:'B',
+   explanation:'Q4 return rate = 65/1620 × 100 ≈ 4.012% ≈ 4.0%.'},
+  {id:'d8',type:'data_interpretation',
+   tableTitle:'Company Sales Data',
+   table:{headers:['Quarter','Units Sold','Revenue ($K)','Returns'],rows:[['Q1','1,200','$360K','48'],['Q2','1,450','$435K','58'],['Q3','1,380','$414K','41'],['Q4','1,620','$486K','65']]},
+   text:'What is the average revenue per unit sold across all four quarters?',
+   choices:[['A','$290'],['B','$295'],['C','$300'],['D','$310'],['E','$285']],answer:'C',
+   explanation:'Total units = 1200+1450+1380+1620 = 5650. Total revenue = 360+435+414+486 = $1695K. Avg = 1695000/5650 ≈ $300 per unit.'},
+  {id:'d9',type:'data_sufficiency',
+   text:'A jar contains only red and blue marbles. What is the probability of drawing a red marble?\n(1) The ratio of red to blue marbles is 3:5\n(2) There are 24 marbles in the jar',
+   choices:[['A','Statement (1) alone is sufficient'],['B','Statement (2) alone is sufficient'],['C','Both statements together are sufficient'],['D','Each statement alone is sufficient'],['E','Statements (1) and (2) together are not sufficient']],answer:'A',
+   explanation:'Statement 1: ratio 3:5 → P(red) = 3/(3+5) = 3/8. This fully determines probability regardless of total count. Sufficient alone. Statement 2: 24 marbles but no information about distribution. Not sufficient.'},
+  {id:'d10',type:'data_interpretation',
+   tableTitle:'Population Growth (Millions)',
+   table:{headers:['Country','2000','2010','2020'],rows:[['Country A','45','52','61'],['Country B','120','138','155'],['Country C','28','31','33'],['Country D','78','91','108']]},
+   text:'Which country showed the greatest percentage growth from 2000 to 2020?',
+   choices:[['A','Country A'],['B','Country B'],['C','Country C'],['D','Country D'],['E','Countries A and D tied']],answer:'D',
+   explanation:'Percentage growth: A: (61−45)/45 = 35.6%. B: (155−120)/120 = 29.2%. C: (33−28)/28 = 17.9%. D: (108−78)/78 = 38.5%. Country D had the greatest percentage growth.'},
+];
+
+</script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let examState = {
+  type: null, sections: [], currentSectionIdx: 0,
+  questions: [], currentQIdx: 0,
+  answers: {}, flags: new Set(),
+  timer: null, timeLeft: 0,
+  startTime: null, sectionResults: []
+};
+let breakTimer = null;
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+function showModal(html) {
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function hideModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function fmt(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+let syncNeeded = false;
+function saveUser() {
+  localStorage.setItem('gre_user_' + currentUser.username, JSON.stringify(currentUser));
+  syncNeeded = true;
+  updateSyncIndicator();
+}
+function loadUser(username) {
+  const d = localStorage.getItem('gre_user_' + username);
+  return d ? JSON.parse(d) : null;
+}
+
+// ============================================================
+// CLOUD SYNC
+// ============================================================
+function updateSyncIndicator() {
+  const el = document.getElementById('sync-status');
+  const btn = document.getElementById('btn-sync-save');
+  if (!el || !btn) return;
+  if (syncNeeded) {
+    el.innerHTML = '<span class="sync-dot sync-dot-orange"></span> New progress — tap <b>Save to Cloud</b> to sync';
+    btn.textContent = 'Save to Cloud *';
+    btn.style.boxShadow = '0 0 0 2px var(--warn)';
+  } else {
+    const lastSync = localStorage.getItem('gre_last_sync');
+    if (lastSync) {
+      const d = new Date(lastSync);
+      const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      el.innerHTML = '<span class="sync-dot sync-dot-green"></span> Last synced: ' + timeStr;
+    } else {
+      el.textContent = 'Syncs your progress across Mac, iPad & iPhone';
+    }
+    btn.textContent = 'Save to Cloud';
+    btn.style.boxShadow = 'none';
+  }
+}
+function exportProgress() {
+  const allData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('gre_user_')) {
+      try { allData[key] = JSON.parse(localStorage.getItem(key)); }
+      catch(e) { allData[key] = localStorage.getItem(key); }
+    }
+  }
+  const syncPayload = {
+    app: 'GRE Practice Exam',
+    version: 1,
+    syncedAt: new Date().toISOString(),
+    users: allData
+  };
+  const blob = new Blob([JSON.stringify(syncPayload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'gre-progress.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  localStorage.setItem('gre_last_sync', new Date().toISOString());
+  syncNeeded = false;
+  updateSyncIndicator();
+  alert('Progress saved! On iPad/iPhone: save the file to the same iCloud folder as this app.');
+}
+function importProgress(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.users || data.app !== 'GRE Practice Exam') {
+        alert('Invalid sync file. Please select a valid gre-progress.json file.');
+        return;
+      }
+      let merged = 0;
+      for (const [key, cloudUser] of Object.entries(data.users)) {
+        const localRaw = localStorage.getItem(key);
+        if (localRaw) {
+          const localUser = JSON.parse(localRaw);
+          const mergedUser = mergeUserData(localUser, cloudUser);
+          localStorage.setItem(key, JSON.stringify(mergedUser));
+        } else {
+          localStorage.setItem(key, JSON.stringify(cloudUser));
+        }
+        merged++;
+      }
+      localStorage.setItem('gre_last_sync', new Date().toISOString());
+      syncNeeded = false;
+      if (currentUser) {
+        const refreshed = loadUser(currentUser.username);
+        if (refreshed) currentUser = refreshed;
+        showDashboard();
+      }
+      updateSyncIndicator();
+      alert('Progress loaded from cloud! ' + merged + ' account(s) synced.');
+    } catch(err) {
+      alert('Error reading sync file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+function mergeUserData(local, cloud) {
+  const merged = {...local};
+  // Keep the longer history (more sessions completed)
+  const lh = (local.history || []);
+  const ch = (cloud.history || []);
+  if (ch.length > lh.length) {
+    merged.history = ch;
+  } else if (ch.length === lh.length && ch.length > 0) {
+    // Same length — merge unique entries by date
+    const dates = new Set(lh.map(x => x.date));
+    for (const entry of ch) {
+      if (!dates.has(entry.date)) {
+        merged.history.push(entry);
+      }
+    }
+    merged.history.sort((a,b) => new Date(a.date) - new Date(b.date));
+  }
+  // Merge weekProgress — keep the union of completed weeks
+  const lw = local.weekProgress || {};
+  const cw = cloud.weekProgress || {};
+  merged.weekProgress = {...lw};
+  for (const [week, timestamp] of Object.entries(cw)) {
+    if (!merged.weekProgress[week]) {
+      merged.weekProgress[week] = timestamp;
+    }
+  }
+  // Keep newest targetDate if cloud is more recent
+  if (cloud.targetDate && (!local.targetDate || cloud.targetDate > local.targetDate)) {
+    merged.targetDate = cloud.targetDate;
+  }
+  return merged;
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function showLoginTab(tab) {
+  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+}
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  if (!u || !p) { err.textContent = 'Please enter username and password.'; err.classList.remove('hidden'); return; }
+  const user = loadUser(u);
+  if (!user || user.password !== btoa(p)) {
+    err.textContent = 'Invalid username or password.'; err.classList.remove('hidden'); return;
+  }
+  currentUser = user;
+  showDashboard();
+}
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const u = document.getElementById('reg-user').value.trim();
+  const p = document.getElementById('reg-pass').value;
+  const date = document.getElementById('reg-date').value;
+  const err = document.getElementById('reg-error');
+  if (!name || !u || !p) { err.textContent = 'Please fill in all required fields.'; err.classList.remove('hidden'); return; }
+  if (p.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+  if (loadUser(u)) { err.textContent = 'Username already taken. Please choose another.'; err.classList.remove('hidden'); return; }
+  currentUser = {
+    username: u, password: btoa(p), name, targetDate: date,
+    history: [], createdAt: new Date().toISOString(),
+    weekProgress: {}
+  };
+  saveUser();
+  showInstructions('welcome');
+}
+function logout() {
+  currentUser = null;
+  stopTimer();
+  showPage('page-login');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function showDashboard() {
+  showPage('page-dashboard');
+  document.getElementById('dash-name').textContent = currentUser.name;
+  document.getElementById('dash-username').textContent = currentUser.username;
+  renderStats();
+  renderWeekPlan();
+  renderHistory();
+  updateSyncIndicator();
+}
+function renderStats() {
+  const h = currentUser.history || [];
+  const total = h.length;
+  const avgV = total ? Math.round(h.reduce((s,x) => s+(x.verbal||0),0)/total) : '--';
+  const avgQ = total ? Math.round(h.reduce((s,x) => s+(x.quant||0),0)/total) : '--';
+  const last = h.length ? h[h.length-1] : null;
+  const streak = calcStreak();
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-label">Sessions Completed</div></div>
+    <div class="stat-card"><div class="stat-val">${avgV}</div><div class="stat-label">Avg Verbal Score</div></div>
+    <div class="stat-card"><div class="stat-val">${avgQ}</div><div class="stat-label">Avg Quant Score</div></div>
+    <div class="stat-card"><div class="stat-val">${streak}</div><div class="stat-label">Day Streak 🔥</div></div>
+  `;
+}
+function calcStreak() {
+  const h = currentUser.history || [];
+  if (!h.length) return 0;
+  const days = [...new Set(h.map(x => x.date.split('T')[0]))].sort().reverse();
+  let streak = 0, d = new Date();
+  for (const day of days) {
+    const diff = Math.round((d - new Date(day)) / 86400000);
+    if (diff <= 1) { streak++; d = new Date(day); }
+    else break;
+  }
+  return streak;
+}
+function renderWeekPlan() {
+  const weeks = [
+    {w:1,title:'Week 1',focus:'Verbal Foundations',desc:'Text completion, basic vocabulary, sentence structure'},
+    {w:2,title:'Week 2',focus:'Quant Foundations',desc:'Arithmetic, algebra basics, number properties'},
+    {w:3,title:'Week 3',focus:'Reading Comprehension',desc:'Passage types, inference questions, main idea'},
+    {w:4,title:'Week 4',focus:'Advanced Quant',desc:'Geometry, data analysis, word problems'},
+    {w:5,title:'Week 5',focus:'Analytical Writing',desc:'Issue essays, argument analysis, structure'},
+    {w:6,title:'Week 6',focus:'Data Insights',desc:'Tables, graphs, data sufficiency strategies'},
+    {w:7,title:'Week 7',focus:'Full Practice Exams',desc:'Timed full simulations, review weak areas'},
+    {w:8,title:'Week 8',focus:'Final Review',desc:'Targeted drilling, test-day strategies, confidence building'},
+  ];
+  const wp = currentUser.weekProgress || {};
+  document.getElementById('week-grid').innerHTML = weeks.map(w => {
+    const done = wp[w.w];
+    const isCurrent = !done && !weeks.slice(0,w.w-1).some(x => !wp[x.w]) || w.w === 1;
+    return `<div class="week-item ${done?'done':''}">
+      <h4>${w.title} ${done?'✅':''}</h4>
+      <div style="font-weight:700;color:var(--blue2);font-size:12px;margin-bottom:4px;">${w.focus}</div>
+      <p>${w.desc}</p>
+      ${!done?`<button class="btn btn-sm btn-primary" style="margin-top:8px;font-size:11px;" onclick="markWeek(${w.w})">Mark Done</button>`:''}
+    </div>`;
+  }).join('');
+}
+function markWeek(w) {
+  if (!currentUser.weekProgress) currentUser.weekProgress = {};
+  currentUser.weekProgress[w] = new Date().toISOString();
+  saveUser();
+  renderWeekPlan();
+}
+function renderHistory() {
+  const h = (currentUser.history || []).slice().reverse().slice(0, 10);
+  const tbody = document.getElementById('history-body');
+  if (!h.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:20px;">No sessions yet. Start your first practice exam!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = h.map(s => {
+    const d = new Date(s.date).toLocaleDateString();
+    const grade = s.grade || '--';
+    const cls = s.gradeNum >= 320 ? 'score-high' : s.gradeNum >= 300 ? 'score-mid' : 'score-low';
+    return `<tr>
+      <td>${d}</td><td>${s.type}</td>
+      <td>${s.verbal||'--'}</td><td>${s.quant||'--'}</td>
+      <td>${s.aw||'--'}</td><td>${s.data||'--'}</td>
+      <td><span class="score-badge ${cls}">${grade}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// INSTRUCTIONS
+// ============================================================
+function showInstructions(context) {
+  showPage('page-instructions');
+  document.getElementById('inst-username').textContent = currentUser.username;
+  const c = document.getElementById('inst-content');
+  if (context === 'welcome') {
+    c.innerHTML = `
+      <div class="inst-header"><h2>Welcome to the GRE General Test Practice Platform</h2><p>Please read all instructions carefully before proceeding.</p></div>
+      <div class="inst-body">
+        <div class="warning-box">⚠️ <strong>IMPORTANT:</strong> This is a simulated GRE examination environment. All rules and time limits mirror those of the official GRE General Test administered by ETS.</div>
+        <h3>About the GRE General Test</h3>
+        <p>The GRE General Test measures verbal reasoning, quantitative reasoning, analytical writing, and data insights skills — skills that are important for success in graduate school and business school.</p>
+        <h3>Test Structure</h3>
+        <ol>
+          <li><strong>Analytical Writing</strong> — 1 task, 30 minutes (scored 0–6)</li>
+          <li><strong>Verbal Reasoning</strong> — 2 sections, 27 questions each, 41 minutes each (scaled 130–170)</li>
+          <li><strong>Quantitative Reasoning</strong> — 2 sections, 27 questions each, 47 minutes each (scaled 130–170)</li>
+          <li><strong>Data Insights</strong> — 1 section, 20 questions, 45 minutes</li>
+          <li><strong>Optional 10-minute break</strong> after the third section</li>
+        </ol>
+        <h3>Rules &amp; Test-Taking Policies</h3>
+        <ul>
+          <li>You may not go back to a previous section once it is submitted.</li>
+          <li>Within a section, you may navigate freely between questions.</li>
+          <li>You may flag questions for review and return to them before time expires.</li>
+          <li>When the timer reaches zero, the section is automatically submitted.</li>
+          <li>No calculators are permitted on Verbal or Analytical Writing sections. An on-screen calculator is available for Quantitative and Data Insights sections.</li>
+          <li>Do not leave the testing environment during a section.</li>
+        </ul>
+        <h3>Scoring</h3>
+        <ul>
+          <li>Verbal Reasoning: 130–170 (1-point increments)</li>
+          <li>Quantitative Reasoning: 130–170 (1-point increments)</li>
+          <li>Analytical Writing: 0–6 (half-point increments)</li>
+          <li>There is <strong>no penalty</strong> for incorrect answers.</li>
+        </ul>
+        <div class="info-box">💡 <strong>Score Report:</strong> At the end of each session, you will receive a predicted GRE score based on your performance, along with detailed explanations for every question.</div>
+        <h3>Non-Disclosure Agreement</h3>
+        <p>By proceeding, you acknowledge that this is a practice simulation. The questions are representative of real GRE content but are for educational purposes only. Do not share specific questions outside this platform.</p>
+        <div class="inst-actions">
+          <button class="btn btn-outline" onclick="showPage('page-login')">Go Back</button>
+          <button class="btn btn-primary" onclick="showDashboard()">I Agree — Go to Dashboard →</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ============================================================
+// EXAM ENGINE
+// ============================================================
+const SECTION_CONFIG = {
+  verbal:       { name: 'Verbal Reasoning',       time: 41*60, count: 27, bank: () => VERBAL_QUESTIONS },
+  quant:        { name: 'Quantitative Reasoning', time: 47*60, count: 27, bank: () => QUANT_QUESTIONS },
+  writing:      { name: 'Analytical Writing',     time: 30*60, count: 1,  bank: () => WRITING_PROMPTS },
+  datainsights: { name: 'Data Insights',           time: 45*60, count: 20, bank: () => DATA_INSIGHTS_QUESTIONS },
+};
+
+function startExam(type) {
+  let sections = [];
+  if (type === 'full') {
+    sections = ['writing','verbal','verbal','quant','quant','datainsights'];
+  } else if (type === 'quick') {
+    sections = ['mixed'];
+  } else {
+    sections = [type];
+  }
+  examState = {
+    type, sections, currentSectionIdx: 0,
+    questions: [], currentQIdx: 0,
+    answers: {}, flags: new Set(),
+    timer: null, timeLeft: 0,
+    startTime: new Date().toISOString(), sectionResults: []
+  };
+  showInstructions('exam');
+  const c = document.getElementById('inst-content');
+  const sec = sections[0];
+  const cfg = sec === 'mixed' ? null : SECTION_CONFIG[sec];
+  c.innerHTML = `
+    <div class="inst-header"><h2>Section Instructions: ${cfg ? cfg.name : 'Mixed Practice'}</h2><p>Read carefully before beginning.</p></div>
+    <div class="inst-body">
+      <div class="info-box">⏱️ <strong>Time Limit:</strong> ${cfg ? Math.floor(cfg.time/60) : 20} minutes &nbsp;|&nbsp; <strong>Questions:</strong> ${cfg ? cfg.count : 15}</div>
+      <h3>Instructions</h3>
+      <ul>
+        <li>Answer all questions to the best of your ability.</li>
+        <li>You may move freely between questions within this section.</li>
+        <li>Flag any question you want to review before submitting.</li>
+        <li>The section will auto-submit when time expires.</li>
+        ${type==='writing'?'<li>Write your essay in the text area provided. Aim for 400–600 words.</li>':''}
+        <li>Click <strong>NEED HELP</strong> on the right side at any time to see the answer and explanation for the current question.</li>
+      </ul>
+      <div class="warning-box">⚠️ Once you click "Begin Section", the timer starts immediately.</div>
+      <div class="inst-actions">
+        <button class="btn btn-outline" onclick="showDashboard()">Cancel</button>
+        <button class="btn btn-accent" onclick="beginSection()">Begin Section →</button>
+      </div>
+    </div>`;
+}
+
+function beginSection() {
+  const sec = examState.sections[examState.currentSectionIdx];
+  loadSectionQuestions(sec);
+  showPage('page-exam');
+  renderExamQuestion();
+  startTimer();
+}
+
+function loadSectionQuestions(sec) {
+  let bank, count;
+  if (sec === 'mixed') {
+    const all = [...VERBAL_QUESTIONS, ...QUANT_QUESTIONS, ...DATA_INSIGHTS_QUESTIONS];
+    bank = shuffle(all);
+    count = 15;
+  } else if (sec === 'verbal') {
+    bank = shuffle(VERBAL_QUESTIONS);
+    count = Math.min(SECTION_CONFIG.verbal.count, VERBAL_QUESTIONS.length);
+  } else if (sec === 'quant') {
+    bank = shuffle(QUANT_QUESTIONS);
+    count = Math.min(SECTION_CONFIG.quant.count, QUANT_QUESTIONS.length);
+  } else if (sec === 'writing') {
+    bank = shuffle(WRITING_PROMPTS);
+    count = 1;
+  } else if (sec === 'datainsights') {
+    bank = shuffle(DATA_INSIGHTS_QUESTIONS);
+    count = Math.min(SECTION_CONFIG.datainsights.count, DATA_INSIGHTS_QUESTIONS.length);
+  }
+  examState.questions = bank.slice(0, count);
+  examState.currentQIdx = 0;
+  examState.answers = {};
+  examState.flags = new Set();
+  const cfg = SECTION_CONFIG[sec];
+  examState.timeLeft = cfg ? cfg.time : 20*60;
+  document.getElementById('exam-section-name').textContent = cfg ? cfg.name : 'Mixed Practice';
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+  stopTimer();
+  updateTimerDisplay();
+  examState.timer = setInterval(() => {
+    examState.timeLeft--;
+    updateTimerDisplay();
+    if (examState.timeLeft <= 0) { clearInterval(examState.timer); submitSection(true); }
+  }, 1000);
+}
+function stopTimer() {
+  if (examState.timer) { clearInterval(examState.timer); examState.timer = null; }
+}
+function updateTimerDisplay() {
+  const el = document.getElementById('exam-timer');
+  if (!el) return;
+  el.textContent = fmt(examState.timeLeft);
+  el.className = 'timer';
+  if (examState.timeLeft <= 300) el.classList.add('warn');
+  if (examState.timeLeft <= 60) { el.classList.remove('warn'); el.classList.add('danger'); }
+}
+
+// ============================================================
+// QUESTION RENDERING
+// ============================================================
+function renderExamQuestion() {
+  const q = examState.questions[examState.currentQIdx];
+  if (!q) return;
+  const total = examState.questions.length;
+  document.getElementById('exam-q-count').textContent = `Question ${examState.currentQIdx+1} of ${total}`;
+  const flagBtn = document.getElementById('flag-btn');
+  flagBtn.classList.toggle('flagged', examState.flags.has(examState.currentQIdx));
+  flagBtn.textContent = examState.flags.has(examState.currentQIdx) ? '🚩 Flagged' : '🚩 Flag for Review';
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = examState.currentQIdx === total-1 ? 'Submit Section' : 'Next →';
+  renderNavGrid();
+  const panel = document.getElementById('q-panel');
+  panel.innerHTML = buildQuestionHTML(q, false);
+  restoreAnswer(q);
+}
+
+function buildQuestionHTML(q, showSolution) {
+  let html = `<div class="question-card">
+    <div class="q-meta">
+      <span class="q-type-badge">${typeLabel(q.type)}</span>
+      <span>Question ${examState.currentQIdx+1}</span>
+    </div>`;
+
+  if (q.type === 'reading_comprehension') {
+    html += `<div class="passage">${q.passage}</div>`;
+    const subQ = q.questions[0];
+    html += `<div class="q-text">${subQ.text}</div><div class="choices">`;
+    subQ.choices.forEach(([val, label]) => {
+      const sel = examState.answers[q.id] === val;
+      html += `<label class="choice ${showSolution?(val===subQ.answer?'correct':(sel&&val!==subQ.answer?'wrong':'')):(sel?'selected':'')}">
+        <input type="radio" name="ans_${q.id}" value="${val}" onchange="recordAnswer('${q.id}','${val}')" ${sel?'checked':''}>
+        <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+    });
+    html += '</div>';
+    if (q.questions.length > 1) {
+      const subQ2 = q.questions[1];
+      const ans2 = examState.answers[q.id+'_2'];
+      html += `</div><div class="question-card" style="margin-top:12px;"><div class="q-meta"><span class="q-type-badge">${typeLabel(q.type)}</span><span>Question ${examState.currentQIdx+1} (Part 2)</span></div>`;
+      html += `<div class="q-text">${subQ2.text}</div><div class="choices">`;
+      subQ2.choices.forEach(([val, label]) => {
+        const sel2 = ans2 === val;
+        html += `<label class="choice ${showSolution?(val===subQ2.answer?'correct':(sel2&&val!==subQ2.answer?'wrong':'')):(sel2?'selected':'')}">
+          <input type="radio" name="ans_${q.id}_2" value="${val}" onchange="recordAnswer('${q.id+'_2'}','${val}')" ${sel2?'checked':''}>
+          <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+      });
+      html += '</div>';
+    }
+  } else if (q.type === 'text_completion' && q.blanks === 1) {
+    html += `<div class="q-text">${q.text}</div><div class="choices">`;
+    q.choices.forEach(([val, label]) => {
+      const sel = examState.answers[q.id] === val;
+      html += `<label class="choice ${showSolution?(val===q.answer?'correct':(sel&&val!==q.answer?'wrong':'')):(sel?'selected':'')}">
+        <input type="radio" name="ans_${q.id}" value="${val}" onchange="recordAnswer('${q.id}','${val}')" ${sel?'checked':''}>
+        <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'text_completion' && q.blanks >= 2) {
+    html += `<div class="q-text">${q.text}</div>`;
+    html += `<p style="font-size:13px;color:var(--gray);margin-bottom:8px;">Select one answer for each blank.</p>`;
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr ${q.blanks===3?'1fr':''};gap:12px;">`;
+    const blanks = [q.blank1, q.blank2];
+    if (q.blanks === 3) blanks.push(q.blank3);
+    const keys = [q.id+'_b1', q.id+'_b2', q.id+'_b3'];
+    blanks.forEach((blank, bi) => {
+      const key = keys[bi];
+      const correctAns = q.answer[bi];
+      html += `<div><div style="font-weight:700;font-size:13px;margin-bottom:6px;">Blank ${['(i)','(ii)','(iii)'][bi]}</div>`;
+      blank.forEach(([val, label]) => {
+        const sel = examState.answers[key] === val;
+        html += `<label class="choice ${showSolution?(val===correctAns?'correct':(sel&&val!==correctAns?'wrong':'')):(sel?'selected':'')}" style="margin-bottom:4px;">
+          <input type="radio" name="ans_${key}" value="${val}" onchange="recordAnswer('${key}','${val}')" ${sel?'checked':''}>
+          <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  } else if (q.type === 'sentence_equivalence') {
+    html += `<div class="q-text">${q.text}</div>`;
+    html += `<p style="font-size:13px;color:var(--gray);margin-bottom:8px;">Select <strong>exactly two</strong> answer choices.</p><div class="choices">`;
+    const sel = examState.answers[q.id] || [];
+    q.choices.forEach(([val, label]) => {
+      const checked = sel.includes(val);
+      html += `<label class="choice ${showSolution?(q.answer.includes(val)?'correct':(checked&&!q.answer.includes(val)?'wrong':'')):(checked?'selected':'')}">
+        <input type="checkbox" name="ans_${q.id}" value="${val}" onchange="recordMultiAnswer('${q.id}','${val}',this.checked)" ${checked?'checked':''}>
+        <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'problem_solving' || q.type === 'quant_comparison') {
+    html += `<div class="q-text">${q.text}</div><div class="choices">`;
+    q.choices.forEach(([val, label]) => {
+      const sel = examState.answers[q.id] === val;
+      html += `<label class="choice ${showSolution?(val===q.answer?'correct':(sel&&val!==q.answer?'wrong':'')):(sel?'selected':'')}">
+        <input type="radio" name="ans_${q.id}" value="${val}" onchange="recordAnswer('${q.id}','${val}')" ${sel?'checked':''}>
+        <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'data_interpretation' || q.type === 'data_sufficiency') {
+    if (q.table) {
+      html += `<p style="font-weight:700;font-size:13px;margin-bottom:6px;">${q.tableTitle||''}</p>`;
+      html += `<table class="data-table"><thead><tr>${q.table.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+      q.table.rows.forEach(row => { html += `<tr>${row.map(c=>`<td>${c}</td>`).join('')}</tr>`; });
+      html += '</tbody></table>';
+    }
+    html += `<div class="q-text" style="margin-top:12px;">${q.text}</div><div class="choices">`;
+    q.choices.forEach(([val, label]) => {
+      const sel = examState.answers[q.id] === val;
+      html += `<label class="choice ${showSolution?(val===q.answer?'correct':(sel&&val!==q.answer?'wrong':'')):(sel?'selected':'')}">
+        <input type="radio" name="ans_${q.id}" value="${val}" onchange="recordAnswer('${q.id}','${val}')" ${sel?'checked':''}>
+        <span class="choice-label"><strong>${val}.</strong> ${label}</span></label>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'issue' || q.type === 'argument') {
+    html += `<div class="q-text"><strong>${q.type === 'issue' ? 'Issue Task' : 'Argument Task'}:</strong> ${q.text}</div>`;
+    if (q.type === 'argument') {
+      html += `<div class="info-box" style="margin-bottom:12px;font-size:13px;">Examine the logical flaws and unstated assumptions in the argument above. Do not merely agree or disagree — analyze the reasoning.</div>`;
+    }
+    const saved = examState.answers[q.id] || '';
+    html += `<textarea class="essay-area" id="essay_${q.id}" onkeyup="recordEssay('${q.id}')" placeholder="Write your essay here...">${saved}</textarea>`;
+    html += `<div class="word-count" id="wc_${q.id}">Words: ${wordCount(saved)}</div>`;
+    html += `<div style="margin-top:12px;font-size:13px;color:var(--gray);">📋 Scoring criteria: ${q.rubric.join(' | ')}</div>`;
+  }
+
+  if (showSolution) {
+    const exp = q.explanation || (q.questions && q.questions[0].explanation) || '';
+    const correctDisplay = Array.isArray(q.answer) ? q.answer.join(', ') : q.answer;
+    html += `<div class="solution-box" style="margin-top:16px;">
+      <div class="correct-ans">✅ Correct Answer: ${correctDisplay}</div>
+      <div class="explanation"><strong>Explanation:</strong> ${exp}</div>
+    </div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function typeLabel(t) {
+  const map = {
+    text_completion:'Text Completion', sentence_equivalence:'Sentence Equivalence',
+    reading_comprehension:'Reading Comprehension', problem_solving:'Problem Solving',
+    quant_comparison:'Quantitative Comparison', data_interpretation:'Data Interpretation',
+    data_sufficiency:'Data Sufficiency', issue:'Issue Essay', argument:'Argument Essay'
+  };
+  return map[t] || t;
+}
+function wordCount(text) { return text.trim() ? text.trim().split(/\s+/).length : 0; }
+
+function recordAnswer(id, val) { examState.answers[id] = val; renderNavGrid(); }
+function recordMultiAnswer(id, val, checked) {
+  if (!examState.answers[id]) examState.answers[id] = [];
+  if (checked) { if (!examState.answers[id].includes(val)) examState.answers[id].push(val); }
+  else { examState.answers[id] = examState.answers[id].filter(v => v !== val); }
+  renderNavGrid();
+}
+function recordEssay(id) {
+  const el = document.getElementById('essay_'+id);
+  if (el) {
+    examState.answers[id] = el.value;
+    const wc = document.getElementById('wc_'+id);
+    if (wc) wc.textContent = 'Words: ' + wordCount(el.value);
+  }
+}
+function restoreAnswer() { /* answers are restored via buildQuestionHTML */ }
+
+function renderNavGrid() {
+  const grid = document.getElementById('q-nav-grid');
+  if (!grid) return;
+  grid.innerHTML = examState.questions.map((q,i) => {
+    let cls = '';
+    const answered = isAnswered(q, i);
+    if (i === examState.currentQIdx) cls = 'current';
+    else if (answered && examState.flags.has(i)) cls = 'answered flagged';
+    else if (answered) cls = 'answered';
+    else if (examState.flags.has(i)) cls = 'flagged';
+    return `<div class="q-dot ${cls}" onclick="jumpTo(${i})">${i+1}</div>`;
+  }).join('');
+}
+function isAnswered(q, i) {
+  const a = examState.answers[q.id];
+  if (q.type === 'sentence_equivalence') return Array.isArray(a) && a.length === 2;
+  if (q.type === 'text_completion' && q.blanks >= 2) {
+    return !!examState.answers[q.id+'_b1'] && !!examState.answers[q.id+'_b2'] && (q.blanks < 3 || !!examState.answers[q.id+'_b3']);
+  }
+  if (q.type === 'reading_comprehension') return !!a;
+  if (q.type === 'issue' || q.type === 'argument') return a && a.length > 50;
+  return !!a;
+}
+
+function jumpTo(i) { examState.currentQIdx = i; renderExamQuestion(); }
+function prevQuestion() { if (examState.currentQIdx > 0) { examState.currentQIdx--; renderExamQuestion(); } }
+function nextQuestion() {
+  if (examState.currentQIdx < examState.questions.length - 1) {
+    examState.currentQIdx++;
+    renderExamQuestion();
+  } else {
+    submitSection(false);
+  }
+}
+function toggleFlag() {
+  const i = examState.currentQIdx;
+  if (examState.flags.has(i)) examState.flags.delete(i); else examState.flags.add(i);
+  renderExamQuestion();
+}
+function showReviewPanel() {
+  const answered = examState.questions.filter((q,i) => isAnswered(q,i)).length;
+  const flagged = examState.flags.size;
+  const total = examState.questions.length;
+  showModal(`<button class="modal-close" onclick="hideModal()">×</button>
+    <h3>Section Review</h3>
+    <p style="margin-bottom:16px;color:var(--gray);">Review your progress before submitting.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-val" style="font-size:24px;">${answered}</div><div class="stat-label">Answered</div></div>
+      <div class="stat-card"><div class="stat-val" style="font-size:24px;color:var(--warn);">${flagged}</div><div class="stat-label">Flagged</div></div>
+      <div class="stat-card"><div class="stat-val" style="font-size:24px;color:var(--gray);">${total-answered}</div><div class="stat-label">Unanswered</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">Click a question number to navigate directly to it.</p>
+    <div class="q-grid" style="margin-bottom:20px;">${examState.questions.map((q,i) => {
+      let cls = isAnswered(q,i)?'answered':''; if(examState.flags.has(i)) cls+=' flagged';
+      return `<div class="q-dot ${cls}" onclick="hideModal();jumpTo(${i})">${i+1}</div>`;
+    }).join('')}</div>
+    <button class="btn btn-danger btn-full" onclick="hideModal();submitSection(false)">Submit Section Now</button>`);
+}
+function confirmExit() {
+  stopTimer();
+  // Score current section so results are available for preview
+  const sec = examState.sections[examState.currentSectionIdx];
+  const result = scoreSection(sec);
+  // Store temporarily but do NOT push to sectionResults yet — user decides below
+  examState._exitPreviewResult = result;
+  examState._exitPreviewSec    = sec;
+
+  showModal(`
+    <button class="modal-close" onclick="hideModal();startTimer()">×</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:8px;">🚪</div>
+      <h3 style="font-size:20px;color:#1a3a6b;">Exit Test?</h3>
+      <p style="color:#6b7280;font-size:14px;margin-top:6px;">Choose what you'd like to do.</p>
+    </div>
+
+    <!-- Option 1: See results -->
+    <div onclick="exitAndSeeResults()" style="
+      display:flex;align-items:center;gap:14px;padding:16px 18px;
+      border:2px solid #2255a4;border-radius:10px;cursor:pointer;
+      background:#eff6ff;margin-bottom:10px;transition:all .2s;"
+      onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+      <span style="font-size:28px;">📊</span>
+      <div>
+        <div style="font-weight:700;color:#1a3a6b;font-size:15px;">See My Results</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:2px;">View your score and full answer corrections — then decide whether to save.</div>
+      </div>
+      <span style="margin-left:auto;font-size:18px;color:#2255a4;">›</span>
+    </div>
+
+    <!-- Option 2: Discard and restart -->
+    <div onclick="exitAndDiscard()" style="
+      display:flex;align-items:center;gap:14px;padding:16px 18px;
+      border:2px solid #dc2626;border-radius:10px;cursor:pointer;
+      background:#fff5f5;margin-bottom:10px;transition:all .2s;"
+      onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff5f5'">
+      <span style="font-size:28px;">🗑️</span>
+      <div>
+        <div style="font-weight:700;color:#b91c1c;font-size:15px;">Cancel &amp; Start Fresh</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:2px;">Discard this attempt completely. No result recorded. Return to dashboard.</div>
+      </div>
+      <span style="margin-left:auto;font-size:18px;color:#dc2626;">›</span>
+    </div>
+
+    <!-- Option 3: Continue -->
+    <div onclick="hideModal();startTimer()" style="
+      display:flex;align-items:center;gap:14px;padding:16px 18px;
+      border:2px solid #16a34a;border-radius:10px;cursor:pointer;
+      background:#f0fdf4;transition:all .2s;"
+      onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+      <span style="font-size:28px;">▶️</span>
+      <div>
+        <div style="font-weight:700;color:#15803d;font-size:15px;">Continue Exam</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:2px;">Go back and keep working. Timer will resume from where you left off.</div>
+      </div>
+      <span style="margin-left:auto;font-size:18px;color:#16a34a;">›</span>
+    </div>
+  `);
+}
+
+function exitAndDiscard() {
+  hideModal();
+  stopTimer();
+  // Clear any temporary exit state
+  examState._exitPreviewResult = null;
+  examState._exitPreviewSec    = null;
+  showDashboard();
+}
+
+function exitAndSeeResults() {
+  hideModal();
+  stopTimer();
+  // Commit what was scored so showResults can compute properly
+  if (examState._exitPreviewResult) {
+    examState.sectionResults.push({
+      section: examState._exitPreviewSec,
+      ...examState._exitPreviewResult
+    });
+  }
+  // Mark that this is an "exit preview" — save decision deferred
+  examState._exitPreview = true;
+  showResultsPreview();
+}
+
+// Show results WITHOUT saving to history yet
+function showResultsPreview() {
+  showPage('page-results');
+  const results = examState.sectionResults;
+
+  let verbalScores=[], quantScores=[], awScore=null, dataScore=null;
+  results.forEach(r => {
+    if (r.section==='verbal')       verbalScores.push(r);
+    else if (r.section==='quant')   quantScores.push(r);
+    else if (r.section==='writing') awScore = r;
+    else if (r.section==='datainsights') dataScore = r;
+  });
+
+  const avgV     = verbalScores.length ? verbalScores.reduce((s,x)=>s+x.raw,0)/verbalScores.length : null;
+  const avgQ     = quantScores.length  ? quantScores.reduce((s,x)=>s+x.raw,0)/quantScores.length   : null;
+  const scaledV  = avgV  !== null ? rawToScaled(avgV,'verbal') : null;
+  const scaledQ  = avgQ  !== null ? rawToScaled(avgQ,'quant')  : null;
+  const aw       = awScore   ? awScore.essayScore   : null;
+  const dataRaw  = dataScore ? dataScore.raw        : null;
+  const scaledData = dataRaw !== null ? Math.round(130 + dataRaw*40) : null;
+
+  const totalScaled = (scaledV||0) + (scaledQ||0);
+  const gradeLabel  = predictGrade(totalScaled, scaledV, scaledQ);
+  const pctV = scaledV ? percentile(scaledV,'verbal') : '--';
+  const pctQ = scaledQ ? percentile(scaledQ,'quant')  : '--';
+
+  // Cache computed scores so saveResultToHistory() can use them without recomputing
+  examState._cachedScores = { scaledV, scaledQ, aw, scaledData, totalScaled, gradeLabel };
+
+  document.getElementById('results-content').innerHTML = `
+
+    <!-- Early-exit notice banner -->
+    <div style="background:linear-gradient(90deg,#d97706,#f59e0b);color:#fff;border-radius:10px;
+      padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:22px;">⚠️</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;">Early Exit — Results Not Yet Saved</div>
+        <div style="font-size:13px;opacity:.9;margin-top:2px;">Review your answers below, then choose to <strong>save</strong> or <strong>discard</strong> this session.</div>
+      </div>
+    </div>
+
+    <h2 style="margin-bottom:20px;">Score Report (Preview)</h2>
+    <div class="grade-prediction">
+      <div>
+        <div class="grade-label">Predicted GRE Score</div>
+        <div class="grade-big">${totalScaled||'--'}</div>
+        <div class="grade-label">Combined (Verbal + Quant)</div>
+      </div>
+      <div>
+        <div class="grade-name">${gradeLabel.label}</div>
+        <div class="grade-label" style="margin-top:8px;">${gradeLabel.desc}</div>
+        <div style="margin-top:12px;font-size:13px;opacity:.85;">${gradeLabel.advice}</div>
+      </div>
+    </div>
+
+    <div class="score-report">
+      <div class="score-report-header"><h2>Section Scores</h2><p>Based on ${results.reduce((s,r)=>s+r.total,0)} total questions attempted</p></div>
+      <div class="score-sections">
+        ${scaledV    ? `<div class="score-section"><div class="score-num">${scaledV}</div><div class="score-range">130–170</div><div class="score-name">Verbal Reasoning</div><div class="pct">${pctV}th percentile</div></div>` : ''}
+        ${scaledQ    ? `<div class="score-section"><div class="score-num">${scaledQ}</div><div class="score-range">130–170</div><div class="score-name">Quantitative Reasoning</div><div class="pct">${pctQ}th percentile</div></div>` : ''}
+        ${aw !== null? `<div class="score-section"><div class="score-num">${aw}</div><div class="score-range">0–6</div><div class="score-name">Analytical Writing</div></div>` : ''}
+        ${scaledData ? `<div class="score-section"><div class="score-num">${scaledData}</div><div class="score-range">130–170</div><div class="score-name">Data Insights</div></div>` : ''}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Performance Breakdown</div>
+      ${buildPerformanceBreakdown(results)}
+    </div>
+
+    <!-- Action row -->
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="showSolutionReview()">📖 Review All Answers &amp; Corrections</button>
+    </div>
+
+    <!-- Save / Discard decision -->
+    ${buildSaveDecisionPanel()}
+  `;
+}
+
+function buildSaveDecisionPanel() {
+  return `
+  <div style="background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);
+    overflow:hidden;margin-bottom:28px;">
+    <div style="background:linear-gradient(90deg,#1a3a6b,#2255a4);padding:18px 24px;color:#fff;">
+      <div style="font-size:16px;font-weight:700;">💾 Keep This Result?</div>
+      <div style="font-size:13px;opacity:.8;margin-top:3px;">Decide whether to record this session in your progress history.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+
+      <!-- Save -->
+      <div style="padding:24px;border-right:1px solid #e5e7eb;text-align:center;">
+        <div style="font-size:36px;margin-bottom:8px;">✅</div>
+        <div style="font-weight:700;font-size:15px;color:#15803d;margin-bottom:6px;">Save to My History</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:16px;">
+          This result will count toward your progress tracking, average scores, and study plan analytics.
+        </div>
+        <button class="btn btn-green btn-full" onclick="saveResultToHistory()">
+          ✅ Yes, Save This Result
+        </button>
+      </div>
+
+      <!-- Discard -->
+      <div style="padding:24px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:8px;">🗑️</div>
+        <div style="font-weight:700;font-size:15px;color:#b91c1c;margin-bottom:6px;">Discard — Don't Record</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:16px;">
+          This session won't appear in your history or affect your average scores. Nothing is saved.
+        </div>
+        <button class="btn btn-danger btn-full" onclick="discardResultAndExit()">
+          🗑️ Discard &amp; Go to Dashboard
+        </button>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function saveResultToHistory() {
+  const s = examState._cachedScores;
+  if (!s) { showDashboard(); return; }
+  if (!currentUser.history) currentUser.history = [];
+  currentUser.history.push({
+    date: new Date().toISOString(),
+    type: examState.type,
+    verbal: s.scaledV, quant: s.scaledQ, aw: s.aw, data: s.scaledData,
+    grade: s.gradeLabel.label, gradeNum: s.totalScaled
+  });
+  saveUser();
+  examState._exitPreview   = false;
+  examState._cachedScores  = null;
+  // Show a confirmation toast then go to dashboard
+  showModal(`
+    <div style="text-align:center;padding:12px 0;">
+      <div style="font-size:52px;margin-bottom:12px;">🎉</div>
+      <h3 style="color:#15803d;">Result Saved!</h3>
+      <p style="color:#6b7280;font-size:14px;margin:10px 0 20px;">
+        Your session has been recorded in your progress history.
+      </p>
+      <button class="btn btn-primary btn-full" onclick="hideModal();showDashboard()">Go to Dashboard</button>
+    </div>
+  `);
+}
+
+function discardResultAndExit() {
+  examState._exitPreview  = false;
+  examState._cachedScores = null;
+  showDashboard();
+}
+function showSkipModal() {
+  const q = examState.questions[examState.currentQIdx];
+  let html = `<button class="modal-close" onclick="hideModal()">×</button>
+    <h3>Question ${examState.currentQIdx+1} — Answer &amp; Explanation</h3>
+    <div style="margin-top:12px;">`;
+  const correctDisplay = Array.isArray(q.answer) ? q.answer.join(', ') : q.answer;
+  const exp = q.explanation || (q.questions && q.questions[0].explanation) || 'See the correct answer highlighted above.';
+  html += `<div class="solution-box">
+    <div class="correct-ans">✅ Correct Answer: ${correctDisplay}</div>
+    <div class="explanation"><strong>Step-by-Step Explanation:</strong><br><br>${exp}</div>
+  </div>`;
+  if (q.type === 'reading_comprehension' && q.questions && q.questions[1]) {
+    html += `<div class="solution-box" style="margin-top:12px;">
+      <div class="correct-ans">✅ Part 2 Answer: ${q.questions[1].answer}</div>
+      <div class="explanation"><strong>Explanation:</strong><br><br>${q.questions[1].explanation}</div>
+    </div>`;
+  }
+  html += `</div><button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="hideModal()">Got it — Continue</button>`;
+  showModal(html);
+}
+
+// ============================================================
+// SECTION SUBMISSION & SCORING
+// ============================================================
+function submitSection(timeExpired) {
+  stopTimer();
+  const sec = examState.sections[examState.currentSectionIdx];
+  const result = scoreSection(sec);
+  examState.sectionResults.push({ section: sec, ...result });
+
+  const nextIdx = examState.currentSectionIdx + 1;
+  const isLast = nextIdx >= examState.sections.length;
+
+  if (!timeExpired) {
+    const msg = isLast
+      ? 'Submit this section and see your results?'
+      : `Submit this section and proceed to the next? (${examState.sections.length - nextIdx} section(s) remaining)`;
+    showModal(`<button class="modal-close" onclick="hideModal()">×</button>
+      <h3>Submit Section?</h3>
+      <p style="margin:12px 0;color:var(--gray);">${msg}</p>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-outline" onclick="hideModal();startTimer()">Go Back</button>
+        <button class="btn btn-primary" onclick="hideModal();proceedAfterSection()">Submit →</button>
+      </div>`);
+    examState.timeLeft = examState.timeLeft; // pause
+  } else {
+    proceedAfterSection();
+  }
+}
+
+function proceedAfterSection() {
+  const nextIdx = examState.currentSectionIdx + 1;
+  if (nextIdx >= examState.sections.length) {
+    showResults();
+    return;
+  }
+  // Show break between section 3 and 4 in full exam
+  if (examState.type === 'full' && examState.currentSectionIdx === 2) {
+    showBreak();
+  } else {
+    examState.currentSectionIdx = nextIdx;
+    startExamSection(nextIdx);
+  }
+}
+
+function startExamSection(idx) {
+  const sec = examState.sections[idx];
+  loadSectionQuestions(sec);
+  showPage('page-exam');
+  const cfg = SECTION_CONFIG[sec];
+  document.getElementById('exam-section-name').textContent = cfg ? cfg.name + ` (${idx+1} of ${examState.sections.length})` : 'Practice';
+  renderExamQuestion();
+  startTimer();
+}
+
+function scoreSection(sec) {
+  const qs = examState.questions;
+  let correct = 0, total = qs.length;
+  let essayScore = null;
+  qs.forEach(q => {
+    if (q.type === 'issue' || q.type === 'argument') {
+      const essay = examState.answers[q.id] || '';
+      essayScore = scoreEssay(essay, q.rubric);
+    } else if (q.type === 'text_completion' && q.blanks >= 2) {
+      const b1 = examState.answers[q.id+'_b1'];
+      const b2 = examState.answers[q.id+'_b2'];
+      const b3 = q.blanks === 3 ? examState.answers[q.id+'_b3'] : q.answer[2];
+      if (b1===q.answer[0] && b2===q.answer[1] && (q.blanks<3||b3===q.answer[2])) correct++;
+    } else if (q.type === 'sentence_equivalence') {
+      const a = examState.answers[q.id] || [];
+      if (a.length===2 && q.answer.every(x=>a.includes(x))) correct++;
+    } else if (q.type === 'reading_comprehension') {
+      if (examState.answers[q.id] === q.questions[0].answer) correct++;
+      if (q.questions[1] && examState.answers[q.id+'_2'] === q.questions[1].answer) correct++;
+    } else {
+      if (examState.answers[q.id] === q.answer) correct++;
+    }
+  });
+  return { correct, total, essayScore, raw: correct / Math.max(total,1) };
+}
+
+function scoreEssay(text, rubric) {
+  const wc = wordCount(text);
+  if (wc < 50) return 1.0;
+  const checks = rubric.length;
+  const lower = text.toLowerCase();
+  let met = 0;
+  if (wc >= 300) met++;
+  if (wc >= 450) met++;
+  if (lower.includes('however') || lower.includes('although') || lower.includes('while')) met++;
+  if (lower.includes('for example') || lower.includes('for instance') || lower.includes('such as')) met++;
+  if (lower.includes('therefore') || lower.includes('thus') || lower.includes('consequently')) met++;
+  if (lower.includes('in conclusion') || lower.includes('to conclude') || lower.includes('in summary')) met++;
+  const score = Math.min(6.0, Math.max(1.0, 1.0 + (met / 6) * 5.0));
+  return Math.round(score * 2) / 2;
+}
+
+function rawToScaled(raw, section) {
+  // Approximate ETS raw-to-scaled conversion
+  if (section === 'verbal' || section === 'quant') {
+    return Math.round(130 + raw * 40);
+  }
+  return null;
+}
+
+// ============================================================
+// BREAK
+// ============================================================
+function showBreak() {
+  showPage('page-break');
+  let t = 10 * 60;
+  document.getElementById('break-timer').textContent = fmt(t);
+  breakTimer = setInterval(() => {
+    t--;
+    document.getElementById('break-timer').textContent = fmt(t);
+    if (t <= 0) { clearInterval(breakTimer); endBreak(); }
+  }, 1000);
+}
+function endBreak() {
+  clearInterval(breakTimer);
+  examState.currentSectionIdx++;
+  startExamSection(examState.currentSectionIdx);
+}
+
+// ============================================================
+// RESULTS  (full normal completion — auto-saves)
+// ============================================================
+function showResults() {
+  showPage('page-results');
+  const results = examState.sectionResults;
+
+  let verbalScores=[], quantScores=[], awScore=null, dataScore=null;
+  results.forEach(r => {
+    if (r.section==='verbal')       verbalScores.push(r);
+    else if (r.section==='quant')   quantScores.push(r);
+    else if (r.section==='writing') awScore = r;
+    else if (r.section==='datainsights') dataScore = r;
+  });
+
+  const avgV     = verbalScores.length ? verbalScores.reduce((s,x)=>s+x.raw,0)/verbalScores.length : null;
+  const avgQ     = quantScores.length  ? quantScores.reduce((s,x)=>s+x.raw,0)/quantScores.length   : null;
+  const scaledV  = avgV  !== null ? rawToScaled(avgV,'verbal') : null;
+  const scaledQ  = avgQ  !== null ? rawToScaled(avgQ,'quant')  : null;
+  const aw       = awScore   ? awScore.essayScore   : null;
+  const dataRaw  = dataScore ? dataScore.raw        : null;
+  const scaledData = dataRaw !== null ? Math.round(130 + dataRaw*40) : null;
+  const totalScaled = (scaledV||0) + (scaledQ||0);
+  const gradeLabel  = predictGrade(totalScaled, scaledV, scaledQ);
+
+  // Auto-save on normal completion (exam ran to end / submitted normally)
+  if (!examState._exitPreview) {
+    if (!currentUser.history) currentUser.history = [];
+    currentUser.history.push({
+      date: new Date().toISOString(),
+      type: examState.type,
+      verbal: scaledV, quant: scaledQ, aw: aw, data: scaledData,
+      grade: gradeLabel.label, gradeNum: totalScaled
+    });
+    saveUser();
+  }
+
+  const pctV = scaledV ? percentile(scaledV,'verbal') : '--';
+  const pctQ = scaledQ ? percentile(scaledQ,'quant')  : '--';
+
+  document.getElementById('results-content').innerHTML = `
+    <h2 style="margin-bottom:20px;">Score Report</h2>
+    <div class="grade-prediction">
+      <div>
+        <div class="grade-label">Predicted GRE Score</div>
+        <div class="grade-big">${totalScaled||'--'}</div>
+        <div class="grade-label">Combined (Verbal + Quant)</div>
+      </div>
+      <div>
+        <div class="grade-name">${gradeLabel.label}</div>
+        <div class="grade-label" style="margin-top:8px;">${gradeLabel.desc}</div>
+        <div style="margin-top:12px;font-size:13px;opacity:.85;">${gradeLabel.advice}</div>
+      </div>
+    </div>
+    <div class="score-report">
+      <div class="score-report-header"><h2>Section Scores</h2><p>Based on ${results.reduce((s,r)=>s+r.total,0)} total questions answered</p></div>
+      <div class="score-sections">
+        ${scaledV    ? `<div class="score-section"><div class="score-num">${scaledV}</div><div class="score-range">130–170</div><div class="score-name">Verbal Reasoning</div><div class="pct">${pctV}th percentile</div></div>` : ''}
+        ${scaledQ    ? `<div class="score-section"><div class="score-num">${scaledQ}</div><div class="score-range">130–170</div><div class="score-name">Quantitative Reasoning</div><div class="pct">${pctQ}th percentile</div></div>` : ''}
+        ${aw !== null? `<div class="score-section"><div class="score-num">${aw}</div><div class="score-range">0–6</div><div class="score-name">Analytical Writing</div></div>` : ''}
+        ${scaledData ? `<div class="score-section"><div class="score-num">${scaledData}</div><div class="score-range">130–170</div><div class="score-name">Data Insights</div></div>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="showSolutionReview()">📖 Review All Answers &amp; Explanations</button>
+      <button class="btn btn-outline" onclick="showDashboard()">🏠 Back to Dashboard</button>
+      <button class="btn btn-accent" onclick="startExam('${examState.type}')">🔄 Retake This Exam</button>
+    </div>
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Performance Breakdown</div>
+      ${buildPerformanceBreakdown(results)}
+    </div>`;
+}
+
+function buildPerformanceBreakdown(results) {
+  return results.map(r => {
+    const pct = Math.round(r.raw*100);
+    return `<div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-weight:600;">${SECTION_CONFIG[r.section]?.name||r.section}</span>
+        <span style="color:var(--blue2);font-weight:700;">${r.correct}/${r.total} (${pct}%)</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct>=70?'var(--green)':pct>=50?'var(--warn)':'var(--red)'};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function predictGrade(total, v, q) {
+  if (!total) return {label:'N/A',desc:'Complete more sections for a score',advice:'',num:0};
+  if (total >= 330) return {label:'Excellent (330+)',desc:'Top 3% of test-takers worldwide',advice:'You are well-prepared. Focus on maintaining consistency and stamping out any remaining weak areas.',num:330};
+  if (total >= 320) return {label:'Very Strong (320–329)',desc:'Top 10–15% of test-takers',advice:'Strong performance. Target elite programs confidently. Work on any section below 160.',num:320};
+  if (total >= 310) return {label:'Competitive (310–319)',desc:'Above average — competitive for many programs',advice:'Good foundation. An additional 4–6 weeks of targeted practice could push you into the 320+ range.',num:310};
+  if (total >= 300) return {label:'Average (300–309)',desc:'Near median GRE performance',advice:'Solid start. Focus on your weaker section. 6–8 weeks of structured practice recommended.',num:300};
+  if (total >= 290) return {label:'Below Average (290–299)',desc:'Below median — additional preparation needed',advice:'Commit to the full 8-week plan. Focus heavily on fundamentals and daily vocabulary practice.',num:290};
+  return {label:'Needs Work (<290)',desc:'Significant preparation recommended',advice:'Begin with the foundations. Follow the 8-week plan strictly and aim for 2+ hours of daily practice.',num:0};
+}
+
+function percentile(score, section) {
+  const table = {verbal:{130:1,140:8,150:43,155:68,160:84,165:96,170:99},quant:{130:1,140:8,150:37,155:58,160:76,165:89,170:97}};
+  const t = table[section];
+  const keys = Object.keys(t).map(Number).sort((a,b)=>a-b);
+  for (let i = keys.length-1; i >= 0; i--) { if (score >= keys[i]) return t[keys[i]]; }
+  return 1;
+}
+
+// ============================================================
+// SOLUTION REVIEW — Rich Interactive Version
+// ============================================================
+
+// Per-option short explanations for why each distractor is wrong
+function optionNotes(q) {
+  // Returns {letterKey: {text, why}} for each option where possible
+  // Falls back to generic notes if not specifically defined
+  const notes = {};
+  const allChoices = q.choices || q.blank1 || [];
+  const correctAns = Array.isArray(q.answer) ? q.answer : [q.answer];
+  allChoices.forEach(([val, label]) => {
+    if (correctAns.includes(val)) {
+      notes[val] = { correct: true, text: label };
+    } else {
+      notes[val] = { correct: false, text: label };
+    }
+  });
+  return notes;
+}
+
+function getCorrectness(q) {
+  const userAns = examState.answers[q.id];
+  let correct = false, skipped = false;
+  if (q.type === 'sentence_equivalence') {
+    const a = userAns || [];
+    if (!a.length) skipped = true;
+    else correct = Array.isArray(a) && a.length===2 && q.answer.every(x=>a.includes(x));
+  } else if (q.type === 'text_completion' && q.blanks >= 2) {
+    const b1 = examState.answers[q.id+'_b1'], b2 = examState.answers[q.id+'_b2'];
+    if (!b1 && !b2) skipped = true;
+    else correct = b1===q.answer[0] && b2===q.answer[1] && (q.blanks<3 || examState.answers[q.id+'_b3']===q.answer[2]);
+  } else if (q.type === 'reading_comprehension') {
+    if (!userAns) skipped = true;
+    else correct = userAns === q.questions[0].answer;
+  } else if (q.type === 'issue' || q.type === 'argument') {
+    return { correct: null, skipped: false };
+  } else {
+    if (!userAns) skipped = true;
+    else correct = userAns === q.answer;
+  }
+  return { correct: skipped ? null : correct, skipped };
+}
+
+function buildOptionRows(q, userAns) {
+  // For MC questions: render each option with colour coding + tag + mini note
+  const choices = q.choices || [];
+  if (!choices.length) return '';
+  const correctAns = Array.isArray(q.answer) ? q.answer : [q.answer];
+  const userSelected = Array.isArray(userAns) ? userAns : (userAns ? [userAns] : []);
+
+  return choices.map(([val, label]) => {
+    const isCorrect = correctAns.includes(val);
+    const isUserPick = userSelected.includes(val);
+    const isUserWrong = isUserPick && !isCorrect;
+
+    let cls = 'opt-neutral', letterCls = '', tagHtml = '', miniExp = '';
+
+    if (isCorrect && isUserPick) {
+      cls = 'opt-correct';
+      tagHtml = `<span class="opt-tag tag-your-correct">✅ Your Answer — Correct!</span>`;
+      miniExp = `<div class="opt-mini-exp exp-correct">✔ This is the correct answer.</div>`;
+    } else if (isCorrect && !isUserPick) {
+      cls = 'opt-correct';
+      tagHtml = `<span class="opt-tag tag-correct">✅ Correct Answer</span>`;
+      miniExp = `<div class="opt-mini-exp exp-correct">✔ This was the right choice — see explanation below for why.</div>`;
+    } else if (isUserWrong) {
+      cls = 'opt-user-wrong';
+      tagHtml = `<span class="opt-tag tag-your-wrong">✗ Your Answer — Incorrect</span>`;
+      miniExp = `<div class="opt-mini-exp exp-wrong">✘ You selected this, but it does not fit the context. Review the explanation below.</div>`;
+    } else {
+      tagHtml = `<span class="opt-tag tag-skipped" style="opacity:.55;">Not selected</span>`;
+      miniExp = `<div class="opt-mini-exp">This option was a distractor.</div>`;
+    }
+
+    return `<div class="sol-option ${cls}">
+      <div class="opt-letter">${val}</div>
+      <div class="opt-content">
+        <div class="opt-text">${label}</div>
+        ${miniExp}
+      </div>
+      ${tagHtml}
+    </div>`;
+  }).join('');
+}
+
+function buildMultiBlankRows(q, userAns) {
+  const blanks = [q.blank1, q.blank2];
+  if (q.blanks === 3) blanks.push(q.blank3);
+  const keys = [q.id+'_b1', q.id+'_b2', q.id+'_b3'];
+  const labels = ['Blank (i)', 'Blank (ii)', 'Blank (iii)'];
+  return blanks.map((blank, bi) => {
+    const key = keys[bi];
+    const correctAns = q.answer[bi];
+    const userPick = examState.answers[key];
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">${labels[bi]}</div>
+      <div class="sol-options">
+        ${blank.map(([val, label]) => {
+          const isCorrect = val === correctAns;
+          const isUserPick = val === userPick;
+          const isUserWrong = isUserPick && !isCorrect;
+          let cls = 'opt-neutral', tagHtml = '', miniExp = '';
+          if (isCorrect && isUserPick) {
+            cls='opt-correct'; tagHtml=`<span class="opt-tag tag-your-correct">✅ Your Answer — Correct!</span>`; miniExp=`<div class="opt-mini-exp exp-correct">✔ Correct choice for this blank.</div>`;
+          } else if (isCorrect) {
+            cls='opt-correct'; tagHtml=`<span class="opt-tag tag-correct">✅ Correct Answer</span>`; miniExp=`<div class="opt-mini-exp exp-correct">✔ This was the right word for this blank.</div>`;
+          } else if (isUserWrong) {
+            cls='opt-user-wrong'; tagHtml=`<span class="opt-tag tag-your-wrong">✗ Your Answer</span>`; miniExp=`<div class="opt-mini-exp exp-wrong">✘ Incorrect for this blank.</div>`;
+          } else {
+            tagHtml=`<span class="opt-tag tag-skipped" style="opacity:.45;">Not selected</span>`; miniExp=`<div class="opt-mini-exp">Distractor option.</div>`;
+          }
+          return `<div class="sol-option ${cls}">
+            <div class="opt-letter">${val}</div>
+            <div class="opt-content"><div class="opt-text">${label}</div>${miniExp}</div>
+            ${tagHtml}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildRCRows(q) {
+  // Reading comprehension: show all sub-questions
+  return q.questions.map((subQ, qi) => {
+    const key = qi === 0 ? q.id : q.id+'_2';
+    const userAns = examState.answers[key];
+    return `<div style="${qi>0?'margin-top:18px;padding-top:14px;border-top:1px dashed #e2e8f0;':''}">
+      <div style="font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:10px;">Part ${qi+1}: ${subQ.text}</div>
+      <div class="sol-options">
+        ${subQ.choices.map(([val, label]) => {
+          const isCorrect = val === subQ.answer;
+          const isUserPick = val === userAns;
+          const isUserWrong = isUserPick && !isCorrect;
+          let cls='opt-neutral', tagHtml='', miniExp='';
+          if (isCorrect && isUserPick) { cls='opt-correct'; tagHtml=`<span class="opt-tag tag-your-correct">✅ Your Answer — Correct!</span>`; miniExp=`<div class="opt-mini-exp exp-correct">✔ Correct.</div>`; }
+          else if (isCorrect) { cls='opt-correct'; tagHtml=`<span class="opt-tag tag-correct">✅ Correct Answer</span>`; miniExp=`<div class="opt-mini-exp exp-correct">✔ This was the best supported answer.</div>`; }
+          else if (isUserWrong) { cls='opt-user-wrong'; tagHtml=`<span class="opt-tag tag-your-wrong">✗ Your Answer</span>`; miniExp=`<div class="opt-mini-exp exp-wrong">✘ Incorrect — re-read the passage carefully.</div>`; }
+          else { tagHtml=`<span class="opt-tag tag-skipped" style="opacity:.45;">Not selected</span>`; miniExp=`<div class="opt-mini-exp">Distractor.</div>`; }
+          return `<div class="sol-option ${cls}">
+            <div class="opt-letter">${val}</div>
+            <div class="opt-content"><div class="opt-text">${label}</div>${miniExp}</div>
+            ${tagHtml}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="sol-explanation" style="margin-top:10px;">
+        <div class="exp-label">💡 Explanation</div>
+        <div class="exp-body">${subQ.explanation}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Key takeaway messages by question type
+function takeawayFor(q, correct) {
+  if (correct === null) return '📝 Essays are evaluated holistically. Review the rubric below and reflect on your argument structure, use of examples, and vocabulary range.';
+  if (correct === true) return '🌟 Excellent! You identified the correct answer. Reinforce this pattern so you can apply it consistently under timed conditions.';
+  // Wrong — type-specific advice
+  const tips = {
+    text_completion: '📌 Tip: For text completion, always find the "context clue" — a word or phrase nearby that signals the meaning of the blank. Eliminate extremes first.',
+    sentence_equivalence: '📌 Tip: In sentence equivalence, both correct answers must create complete, equivalent sentences. Test each pair together, not individually.',
+    reading_comprehension: '📌 Tip: Always base your answer only on what the passage explicitly states or implies. Avoid choices that are true in the real world but unsupported by the text.',
+    problem_solving: '📌 Tip: Re-read the question carefully. Write out the given information and set up the equation before solving. Check your answer by plugging it back in.',
+    quant_comparison: '📌 Tip: For quantity comparisons, try special values: 0, 1, −1, and fractions. If different values give different outcomes, choose "Cannot be determined."',
+    data_interpretation: '📌 Tip: Read table/graph labels and units carefully before calculating. Double-check which row and column you are using.',
+    data_sufficiency: '📌 Tip: Test each statement independently first. Remember — you only need to know IF a unique answer exists, not what the answer actually is.',
+    issue: '📌 Tip: A strong Issue essay takes a nuanced position, uses specific examples, and acknowledges the opposing view before countering it.',
+    argument: '📌 Tip: Focus on the logical flaws — unsupported assumptions, correlation vs. causation, and sampling issues — rather than whether the conclusion is true.',
+  };
+  return tips[q.type] || '📌 Review this question type and practice similar problems on your dashboard.';
+}
+
+// Review filter state
+let reviewFilter = 'all';
+
+function showSolutionReview(filter) {
+  filter = filter || reviewFilter || 'all';
+  reviewFilter = filter;
+  showPage('page-results');
+  const allQ = examState.questions;
+
+  // Tally stats
+  let nCorrect=0, nWrong=0, nSkipped=0, nEssay=0;
+  allQ.forEach(q => {
+    const {correct, skipped} = getCorrectness(q);
+    if (correct===null && (q.type==='issue'||q.type==='argument')) nEssay++;
+    else if (correct===true) nCorrect++;
+    else if (skipped) nSkipped++;
+    else nWrong++;
+  });
+
+  // Filter
+  const filtered = allQ.filter(q => {
+    if (filter==='all') return true;
+    const {correct, skipped} = getCorrectness(q);
+    if (filter==='correct') return correct===true;
+    if (filter==='wrong') return correct===false && !skipped;
+    if (filter==='skipped') return skipped;
+    if (filter==='essay') return q.type==='issue'||q.type==='argument';
+    return true;
+  });
+
+  // Build hero stats
+  const pctCorrect = allQ.length ? Math.round(nCorrect/(allQ.length-nEssay||1)*100) : 0;
+
+  let html = `
+  <div class="review-hero">
+    <div>
+      <h2>📋 Answer Review &amp; Corrections</h2>
+      <p>Every question — with your answer, the correct answer, and a full explanation.</p>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:#1a3a6b;font-weight:700;" onclick="examState._exitPreview ? showResultsPreview() : showResults()">← Back to Score Report</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.4);" onclick="showDashboard()">🏠 Dashboard</button>
+        <button class="btn btn-sm" style="background:var(--accent);color:#fff;" onclick="startExam('${examState.type}')">🔄 Retake Exam</button>
+      </div>
+    </div>
+    <div class="review-hero-stats">
+      <div class="rh-stat"><div class="rh-val" style="color:#4ade80;">${nCorrect}</div><div class="rh-lbl">Correct</div></div>
+      <div class="rh-stat"><div class="rh-val" style="color:#f87171;">${nWrong}</div><div class="rh-lbl">Wrong</div></div>
+      <div class="rh-stat"><div class="rh-val" style="color:#94a3b8;">${nSkipped}</div><div class="rh-lbl">Skipped</div></div>
+      ${nEssay?`<div class="rh-stat"><div class="rh-val" style="color:#c4b5fd;">${nEssay}</div><div class="rh-lbl">Essay</div></div>`:''}
+      <div class="rh-stat"><div class="rh-val">${pctCorrect}%</div><div class="rh-lbl">Score</div></div>
+    </div>
+  </div>
+
+  <div class="review-filter-bar">
+    <span style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;margin-right:4px;">Filter:</span>
+    <div class="filter-chip ${filter==='all'?'active':''}" onclick="showSolutionReview('all')">All Questions <span class="chip-count">${allQ.length}</span></div>
+    <div class="filter-chip ${filter==='correct'?'active':''}" onclick="showSolutionReview('correct')" style="${filter!=='correct'?'border-color:#4ade80;color:#4ade80;':''}">✅ Correct <span class="chip-count">${nCorrect}</span></div>
+    <div class="filter-chip ${filter==='wrong'?'active':''}" onclick="showSolutionReview('wrong')" style="${filter!=='wrong'?'border-color:#f87171;color:#f87171;':''}">✗ Wrong <span class="chip-count">${nWrong}</span></div>
+    ${nSkipped?`<div class="filter-chip ${filter==='skipped'?'active':''}" onclick="showSolutionReview('skipped')" style="${filter!=='skipped'?'border-color:#94a3b8;color:#94a3b8;':''}">⬜ Skipped <span class="chip-count">${nSkipped}</span></div>`:''}
+    ${nEssay?`<div class="filter-chip ${filter==='essay'?'active':''}" onclick="showSolutionReview('essay')" style="${filter!=='essay'?'border-color:#c4b5fd;color:#c4b5fd;':''}">📝 Essays <span class="chip-count">${nEssay}</span></div>`:''}
+  </div>
+
+  ${filtered.length===0?`<div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,0.6);font-size:15px;">No questions in this category.</div>`:''}
+  `;
+
+  // Build each card
+  filtered.forEach((q, idx) => {
+    const globalIdx = allQ.indexOf(q);
+    const {correct, skipped} = getCorrectness(q);
+    const isEssay = q.type==='issue'||q.type==='argument';
+    const userAns = examState.answers[q.id];
+
+    // Ribbon style
+    let ribCls, ribIcon, ribTitle, ribBadge;
+    if (isEssay) {
+      ribCls='rib-essay'; ribIcon='📝'; ribTitle='Essay Task'; ribBadge='Manually Scored';
+    } else if (correct===true) {
+      ribCls='rib-correct'; ribIcon='✅'; ribTitle='Correct Answer!'; ribBadge='+1 Point';
+    } else if (skipped) {
+      ribCls='rib-skipped'; ribIcon='⬜'; ribTitle='Not Answered'; ribBadge='0 Points';
+    } else {
+      ribCls='rib-wrong'; ribIcon='✗'; ribTitle='Incorrect Answer'; ribBadge='Review Needed';
+    }
+
+    const cardCls = isEssay?'sc-essay':correct===true?'sc-correct':skipped?'sc-skipped':'sc-wrong';
+    const exp = q.explanation || (q.questions&&q.questions[0]&&q.questions[0].explanation) || '';
+    const correctDisplay = Array.isArray(q.answer) ? q.answer.join(' and ') : q.answer;
+
+    // Build the main content area
+    let contentHtml = '';
+
+    // Passage for reading comp
+    if (q.type==='reading_comprehension' && q.passage) {
+      contentHtml += `<div class="sol-passage">${q.passage}</div>`;
+    }
+
+    // Full question text
+    const qText = q.type==='reading_comprehension' ? '' : (q.type==='issue'||q.type==='argument') ? q.text : q.text;
+    if (qText) contentHtml += `<div class="sol-q-text">${qText}</div>`;
+
+    // Answer options — rendered differently by type
+    if (q.type==='reading_comprehension') {
+      contentHtml += buildRCRows(q);
+    } else if (q.type==='text_completion' && q.blanks >= 2) {
+      contentHtml += buildMultiBlankRows(q, userAns);
+      // Main explanation
+      contentHtml += `<div class="sol-explanation" style="margin-top:14px;">
+        <div class="exp-label">💡 Full Explanation</div>
+        <div class="exp-body">${exp}</div>
+      </div>`;
+    } else if (isEssay) {
+      const essayText = userAns || '';
+      const essayScore = examState.sectionResults.find(r=>r.section==='writing')?.essayScore ?? '—';
+      contentHtml += `<div class="essay-review-box">
+        <div class="essay-score-row">
+          <div class="essay-score-circle">${essayScore}<span>/ 6.0</span></div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#4c1d95;">Your Essay Score</div>
+            <div style="font-size:13px;color:#6d28d9;margin-top:2px;">Based on ETS analytical writing rubric</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:6px;">Scoring Rubric — did your essay address these?</div>
+        <div class="essay-rubric">
+          ${(q.rubric||[]).map(r=>`<div class="rubric-item"><span class="ri-icon">📌</span>${r}</div>`).join('')}
+        </div>
+        ${essayText ? `<div style="font-size:12px;font-weight:700;color:#6d28d9;margin-top:14px;margin-bottom:4px;">Your Essay:</div>
+        <div class="essay-your-text">${essayText.replace(/\n/g,'<br>')}</div>` : '<div style="color:#9ca3af;font-style:italic;margin-top:10px;font-size:13px;">No essay written.</div>'}
+      </div>`;
+    } else {
+      contentHtml += `<div class="sol-options">${buildOptionRows(q, userAns)}</div>`;
+      if (!q.type.startsWith('reading')) {
+        contentHtml += `<div class="sol-explanation">
+          <div class="exp-label">💡 Step-by-Step Explanation</div>
+          <div class="exp-body">${exp || 'See the correct answer highlighted above.'}</div>
+        </div>`;
+      }
+    }
+
+    // Key takeaway strip
+    contentHtml += `<div class="sol-takeaway">
+      <span class="tk-icon">🎯</span>
+      <span>${takeawayFor(q, correct)}</span>
+    </div>`;
+
+    html += `
+    <div class="sol-card ${cardCls}" id="sol-card-${globalIdx}">
+      <div class="sol-ribbon ${ribCls}">
+        <div class="rib-icon">${ribIcon}</div>
+        <div>
+          <div class="rib-title">Question ${globalIdx+1} &nbsp;·&nbsp; ${typeLabel(q.type)}</div>
+          <div class="rib-subtitle">${ribTitle}</div>
+        </div>
+        <div class="rib-badge">${ribBadge}</div>
+      </div>
+      <div class="sol-body" id="sol-body-${globalIdx}">
+        ${contentHtml}
+      </div>
+      <button class="sol-toggle" onclick="toggleSolCard(${globalIdx})">
+        <span id="sol-toggle-icon-${globalIdx}">▲</span> Collapse this question
+      </button>
+    </div>`;
+  });
+
+  html += `<div style="text-align:center;padding:16px 0 8px;color:rgba(255,255,255,0.5);font-size:13px;">End of Review — ${filtered.length} question(s) shown</div>`;
+
+  // If user exited early and hasn't decided yet, show the save/discard panel at bottom too
+  if (examState._exitPreview && examState._cachedScores) {
+    html += buildSaveDecisionPanel();
+  }
+
+  document.getElementById('results-content').innerHTML = html;
+}
+
+function toggleSolCard(idx) {
+  const body = document.getElementById('sol-body-'+idx);
+  const icon = document.getElementById('sol-toggle-icon-'+idx);
+  const btn  = icon ? icon.closest('button') : null;
+  if (!body) return;
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    icon.textContent = '▲';
+    btn.childNodes[1].textContent = ' Collapse this question';
+  } else {
+    body.style.display = 'none';
+    icon.textContent = '▼';
+    btn.childNodes[1].textContent = ' Expand this question';
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideModal();
+});
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) hideModal();
+});
+// Enter key on login
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
