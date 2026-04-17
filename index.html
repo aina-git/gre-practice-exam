@@ -458,32 +458,47 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--da
       <div class="exam-option-card" onclick="startExam('full')">
         <div class="icon">📋</div>
         <h3>Full GRE Simulation</h3>
-        <p>All sections &bull; ~4 hours &bull; Official timing</p>
+        <p>Official shorter GRE &bull; ~1h 58m &bull; 1 essay + 2 Verbal + 2 Quant</p>
       </div>
-      <div class="exam-option-card" onclick="startExam('verbal')">
+      <div class="exam-option-card" onclick="startExam('quick')">
+        <div class="icon">⚡</div>
+        <h3>Quick 30-Minute Practice</h3>
+        <p>15 mixed questions &bull; 30 minutes &bull; Verbal + Quant</p>
+      </div>
+      <div class="exam-option-card" style="border-color:var(--accent)" onclick="event.stopPropagation()">
+        <div class="icon">⏱️</div>
+        <h3>Custom Timed Practice</h3>
+        <p>Pick your own time (5–120 min). Questions scale to fit.</p>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <input id="custom-minutes" type="number" min="5" max="120" value="30" style="width:80px;padding:8px 10px;border:1.5px solid var(--light);border-radius:6px;font-size:14px;text-align:center" onclick="event.stopPropagation()">
+          <span style="font-size:13px;color:var(--gray)">minutes</span>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="event.stopPropagation();startCustomExam()">Start →</button>
+        </div>
+      </div>
+      <div class="exam-option-card" onclick="startExam('verbal1')">
         <div class="icon">📖</div>
-        <h3>Verbal Reasoning</h3>
-        <p>27 questions &bull; 41 minutes</p>
+        <h3>Verbal — Section 1</h3>
+        <p>12 questions &bull; 18 minutes &bull; Real GRE timing</p>
       </div>
-      <div class="exam-option-card" onclick="startExam('quant')">
+      <div class="exam-option-card" onclick="startExam('verbal2')">
+        <div class="icon">📚</div>
+        <h3>Verbal — Section 2 (harder)</h3>
+        <p>15 questions &bull; 23 minutes &bull; Adaptive difficulty</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('quant1')">
         <div class="icon">📐</div>
-        <h3>Quantitative Reasoning</h3>
-        <p>27 questions &bull; 47 minutes</p>
+        <h3>Quant — Section 1</h3>
+        <p>12 questions &bull; 21 minutes &bull; Real GRE timing</p>
+      </div>
+      <div class="exam-option-card" onclick="startExam('quant2')">
+        <div class="icon">🧮</div>
+        <h3>Quant — Section 2 (harder)</h3>
+        <p>15 questions &bull; 26 minutes &bull; Adaptive difficulty</p>
       </div>
       <div class="exam-option-card" onclick="startExam('writing')">
         <div class="icon">✍️</div>
         <h3>Analytical Writing</h3>
         <p>1 essay task &bull; 30 minutes</p>
-      </div>
-      <div class="exam-option-card" onclick="startExam('datainsights')">
-        <div class="icon">📊</div>
-        <h3>Data Insights</h3>
-        <p>20 questions &bull; 45 minutes</p>
-      </div>
-      <div class="exam-option-card" onclick="startExam('quick')">
-        <div class="icon">⚡</div>
-        <h3>Quick Practice</h3>
-        <p>15 mixed questions &bull; 20 minutes</p>
       </div>
     </div>
 
@@ -1251,19 +1266,64 @@ function showInstructions(context) {
 // ============================================================
 // EXAM ENGINE
 // ============================================================
+// ── REAL GRE FORMAT (shorter GRE, effective Sept 2023) ─────────────────────
+// ETS published spec: 1h 58m total
+//   • Analytical Writing:       30 min · 1 essay
+//   • Verbal Reasoning Sec 1:   18 min · 12 questions
+//   • Verbal Reasoning Sec 2:   23 min · 15 questions  (adaptive — harder than sec 1)
+//   • Quant  Reasoning Sec 1:   21 min · 12 questions
+//   • Quant  Reasoning Sec 2:   26 min · 15 questions  (adaptive — harder than sec 1)
 const SECTION_CONFIG = {
-  verbal:       { name: 'Verbal Reasoning',       time: 41*60, count: 27, bank: () => VERBAL_QUESTIONS },
-  quant:        { name: 'Quantitative Reasoning', time: 47*60, count: 27, bank: () => QUANT_QUESTIONS },
-  writing:      { name: 'Analytical Writing',     time: 30*60, count: 1,  bank: () => WRITING_PROMPTS },
-  datainsights: { name: 'Data Insights',           time: 45*60, count: 20, bank: () => DATA_INSIGHTS_QUESTIONS },
+  writing:   { name: 'Analytical Writing',                   time: 30*60, count: 1,  kind: 'writing', bank: () => WRITING_PROMPTS },
+  verbal1:   { name: 'Verbal Reasoning — Section 1',         time: 18*60, count: 12, kind: 'verbal',  bank: () => VERBAL_QUESTIONS },
+  verbal2:   { name: 'Verbal Reasoning — Section 2 (harder)', time: 23*60, count: 15, kind: 'verbal',  bank: () => VERBAL_QUESTIONS },
+  quant1:    { name: 'Quantitative Reasoning — Section 1',   time: 21*60, count: 12, kind: 'quant',   bank: () => QUANT_QUESTIONS },
+  quant2:    { name: 'Quantitative Reasoning — Section 2 (harder)', time: 26*60, count: 15, kind: 'quant',   bank: () => QUANT_QUESTIONS },
+  // Kept for practice-only (not part of GRE — originally from GMAT Focus).
+  datainsights: { name: 'Data Insights (practice)',           time: 45*60, count: 20, kind: 'data',   bank: () => DATA_INSIGHTS_QUESTIONS },
+  // Single-section "practice" aliases (kept so the old per-topic cards still work)
+  verbal:    { name: 'Verbal Reasoning Practice',            time: 18*60, count: 12, kind: 'verbal',  bank: () => VERBAL_QUESTIONS },
+  quant:     { name: 'Quantitative Reasoning Practice',      time: 21*60, count: 12, kind: 'quant',   bank: () => QUANT_QUESTIONS },
 };
 
-function startExam(type) {
+// ── Cross-session question rotation ─────────────────────────────────────────
+// Remember the last N question IDs each user saw per kind so fresh sessions
+// prefer questions the user hasn't seen recently. Bank size is small (~23/27
+// per kind) so we rotate through the bank before repeating when possible.
+function getRecentSeen(kind) {
+  try {
+    const raw = localStorage.getItem(`gre_seen_${currentUser?.email || 'guest'}_${kind}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function pushRecentSeen(kind, ids) {
+  try {
+    const key = `gre_seen_${currentUser?.email || 'guest'}_${kind}`;
+    const prev = getRecentSeen(kind);
+    const merged = [...ids, ...prev].slice(0, 80); // keep last ~80 IDs
+    localStorage.setItem(key, JSON.stringify(merged));
+  } catch {}
+}
+function pickFromBank(bank, kind, count) {
+  // Prefer unseen questions first, then fill with least-recently-seen.
+  const seen = new Set(getRecentSeen(kind));
+  const unseen = bank.filter(q => !seen.has(q.id));
+  const seenArr = bank.filter(q => seen.has(q.id));
+  const picked = [...shuffle(unseen), ...shuffle(seenArr)].slice(0, Math.min(count, bank.length));
+  pushRecentSeen(kind, picked.map(q => q.id));
+  return picked;
+}
+
+function startExam(type, opts) {
+  opts = opts || {};
   let sections = [];
   if (type === 'full') {
-    sections = ['writing','verbal','verbal','quant','quant','datainsights'];
+    // Real GRE order: writing → V1 → V2 → Q1 → Q2  (≈ 1h 58m)
+    sections = ['writing','verbal1','verbal2','quant1','quant2'];
   } else if (type === 'quick') {
     sections = ['mixed'];
+  } else if (type === 'custom') {
+    sections = ['custom'];
   } else {
     sections = [type];
   }
@@ -1272,16 +1332,29 @@ function startExam(type) {
     questions: [], currentQIdx: 0,
     answers: {}, flags: new Set(),
     timer: null, timeLeft: 0,
-    startTime: new Date().toISOString(), sectionResults: []
+    startTime: new Date().toISOString(), sectionResults: [],
+    customMinutes: opts.minutes || null,
   };
   showInstructions('exam');
   const c = document.getElementById('inst-content');
   const sec = sections[0];
-  const cfg = sec === 'mixed' ? null : SECTION_CONFIG[sec];
+  const cfg = (sec === 'mixed' || sec === 'custom') ? null : SECTION_CONFIG[sec];
+
+  let minutes, count;
+  if (sec === 'mixed') { minutes = 30; count = 15; }
+  else if (sec === 'custom') {
+    minutes = opts.minutes || 30;
+    // Mixed custom: scale question count proportionally — ~1 question per minute.
+    count = Math.max(5, Math.min(40, Math.round(minutes)));
+  }
+  else { minutes = Math.floor(cfg.time/60); count = cfg.count; }
+
+  const title = cfg ? cfg.name : (sec === 'custom' ? `Custom Timed Practice (${minutes} min)` : 'Quick 30-Minute Mixed Practice');
+
   c.innerHTML = `
-    <div class="inst-header"><h2>Section Instructions: ${cfg ? cfg.name : 'Mixed Practice'}</h2><p>Read carefully before beginning.</p></div>
+    <div class="inst-header"><h2>Section Instructions: ${title}</h2><p>Read carefully before beginning.</p></div>
     <div class="inst-body">
-      <div class="info-box">⏱️ <strong>Time Limit:</strong> ${cfg ? Math.floor(cfg.time/60) : 20} minutes &nbsp;|&nbsp; <strong>Questions:</strong> ${cfg ? cfg.count : 15}</div>
+      <div class="info-box">⏱️ <strong>Time Limit:</strong> ${minutes} minutes &nbsp;|&nbsp; <strong>Questions:</strong> ${count}</div>
       <h3>Instructions</h3>
       <ul>
         <li>Answer all questions to the best of your ability.</li>
@@ -1289,7 +1362,8 @@ function startExam(type) {
         <li>Flag any question you want to review before submitting.</li>
         <li>The section will auto-submit when time expires.</li>
         ${type==='writing'?'<li>Write your essay in the text area provided. Aim for 400–600 words.</li>':''}
-        <li>Click <strong>NEED HELP</strong> on the right side at any time to see the answer and explanation for the current question.</li>
+        ${type==='full'?'<li>Full GRE runs about <strong>1 hour 58 minutes</strong> with 1 essay, 2 Verbal sections, 2 Quant sections.</li>':''}
+        <li>Click <strong>NEED HELP</strong> on the right at any time to see the answer and explanation for the current question.</li>
       </ul>
       <div class="warning-box">⚠️ Once you click "Begin Section", the timer starts immediately.</div>
       <div class="inst-actions">
@@ -1297,6 +1371,15 @@ function startExam(type) {
         <button class="btn btn-accent" onclick="beginSection()">Begin Section →</button>
       </div>
     </div>`;
+}
+
+// Convenience wrapper for the custom-time card — reads the minutes input.
+function startCustomExam() {
+  const el = document.getElementById('custom-minutes');
+  let mins = parseInt(el?.value || '30', 10);
+  if (isNaN(mins) || mins < 5) mins = 5;
+  if (mins > 120) mins = 120;
+  startExam('custom', { minutes: mins });
 }
 
 function beginSection() {
@@ -1308,31 +1391,59 @@ function beginSection() {
 }
 
 function loadSectionQuestions(sec) {
-  let bank, count;
+  let picked = [];
+  let sectionName = 'Practice';
+  let timeSec = 20*60;
+
   if (sec === 'mixed') {
-    const all = [...VERBAL_QUESTIONS, ...QUANT_QUESTIONS, ...DATA_INSIGHTS_QUESTIONS];
-    bank = shuffle(all);
-    count = 15;
-  } else if (sec === 'verbal') {
-    bank = shuffle(VERBAL_QUESTIONS);
-    count = Math.min(SECTION_CONFIG.verbal.count, VERBAL_QUESTIONS.length);
-  } else if (sec === 'quant') {
-    bank = shuffle(QUANT_QUESTIONS);
-    count = Math.min(SECTION_CONFIG.quant.count, QUANT_QUESTIONS.length);
-  } else if (sec === 'writing') {
-    bank = shuffle(WRITING_PROMPTS);
-    count = 1;
-  } else if (sec === 'datainsights') {
-    bank = shuffle(DATA_INSIGHTS_QUESTIONS);
-    count = Math.min(SECTION_CONFIG.datainsights.count, DATA_INSIGHTS_QUESTIONS.length);
+    // Quick 30-minute: ~half verbal + half quant, rotated by kind
+    const nVerbal = 8, nQuant = 7;
+    picked = [
+      ...pickFromBank(VERBAL_QUESTIONS, 'verbal', nVerbal),
+      ...pickFromBank(QUANT_QUESTIONS,  'quant',  nQuant),
+    ];
+    picked = shuffle(picked);
+    sectionName = 'Quick 30-Minute Mixed Practice';
+    timeSec = 30*60;
+  } else if (sec === 'custom') {
+    const mins = examState.customMinutes || 30;
+    timeSec = mins * 60;
+    // Scale question count: ~1 question per minute, clamped
+    const total = Math.max(5, Math.min(40, Math.round(mins)));
+    const nVerbal = Math.ceil(total / 2);
+    const nQuant  = total - nVerbal;
+    picked = [
+      ...pickFromBank(VERBAL_QUESTIONS, 'verbal', nVerbal),
+      ...pickFromBank(QUANT_QUESTIONS,  'quant',  nQuant),
+    ];
+    picked = shuffle(picked);
+    sectionName = `Custom Timed Practice (${mins} min)`;
+  } else {
+    const cfg = SECTION_CONFIG[sec];
+    if (!cfg) {
+      console.error('Unknown section:', sec);
+      return;
+    }
+    sectionName = cfg.name;
+    timeSec = cfg.time;
+
+    if (cfg.kind === 'writing') {
+      picked = shuffle(WRITING_PROMPTS).slice(0, 1);
+    } else if (cfg.kind === 'data') {
+      picked = pickFromBank(DATA_INSIGHTS_QUESTIONS, 'data', cfg.count);
+    } else {
+      // verbal or quant — use rotation helper
+      picked = pickFromBank(cfg.bank(), cfg.kind, cfg.count);
+    }
   }
-  examState.questions = bank.slice(0, count);
+
+  examState.questions = picked;
   examState.currentQIdx = 0;
   examState.answers = {};
   examState.flags = new Set();
-  const cfg = SECTION_CONFIG[sec];
-  examState.timeLeft = cfg ? cfg.time : 20*60;
-  document.getElementById('exam-section-name').textContent = cfg ? cfg.name : 'Mixed Practice';
+  examState.timeLeft = timeSec;
+  const el = document.getElementById('exam-section-name');
+  if (el) el.textContent = sectionName;
 }
 
 // ============================================================
@@ -1674,10 +1785,11 @@ function showResultsPreview() {
 
   let verbalScores=[], quantScores=[], awScore=null, dataScore=null;
   results.forEach(r => {
-    if (r.section==='verbal')       verbalScores.push(r);
-    else if (r.section==='quant')   quantScores.push(r);
-    else if (r.section==='writing') awScore = r;
-    else if (r.section==='datainsights') dataScore = r;
+    const kind = (SECTION_CONFIG[r.section] || {}).kind || r.section;
+    if (kind==='verbal')       verbalScores.push(r);
+    else if (kind==='quant')   quantScores.push(r);
+    else if (kind==='writing') awScore = r;
+    else if (kind==='data')    dataScore = r;
   });
 
   const avgV     = verbalScores.length ? verbalScores.reduce((s,x)=>s+x.raw,0)/verbalScores.length : null;
@@ -1969,10 +2081,11 @@ function showResults() {
 
   let verbalScores=[], quantScores=[], awScore=null, dataScore=null;
   results.forEach(r => {
-    if (r.section==='verbal')       verbalScores.push(r);
-    else if (r.section==='quant')   quantScores.push(r);
-    else if (r.section==='writing') awScore = r;
-    else if (r.section==='datainsights') dataScore = r;
+    const kind = (SECTION_CONFIG[r.section] || {}).kind || r.section;
+    if (kind==='verbal')       verbalScores.push(r);
+    else if (kind==='quant')   quantScores.push(r);
+    else if (kind==='writing') awScore = r;
+    else if (kind==='data')    dataScore = r;
   });
 
   const avgV     = verbalScores.length ? verbalScores.reduce((s,x)=>s+x.raw,0)/verbalScores.length : null;
