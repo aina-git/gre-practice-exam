@@ -809,16 +809,35 @@ const QC_KEYS = QUANT_GEN_KEYS.filter(k=>k.startsWith('qc'));
 const MCA_KEYS = QUANT_GEN_KEYS.filter(k=>k.startsWith('mca'));
 const NE_KEYS = QUANT_GEN_KEYS.filter(k=>k.startsWith('ne'));
 const MC_KEYS = QUANT_GEN_KEYS.filter(k=>!k.startsWith('qc')&&!k.startsWith('mca')&&!k.startsWith('ne'));
+// Curated GRE-accurate difficulty tier per generator (also drives the on-screen badge).
+const GEN_DIFF = {
+  // easy — single-step
+  linear:'easy', percentOf:'easy', ratioSplit:'easy', speed:'easy', pythagoras:'easy', probability:'easy',
+  polygonAngles:'easy', median:'easy', qcNumeric:'easy', neAverage:'easy', nePercent:'easy', average:'easy', system:'easy',
+  // medium — two-step / standard
+  percentOriginal:'medium', workRate:'medium', rectangle:'medium', circleSector:'medium', arithSeq:'medium',
+  diffSquares:'medium', permutation:'medium', mcaFactors:'medium', qcFractionSquare:'medium', qcMeanMedian:'medium', neTotal:'medium', setUnion:'medium',
+  // hard — multi-step / tricky / "cannot be determined"
+  markupDiscount:'hard', qcSquareCube:'hard', quadratic:'hard', absValue:'hard', exponent:'hard',
+  combination:'hard', mixture:'hard', qcPrimes:'hard', mcaInequality:'hard',
+};
+QUANT_GEN_KEYS.forEach(k=>{ if(!GEN_DIFF[k]) GEN_DIFF[k]='medium'; });
 
-function genQuant(kind){ // kind optional: 'qc'|'mca'|'ne'|'mc'
-  let key;
-  if(kind==='qc') key=pick(QC_KEYS);
-  else if(kind==='mca') key=pick(MCA_KEYS);
-  else if(kind==='ne') key=pick(NE_KEYS);
-  else key=pick(MC_KEYS);
+function pickByDifficulty(pool, difficulty){
+  if(!difficulty) return pick(pool);
+  const match=pool.filter(k=>GEN_DIFF[k]===difficulty);
+  const rest = difficulty==='medium' ? pool.filter(k=>GEN_DIFF[k]!=='medium')   // vary with easy+hard
+                                     : pool.filter(k=>GEN_DIFF[k]==='medium');   // step toward medium
+  if(match.length && Math.random()<0.6) return pick(match);
+  if(rest.length) return pick(rest);
+  return match.length?pick(match):pick(pool);
+}
+function genQuant(kind, difficulty){ // kind: 'qc'|'mca'|'ne'|'mc'; difficulty: easy|medium|hard
+  const pool = kind==='qc'?QC_KEYS : kind==='mca'?MCA_KEYS : kind==='ne'?NE_KEYS : MC_KEYS;
+  const key = pickByDifficulty(pool, difficulty);
   let q;
   try{ q = GEN[key](); }catch(e){ q = GEN.linear(); }
-  q._id = uid(); q.kind='quant'; q._gen=key;
+  q._id = uid(); q.kind='quant'; q._gen=key; q.difficulty = GEN_DIFF[key] || q.difficulty || 'medium';
   return q;
 }
 // Data-interpretation set: a shared table + a couple of questions (all computed).
@@ -843,15 +862,19 @@ function genDataSet(){
   return qs;
 }
 
-/* Build a quant section with a realistic format mix. */
-function buildQuantSection(n){
+/* Build a quant section with a realistic, difficulty-aware format mix.
+   Harder sections lean on Quantitative Comparison (with more genuine
+   "cannot be determined" cases) and multiple-answer items. */
+function buildQuantSection(n, difficulty){
+  difficulty = difficulty || 'medium';
   const out=[];
-  const nQC=Math.round(n*0.32), nDI=n>=12?2:1, nMCA=1, nNE=1;
-  for(let i=0;i<nQC;i++) out.push(genQuant('qc'));
-  for(let i=0;i<nMCA;i++) out.push(genQuant('mca'));
-  for(let i=0;i<nNE;i++) out.push(genQuant('ne'));
+  const qcFrac = difficulty==='hard'?0.40 : difficulty==='easy'?0.24 : 0.32;
+  const nQC=Math.round(n*qcFrac), nDI=n>=12?2:1, nMCA=difficulty==='easy'?0:1, nNE=1;
+  for(let i=0;i<nQC;i++) out.push(genQuant('qc', difficulty));
+  for(let i=0;i<nMCA;i++) out.push(genQuant('mca', difficulty));
+  for(let i=0;i<nNE;i++) out.push(genQuant('ne', difficulty));
   out.push(...genDataSet().slice(0,nDI));
-  while(out.length<n) out.push(genQuant('mc'));
+  while(out.length<n) out.push(genQuant('mc', difficulty));
   return shuffle(out).slice(0,n);
 }
 
@@ -866,10 +889,10 @@ function totalQuestions(list){ return list.reduce((s,q)=>s+subCount(q),0); }
    --------------------------------------------------------------------------- */
 const SECTIONS = {
   writing:{ name:'Analytical Writing', sub:'Analyze an Issue', time:30*60, kind:'writing', build:()=>[ pickIssue() ] },
-  verbal1:{ name:'Verbal Reasoning — Section 1', sub:'12 questions · 18 min', time:18*60, kind:'verbal', build:()=>buildVerbalSection(12,'medium') },
-  verbal2:{ name:'Verbal Reasoning — Section 2', sub:'15 questions · 23 min · harder', time:23*60, kind:'verbal', build:()=>buildVerbalSection(15,'hard') },
-  quant1:{ name:'Quantitative Reasoning — Section 1', sub:'12 questions · 21 min', time:21*60, kind:'quant', build:()=>buildQuantSection(12) },
-  quant2:{ name:'Quantitative Reasoning — Section 2', sub:'15 questions · 26 min · harder', time:26*60, kind:'quant', build:()=>buildQuantSection(15) },
+  verbal1:{ name:'Verbal Reasoning — Section 1', sub:'12 questions · 18 min', time:18*60, kind:'verbal', difficulty:'medium', setsRoute:'verbal', build:()=>buildVerbalSection(12,'medium') },
+  verbal2:{ name:'Verbal Reasoning — Section 2', sub:'15 questions · 23 min · adapts to Section 1', time:23*60, kind:'verbal', usesRoute:'verbal', build:()=>buildVerbalSection(15,(exam&&exam.routes&&exam.routes.verbal)||'medium') },
+  quant1:{ name:'Quantitative Reasoning — Section 1', sub:'12 questions · 21 min', time:21*60, kind:'quant', difficulty:'medium', setsRoute:'quant', build:()=>buildQuantSection(12,'medium') },
+  quant2:{ name:'Quantitative Reasoning — Section 2', sub:'15 questions · 26 min · adapts to Section 1', time:26*60, kind:'quant', usesRoute:'quant', build:()=>buildQuantSection(15,(exam&&exam.routes&&exam.routes.quant)||'medium') },
 };
 function pickIssue(){ const bank=VBANK.issue.length?VBANK.issue:SEED_BANK.issue; const q=JSON.parse(JSON.stringify(pick(bank))); q._id=uid(); return q; }
 
@@ -880,17 +903,17 @@ function startExam(mode, opts){
   opts = opts || {};
   let plan; // array of section keys OR special
   if(mode==='full') plan=['writing','verbal1','verbal2','quant1','quant2'];
-  else if(mode==='verbalMix') plan=[{name:'Verbal Practice Set',sub:'15 questions · 23 min',time:23*60,kind:'verbal',build:()=>buildVerbalSection(15,'medium')}];
-  else if(mode==='quantMix') plan=[{name:'Quant Practice Set',sub:'15 questions · 26 min',time:26*60,kind:'quant',build:()=>buildQuantSection(15)}];
-  else if(mode==='quick') plan=[{name:'Quick Mixed Practice',sub:'~15 questions · 20 min',time:20*60,kind:'mixed',build:()=>shuffle([...buildVerbalSection(7,'medium'),...buildQuantSection(8)])}];
+  else if(mode==='verbalMix') plan=[{name:'Verbal Practice Set',sub:'15 questions · 23 min',time:23*60,kind:'verbal',difficulty:'medium',build:()=>buildVerbalSection(15,'medium')}];
+  else if(mode==='quantMix') plan=[{name:'Quant Practice Set',sub:'15 questions · 26 min',time:26*60,kind:'quant',difficulty:'medium',build:()=>buildQuantSection(15,'medium')}];
+  else if(mode==='quick') plan=[{name:'Quick Mixed Practice',sub:'~15 questions · 20 min',time:20*60,kind:'mixed',difficulty:'medium',build:()=>shuffle([...buildVerbalSection(7,'medium'),...buildQuantSection(8,'medium')])}];
   else if(mode==='writing') plan=['writing'];
   else if(mode==='custom'){ const m=opts.minutes||30; const n=Math.max(5,Math.min(40,Math.round(m))); const which=opts.mix||'mixed';
-      plan=[{name:`Custom Practice (${m} min)`,sub:`${n} questions`,time:m*60,kind:which,build:()=> which==='verbal'?buildVerbalSection(n,'medium') : which==='quant'?buildQuantSection(n) : shuffle([...buildVerbalSection(Math.ceil(n/2),'medium'),...buildQuantSection(Math.floor(n/2))]) }]; }
+      plan=[{name:`Custom Practice (${m} min)`,sub:`${n} questions`,time:m*60,kind:which,difficulty:'medium',build:()=> which==='verbal'?buildVerbalSection(n,'medium') : which==='quant'?buildQuantSection(n,'medium') : shuffle([...buildVerbalSection(Math.ceil(n/2),'medium'),...buildQuantSection(Math.floor(n/2),'medium')]) }]; }
   else if(mode==='aiVerbal'){ return startAIVerbal(opts); }
   else if(mode==='topic'){ return startTopicDrill(opts.topic); }
   else plan=[mode];
 
-  exam = { mode, plan, secIdx:0, sectionResults:[], startedAt:new Date().toISOString() };
+  exam = { mode, plan, secIdx:0, sectionResults:[], startedAt:new Date().toISOString(), routes:{verbal:null,quant:null} };
   showSectionIntro();
 }
 
@@ -908,6 +931,7 @@ function showSectionIntro(){
     <div class="card">
       <h1 style="font-size:20px;font-weight:800;">${esc(cfg.name)}${secNo}</h1>
       <p class="muted mt8" style="font-size:13.5px;">${esc(cfg.sub||'')}</p>
+      ${cfg.usesRoute && exam.routes && exam.routes[cfg.usesRoute] ? `<div class="mt8" style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:.3px;padding:4px 12px;border-radius:20px;background:var(--warn-soft);color:var(--warn);">🎚️ Adaptive difficulty: ${exam.routes[cfg.usesRoute].toUpperCase()} — set by your Section 1 performance</div>` : ''}
       <div class="card mt16" style="background:var(--blue-soft);box-shadow:none;">
         <div style="font-size:14px;line-height:1.7;">
           ⏱️ <b>Time:</b> ${mins} minutes${cfg.kind!=='writing'?` &nbsp;·&nbsp; The section auto-submits when time runs out.`:''}<br>
@@ -1108,6 +1132,8 @@ function submitSection(auto){
   exam.inSection=false;
   const res = scoreSection(exam.sec);
   exam.sectionResults.push(res);
+  // Section-adaptive routing: Section 1 performance sets Section 2's difficulty (like the real GRE).
+  if(exam.sec.cfg && exam.sec.cfg.setsRoute && exam.routes){ exam.routes[exam.sec.cfg.setsRoute]=routeFor(res.raw); }
   const next=exam.secIdx+1;
   if(next>=exam.plan.length){ finishExam(); return; }
   // break in full exam after 3rd section (2 verbal + essay done)
@@ -1139,7 +1165,8 @@ function scoreSection(sec){
       detail.push({q,userAns:ua,ok,skipped:ua==null});
     }
   });
-  return { kind:cfg.kind, name:cfg.name, correct, total, essay, detail, raw: total?correct/total:0 };
+  const diff = cfg.difficulty || (cfg.usesRoute && exam && exam.routes ? (exam.routes[cfg.usesRoute]||'medium') : 'medium');
+  return { kind:cfg.kind, name:cfg.name, difficulty:diff, correct, total, essay, detail, raw: total?correct/total:0 };
 }
 function evalNumeric(str){ if(str==null) return null; str=String(str).trim(); if(!str) return null;
   if(/^-?\d+(\.\d+)?$/.test(str)) return parseFloat(str);
@@ -1151,20 +1178,36 @@ function showBreak(){ goPage('page-break'); let t=10*60; $('break-timer').textCo
   breakTick=setInterval(()=>{ t--; $('break-timer').textContent=fmtTime(t); if(t<=0){ clearInterval(breakTick); endBreak(); } },1000); }
 function endBreak(){ clearInterval(breakTick); showSectionIntro(); }
 
-/* -------- Finish + results -------- */
-function scaled(raw){ return Math.round(130 + raw*40); }
+/* -------- Finish + results --------
+   Scaled scoring modeled on the real GRE's section-adaptive behavior.
+   The exact ETS raw→scaled tables are proprietary and equated per form, so this
+   is a faithful approximation calibrated to published POWERPREP score behavior:
+   the difficulty "route" a measure ends on sets the attainable ceiling, and a
+   top-weighted curve means near-perfect work is required to reach that ceiling. */
+function routeFor(p){ return p>=0.72?'hard' : p>=0.42?'medium' : 'easy'; }
+function scaledScore(correct, total, route){
+  if(!total) return null;
+  const p=Math.max(0,Math.min(1,correct/total));
+  const cap = route==='hard'?170 : route==='easy'?152 : 162;   // route ceiling
+  const shaped = Math.pow(p, route==='hard'?0.82 : route==='easy'?1.0 : 0.9);
+  return Math.round(130 + (cap-130)*shaped);
+}
 
 // Score a set of section results, push a history entry (partial or complete), persist.
 function buildEntryAndStore(R, mode, partial){
   const V=R.filter(r=>r.kind==='verbal'); const Qs=R.filter(r=>r.kind==='quant'); const M=R.filter(r=>r.kind==='mixed');
   const essayRes=R.find(r=>r.essay);
-  let vRaw=null,qRaw=null;
-  if(V.length){ vRaw=V.reduce((s,r)=>s+r.raw,0)/V.length; }
-  if(Qs.length){ qRaw=Qs.reduce((s,r)=>s+r.raw,0)/Qs.length; }
+  // Combine raw correct/total per measure (both sections count together, like the real test).
+  let vC=0,vT=0,qC=0,qT=0;
+  V.forEach(r=>{ vC+=r.correct; vT+=r.total; });
+  Qs.forEach(r=>{ qC+=r.correct; qT+=r.total; });
   if(M.length){ const md=M.flatMap(r=>r.detail||[]); const vd=md.filter(d=>isVerbalQ(d.q)); const qd=md.filter(d=>!isVerbalQ(d.q));
-    if(vd.length){ const r=vd.filter(d=>d.ok).length/vd.length; vRaw=vRaw==null?r:(vRaw+r)/2; }
-    if(qd.length){ const r=qd.filter(d=>d.ok).length/qd.length; qRaw=qRaw==null?r:(qRaw+r)/2; } }
-  const vScore=vRaw==null?null:scaled(vRaw), qScore=qRaw==null?null:scaled(qRaw);
+    vC+=vd.filter(d=>d.ok).length; vT+=vd.length; qC+=qd.filter(d=>d.ok).length; qT+=qd.length; }
+  // Route = difficulty the measure ended on (Section 2 in a full sim; the section's own level otherwise).
+  const vRoute = V.length ? (V[V.length-1].difficulty||'medium') : 'medium';
+  const qRoute = Qs.length ? (Qs[Qs.length-1].difficulty||'medium') : (M.length?'medium':'medium');
+  const vScore = vT ? scaledScore(vC,vT,vRoute) : null;
+  const qScore = qT ? scaledScore(qC,qT,qRoute) : null;
   let essayScore=null;
   if(essayRes){ essayScore=heuristicEssay(essayRes.essay.text); essayRes.essay.score=essayScore; }
   const combined=(vScore!=null&&qScore!=null)?vScore+qScore:null;
@@ -1173,9 +1216,9 @@ function buildEntryAndStore(R, mode, partial){
   const totalQ=allDetail.length + (essayRes?1:0);
   const base=modeLabel(mode);
   const entry={ date:new Date().toISOString(), mode, modeLabel: partial?base+' · partial':base,
-    partial:!!partial, answered, totalQ,
+    partial:!!partial, answered, totalQ, vRoute:vT?vRoute:null, qRoute:qT?qRoute:null,
     verbal:vScore, quant:qScore, essay:essayScore, combined,
-    sections:R.map(r=>({name:r.name,correct:r.correct,total:r.total,raw:r.raw})) };
+    sections:R.map(r=>({name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty})) };
   S.history.push(entry);
   S.lastSession={ results:R, entry };
   save();
@@ -1302,6 +1345,16 @@ function renderResults(entry, R, essayRes){
     const p=Math.round(r.raw*100); const col=p>=70?'var(--green)':p>=50?'var(--warn)':'var(--red)';
     return `<div class="bd-row"><div class="bd-head"><b>${esc(r.name)}</b><span style="color:${col};font-weight:800;">${r.correct}/${r.total} · ${p}%</span></div><div class="bar"><div class="f" style="width:${p}%;background:${col}"></div></div></div>`;
   }).join('')||'<p class="muted center">Essay-only session.</p>'}</div>`;
+  // Adaptive route + scoring-method note
+  const routeBits=[];
+  if(entry.vRoute) routeBits.push(`Verbal route: <b>${entry.vRoute}</b>`);
+  if(entry.qRoute) routeBits.push(`Quant route: <b>${entry.qRoute}</b>`);
+  html+=`<div class="card" style="margin-top:12px;padding:13px 16px;">
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6;">
+        ${routeBits.length?`🎚️ ${routeBits.join(' · ')} (Section 2 difficulty set by Section 1).<br>`:''}
+        📏 Scaled with an adaptive model calibrated to ETS practice-test behavior.
+        <button onclick="showScoringInfo()" style="background:none;border:none;color:var(--blue);font-weight:700;cursor:pointer;padding:0;font-size:12.5px;">How is this scored?</button>
+      </div></div>`;
   html+=`<div class="row mt16">
       <button class="btn btn-primary" onclick="showReview('all')">📖 Review answers</button>
       <button class="btn btn-gold" onclick="startExam('${entry.mode}')">🔄 New attempt</button>
@@ -1784,6 +1837,18 @@ function showAbout(){ openModal(`<div class="modal-head"><h3>About GRE Ready</h3
   <p class="mt8"><b>Your data.</b> Everything is saved locally on your device and shown across every screen. No account, no password.</p>
   <p class="muted mt12" style="font-size:12px;">Practice simulation for study purposes. Not affiliated with ETS.</p>
   </div><button class="btn btn-primary btn-block mt16" onclick="closeModal()">Close</button>`); }
+
+function showScoringInfo(){ openModal(`<div class="modal-head"><h3>How scoring works</h3><button class="x" onclick="closeModal()">✕</button></div>
+  <div style="font-size:13.5px;line-height:1.7;">
+  <p>This app mirrors the <b>mechanism</b> of the current (shorter) GRE as closely as is publicly possible:</p>
+  <p class="mt8"><b>🎚️ Section-adaptive.</b> In a full simulation, Section 1 of each measure is medium difficulty. How you do on it routes Section 2 to <b>Easy, Medium, or Hard</b> — exactly like the real test. The route you reach sets your score ceiling (Hard → up to 170, Medium → ~162, Easy → ~152).</p>
+  <p class="mt8"><b>📏 130–170 scale.</b> Your combined correct answers are mapped with a top-weighted curve calibrated to ETS's published practice-test (POWERPREP) score behavior, so near-perfect work is required to reach the ceiling.</p>
+  <p class="mt8"><b>✍️ Analytical Writing (0–6).</b> Graded on the official ETS 6-point rubric in half-point steps — thesis, development, organization, and language. With an AI key connected, the AI grader approximates ETS's e-rater + human-reader approach.</p>
+  <div class="card mt12" style="background:var(--warn-soft);box-shadow:none;padding:12px 14px;">
+    <b style="color:var(--warn);font-size:12.5px;">Important — this is an estimate, not an official score.</b>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:4px;">ETS's exact raw→scaled conversion tables are proprietary and re-equated for every test form, and the e-rater essay engine is closed. No third-party tool can reproduce them precisely. Treat these numbers as a well-calibrated practice estimate, typically within a few points of a real score.</div>
+  </div>
+  </div><button class="btn btn-primary btn-block mt16" onclick="closeModal()">Got it</button>`); }
 
 /* ---------------------------------------------------------------------------
    11. Boot
