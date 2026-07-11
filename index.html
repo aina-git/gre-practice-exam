@@ -366,6 +366,7 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
 <!-- ============ EXAM ============ -->
 <div id="page-exam" class="page">
   <div class="exam-top">
+    <button class="icon-btn" onclick="exitPractice()" title="Exit practice">✕</button>
     <div class="sec"><span id="exam-sec-name">Section</span><small id="exam-sec-sub"></small></div>
     <div class="timer" id="exam-timer">00:00</div>
     <button class="icon-btn" onclick="openDrawer()" title="Question navigator">☰</button>
@@ -930,9 +931,11 @@ function beginSection(){
   try{ questions = cfg.build(); }catch(e){ console.error(e); questions=[genQuant('mc')]; }
   save(); // persist rotation "seen" updates
   exam.sec = { cfg, questions, answers:{}, flags:new Set(), qi:0, timeLeft:cfg.time };
+  exam.inSection = true;
   goPage('page-exam');
   renderQuestion();
   startTimer();
+  saveActiveSnapshot();
 }
 
 /* -------- Timer -------- */
@@ -968,6 +971,7 @@ function renderQuestion(){
   $('q-host').innerHTML=renderQuestionHTML(q);
   bindQuestion(q);
   $('exam-scroll').scrollTop=0;
+  saveActiveSnapshot();
 }
 
 function typeLabel(q){
@@ -1052,21 +1056,22 @@ function bindQuestion(q){
         a[key]=ci;
         $('q-host').querySelectorAll(`.choice[data-key="${key}"]`).forEach(c2=>c2.classList.toggle('sel',+c2.dataset.ci===ci));
       }
+      snapSoon();
     });
   });
   // essay
   const essay=$('essay');
-  if(essay){ essay.addEventListener('input',()=>{ exam.sec.answers[q._id]=essay.value; $('wc').textContent='Words: '+wordCount(essay.value); }); }
+  if(essay){ essay.addEventListener('input',()=>{ exam.sec.answers[q._id]=essay.value; $('wc').textContent='Words: '+wordCount(essay.value); snapSoon(); }); }
   // numeric
   const ne=$('ne');
-  if(ne){ ne.addEventListener('input',()=>{ exam.sec.answers[q._id]=ne.value; }); }
+  if(ne){ ne.addEventListener('input',()=>{ exam.sec.answers[q._id]=ne.value; snapSoon(); }); }
 }
 
 /* -------- Navigation -------- */
 function nextQ(){ if(exam.sec.qi<exam.sec.questions.length-1){ exam.sec.qi++; renderQuestion(); } else confirmSubmit(); }
 function prevQ(){ if(exam.sec.qi>0){ exam.sec.qi--; renderQuestion(); } }
 function jumpTo(i){ exam.sec.qi=i; renderQuestion(); closeDrawer(); }
-function toggleFlag(){ const i=exam.sec.qi; if(exam.sec.flags.has(i)) exam.sec.flags.delete(i); else exam.sec.flags.add(i); $('flag-btn').classList.toggle('on',exam.sec.flags.has(i)); }
+function toggleFlag(){ const i=exam.sec.qi; if(exam.sec.flags.has(i)) exam.sec.flags.delete(i); else exam.sec.flags.add(i); $('flag-btn').classList.toggle('on',exam.sec.flags.has(i)); snapSoon(); }
 
 function openDrawer(){
   const g=$('drawer-grid'); const a=exam.sec.answers;
@@ -1100,6 +1105,7 @@ function confirmSubmit(){
 }
 function submitSection(auto){
   stopTimer();
+  exam.inSection=false;
   const res = scoreSection(exam.sec);
   exam.sectionResults.push(res);
   const next=exam.secIdx+1;
@@ -1147,34 +1153,107 @@ function endBreak(){ clearInterval(breakTick); showSectionIntro(); }
 
 /* -------- Finish + results -------- */
 function scaled(raw){ return Math.round(130 + raw*40); }
-function finishExam(){
-  const R=exam.sectionResults;
+
+// Score a set of section results, push a history entry (partial or complete), persist.
+function buildEntryAndStore(R, mode, partial){
   const V=R.filter(r=>r.kind==='verbal'); const Qs=R.filter(r=>r.kind==='quant'); const M=R.filter(r=>r.kind==='mixed');
   const essayRes=R.find(r=>r.essay);
-  // mixed sections contribute to both by splitting detail
   let vRaw=null,qRaw=null;
   if(V.length){ vRaw=V.reduce((s,r)=>s+r.raw,0)/V.length; }
   if(Qs.length){ qRaw=Qs.reduce((s,r)=>s+r.raw,0)/Qs.length; }
-  if(M.length){ const md=M.flatMap(r=>r.detail); const vd=md.filter(d=>isVerbalQ(d.q)); const qd=md.filter(d=>!isVerbalQ(d.q));
+  if(M.length){ const md=M.flatMap(r=>r.detail||[]); const vd=md.filter(d=>isVerbalQ(d.q)); const qd=md.filter(d=>!isVerbalQ(d.q));
     if(vd.length){ const r=vd.filter(d=>d.ok).length/vd.length; vRaw=vRaw==null?r:(vRaw+r)/2; }
     if(qd.length){ const r=qd.filter(d=>d.ok).length/qd.length; qRaw=qRaw==null?r:(qRaw+r)/2; } }
   const vScore=vRaw==null?null:scaled(vRaw), qScore=qRaw==null?null:scaled(qRaw);
-  // essay: heuristic now; AI upgrades asynchronously
   let essayScore=null;
   if(essayRes){ essayScore=heuristicEssay(essayRes.essay.text); essayRes.essay.score=essayScore; }
   const combined=(vScore!=null&&qScore!=null)?vScore+qScore:null;
-
-  // Persist
-  const entry={ date:new Date().toISOString(), mode:exam.mode, modeLabel:modeLabel(exam.mode),
+  const allDetail=R.flatMap(r=>r.detail||[]);
+  const answered=allDetail.filter(d=>!d.skipped).length + (essayRes && (essayRes.essay.text||'').trim()?1:0);
+  const totalQ=allDetail.length + (essayRes?1:0);
+  const base=modeLabel(mode);
+  const entry={ date:new Date().toISOString(), mode, modeLabel: partial?base+' · partial':base,
+    partial:!!partial, answered, totalQ,
     verbal:vScore, quant:qScore, essay:essayScore, combined,
     sections:R.map(r=>({name:r.name,correct:r.correct,total:r.total,raw:r.raw})) };
   S.history.push(entry);
   S.lastSession={ results:R, entry };
   save();
+  return { entry, essayRes, R };
+}
+
+function finalizeExam(partial){
+  const { entry, essayRes, R }=buildEntryAndStore(exam.sectionResults, exam.mode, partial);
+  clearActiveSnapshot();
   renderResults(entry, R, essayRes);
-  // Kick off AI essay grading + is quant/verbal — grounded, no hallucinated correctness.
+  // Kick off AI essay grading — grounded, no hallucinated correctness.
   if(essayRes && aiReady() && S.settings.autoGradeEssay){ gradeEssayAI(essayRes, entry); }
 }
+function finishExam(){ finalizeExam(false); }
+
+/* -------- Exit / save partial attempt -------- */
+function exitPractice(){
+  if(!exam || !exam.sec){ clearActiveSnapshot(); exam=null; goHome(); return; }
+  stopTimer();
+  const answered=exam.sec.questions.filter(isAnswered).length;
+  const total=exam.sec.questions.length;
+  openModal(`<div class="modal-head"><h3>Leave this practice?</h3><button class="x" onclick="closeModal()">✕</button></div>
+    <p class="muted" style="font-size:13.5px;">You've answered <b>${answered}</b> of ${total} in this section. Save this attempt to your history, or discard it? Unanswered questions count as incorrect.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+      <button class="btn btn-green btn-block" onclick="saveAndExit()">💾 Save attempt &amp; exit</button>
+      <button class="btn btn-red btn-block" onclick="discardAndExit()">🗑️ Discard &amp; exit</button>
+      <button class="btn btn-ghost btn-block" onclick="closeModal()">↩︎ Keep practicing</button>
+    </div>`, resumeAfterExit);
+}
+function resumeAfterExit(){ if(exam && exam.sec) startTimer(); }
+function saveAndExit(){ _modalOnClose=null; closeModal(); stopTimer();
+  if(exam.sec){ exam.inSection=false; exam.sectionResults.push(scoreSection(exam.sec)); }
+  finalizeExam(true); }
+function discardAndExit(){ _modalOnClose=null; closeModal(); stopTimer(); clearActiveSnapshot(); exam=null; goHome(); }
+
+/* -------- In-progress snapshot (survives tab close / refresh) -------- */
+const ACTIVE_KEY='greReady_active';
+let _snapT=null;
+function saveActiveSnapshot(){
+  try{
+    if(!exam || !exam.sec || !exam.inSection) return;
+    const snap={ mode:exam.mode, secIdx:exam.secIdx, sectionName:exam.sec.cfg.name, kind:exam.sec.cfg.kind,
+      questions:exam.sec.questions, answers:exam.sec.answers, qi:exam.sec.qi, timeLeft:exam.sec.timeLeft, flags:[...exam.sec.flags],
+      prior:exam.sectionResults.map(r=>({name:r.name,kind:r.kind,correct:r.correct,total:r.total,raw:r.raw})),
+      startedAt:exam.startedAt, savedAt:new Date().toISOString() };
+    localStorage.setItem(ACTIVE_KEY, JSON.stringify(snap));
+  }catch(e){}
+}
+function snapSoon(){ clearTimeout(_snapT); _snapT=setTimeout(saveActiveSnapshot,600); }
+function clearActiveSnapshot(){ try{ localStorage.removeItem(ACTIVE_KEY); }catch(e){} }
+function loadActiveSnapshot(){ try{ const r=localStorage.getItem(ACTIVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+
+function checkUnfinished(){
+  const snap=loadActiveSnapshot();
+  if(!snap || !snap.questions || !snap.questions.length) return;
+  const res=scoreSection({cfg:{kind:snap.kind,name:snap.sectionName},questions:snap.questions,answers:snap.answers});
+  const answered=res.detail.filter(d=>!d.skipped).length + (res.essay && (res.essay.text||'').trim()?1:0);
+  const total=res.detail.length + (res.essay?1:0);
+  const when=snap.savedAt? new Date(snap.savedAt).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  openModal(`<div class="modal-head"><h3>⏸️ Unfinished practice</h3></div>
+    <p class="muted" style="font-size:13.5px;">You left a <b>${esc(modeLabel(snap.mode))}</b> unfinished${when?' ('+esc(when)+')':''}. You had answered <b>${answered}</b> of ${total}. Save it as an attempt in your history?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+      <button class="btn btn-green btn-block" onclick="saveRecovered()">💾 Save this attempt</button>
+      <button class="btn btn-ghost btn-block" onclick="discardRecovered()">Discard it</button>
+    </div>`);
+}
+function saveRecovered(){
+  _modalOnClose=null; closeModal();
+  const snap=loadActiveSnapshot(); if(!snap){ return; }
+  const cur=scoreSection({cfg:{kind:snap.kind,name:snap.sectionName},questions:snap.questions,answers:snap.answers});
+  const prior=(snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,essay:null,detail:[]}));
+  const { entry, essayRes }=buildEntryAndStore([...prior, cur], snap.mode, true);
+  clearActiveSnapshot();
+  renderHome();
+  if(essayRes && aiReady() && S.settings.autoGradeEssay){ gradeEssayAI(essayRes, entry); }
+  toast('✅ Attempt saved to your history');
+}
+function discardRecovered(){ _modalOnClose=null; closeModal(); clearActiveSnapshot(); }
 function isVerbalQ(q){ return ['tc1','tc2','tc3','se','rc','issue'].includes(q.type); }
 function modeLabel(m){ return ({full:'Full Simulation',verbalMix:'Verbal Set',quantMix:'Quant Set',quick:'Quick Practice',writing:'Issue Essay',custom:'Custom',aiVerbal:'AI Verbal',topic:'Topic Drill'})[m]||m; }
 
@@ -1206,7 +1285,9 @@ function renderResults(entry, R, essayRes){
   else if(entry.quant!=null){ headline=entry.quant; sub='Quantitative Reasoning (130–170)'; }
   else if(entry.essay!=null){ headline=entry.essay+' / 6'; sub='Analytical Writing (0–6)'; }
   else { headline='—'; sub=''; }
-  let html=`<div class="result-hero">
+  let html='';
+  if(entry.partial){ html+=`<div class="card" style="background:var(--warn-soft);border:1px solid var(--warn);box-shadow:none;margin-bottom:14px;padding:14px 16px;"><b style="color:var(--warn)">⏸️ Partial attempt saved</b><div class="muted" style="font-size:13px;margin-top:3px;">You exited before finishing. Scored on what you answered (${entry.answered||0} of ${entry.totalQ||0}); unanswered questions count as incorrect.</div></div>`; }
+  html+=`<div class="result-hero">
     <div class="muted" style="color:rgba(255,255,255,.7);font-size:12px;text-transform:uppercase;letter-spacing:1px;">${entry.combined!=null?'Predicted GRE Score':'Your Score'}</div>
     <div class="score">${headline}</div>
     ${entry.combined!=null?`<div class="grade">${gi.g}</div>`:''}
@@ -1223,7 +1304,7 @@ function renderResults(entry, R, essayRes){
   }).join('')||'<p class="muted center">Essay-only session.</p>'}</div>`;
   html+=`<div class="row mt16">
       <button class="btn btn-primary" onclick="showReview('all')">📖 Review answers</button>
-      <button class="btn btn-gold" onclick="startExam('${exam.mode}')">🔄 New attempt</button>
+      <button class="btn btn-gold" onclick="startExam('${entry.mode}')">🔄 New attempt</button>
       <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button></div>
     <div id="results-extra"></div>
     <div style="height:30px"></div>`;
@@ -1540,7 +1621,7 @@ function renderHome(){
   $('topic-grid').innerHTML=TOPICS.map(t=>`<div class="opt" onclick="startExam('topic',{topic:'${t.key}'})"><div class="em">${t.em}</div><h3>${t.name}</h3><p>10-question drill</p></div>`).join('');
   renderHistory();
   updateScoreChips();
-  if(!name && !S.profile.namePrompted){ S.profile.namePrompted=true; save(); setTimeout(askName,600); }
+  if(!name && !S.profile.namePrompted && !loadActiveSnapshot()){ S.profile.namePrompted=true; save(); setTimeout(askName,600); }
 }
 function avgOf(k){ const vals=S.history.map(h=>h[k]).filter(v=>v!=null); return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null; }
 function renderHistory(){
@@ -1551,7 +1632,10 @@ function renderHistory(){
     const score = e.combined!=null?e.combined:(e.verbal!=null?e.verbal:(e.quant!=null?e.quant:(e.essay!=null?e.essay+'/6':'—')));
     const cls = e.combined!=null?(e.combined>=320?'hi':e.combined>=305?'mid':'lo'):(e.essay!=null?(e.essay>=4.5?'hi':e.essay>=3.5?'mid':'lo'):'mid');
     const parts=[]; if(e.verbal!=null)parts.push('V '+e.verbal); if(e.quant!=null)parts.push('Q '+e.quant); if(e.essay!=null)parts.push('AW '+e.essay);
-    return `<div class="hist-row"><div class="hd"><div class="ht">${esc(e.modeLabel||e.mode)}</div><div class="hs">${ds} · ${parts.join(' · ')||'—'}</div></div><span class="pill ${cls}">${score}</span></div>`;
+    const label=esc(e.modeLabel||e.mode).replace(/ · partial$/,'');
+    const badge=e.partial?`<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--warn);background:var(--warn-soft);padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:1px;">PARTIAL</span>`:'';
+    const extra=e.partial&&e.answered!=null?` · ${e.answered}/${e.totalQ} answered`:'';
+    return `<div class="hist-row"><div class="hd"><div class="ht">${label}${badge}</div><div class="hs">${ds} · ${(parts.join(' · ')||'—')}${extra}</div></div><span class="pill ${cls}">${score}</span></div>`;
   }).join('')+`<div class="center mt12"><button class="btn btn-ghost btn-sm" onclick="reopenLastReview()">Review last session</button></div>`;
 }
 function reopenLastReview(){ if(S.lastSession){ showReview('all'); } else toast('No detailed session saved yet'); }
@@ -1559,8 +1643,9 @@ function reopenLastReview(){ if(S.lastSession){ showReview('all'); } else toast(
 /* ---------------------------------------------------------------------------
    10. Modals: settings, custom, name, score detail, about
    --------------------------------------------------------------------------- */
-function openModal(html){ $('modal').innerHTML=html; $('modal-back').classList.add('open'); }
-function closeModal(){ $('modal-back').classList.remove('open'); }
+let _modalOnClose=null;
+function openModal(html,onClose){ $('modal').innerHTML=html; $('modal-back').classList.add('open'); _modalOnClose=onClose||null; }
+function closeModal(){ $('modal-back').classList.remove('open'); const cb=_modalOnClose; _modalOnClose=null; if(cb){ try{ cb(); }catch(e){} } }
 $('modal-back').addEventListener('click',e=>{ if(e.target===$('modal-back')) closeModal(); });
 
 function askName(){
@@ -1704,8 +1789,13 @@ function showAbout(){ openModal(`<div class="modal-head"><h3>About GRE Ready</h3
    11. Boot
    --------------------------------------------------------------------------- */
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeDrawer(); } });
+// Warn + persist if the user closes/refreshes mid-practice (so nothing is silently lost).
+window.addEventListener('beforeunload',e=>{ if(exam && exam.sec && exam.inSection){ saveActiveSnapshot(); e.preventDefault(); e.returnValue=''; } });
+window.addEventListener('pagehide',()=>{ if(exam && exam.sec && exam.inSection) saveActiveSnapshot(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && exam && exam.sec && exam.inSection) saveActiveSnapshot(); });
 renderHome();
 updateScoreChips();
+checkUnfinished();   // offer to save any attempt left unfinished by a previous close/refresh
 </script>
 </body>
 </html>
