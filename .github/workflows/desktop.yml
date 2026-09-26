@@ -18,6 +18,10 @@ permissions:
 jobs:
   build:
     name: Build (${{ matrix.name }})
+    # Deleting a release branch or tag also arrives as a push, carrying the
+    # default branch's commit instead of the deleted one. Never build (and so
+    # never publish) from a deletion.
+    if: ${{ !github.event.deleted }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -52,7 +56,7 @@ jobs:
 
   release:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/desktop-release/')
+    if: ${{ !github.event.deleted && (startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/desktop-release/')) }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +69,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_API: ${{ github.api_url }}/repos/${{ github.repository }}/git/ref/tags
         run: |
           ref="${{ github.ref_name }}"
           case "$ref" in
@@ -74,10 +79,23 @@ jobs:
               # branch would rebuild the installers from a new commit while the
               # tag still pointed at the first one, so it is refused: bump the
               # version in desktop/package.json and push a new release branch.
-              if gh api "repos/${{ github.repository }}/git/ref/tags/$tag" >/dev/null 2>&1; then
-                echo "::error::Tag $tag already exists — a release was already published for this version. Bump desktop/package.json and push desktop-release/v<new-version>."
-                exit 1
-              fi ;;
+              # Only a definite "no such tag" (HTTP 404) lets the release go
+              # ahead; an existing tag (200) or any failure to find out (auth,
+              # rate limit, network) stops it, so a published release is never
+              # overwritten by accident.
+              code=$(curl -sS --retry 3 -o /dev/null -w '%{http_code}' \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "$TAG_API/$tag" || true)
+              case "$code" in
+                404) ;;
+                200)
+                  echo "::error::Tag $tag already exists — a release was already published for this version. Bump desktop/package.json and push desktop-release/v<new-version>."
+                  exit 1 ;;
+                *)
+                  echo "::error::Could not check whether tag $tag exists (HTTP status '$code'); not publishing."
+                  exit 1 ;;
+              esac ;;
             *) tag="$ref" ;;
           esac
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
