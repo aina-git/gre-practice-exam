@@ -1665,6 +1665,17 @@ function checkUnfinished(){
       <button class="btn btn-ghost btn-block" onclick="discardRecovered()">Discard it</button>
     </div>`);
 }
+/* The saved section's config and earlier results, shared by resume and save.
+   The section is scored at the difficulty it was actually run at (a hard
+   adaptive route keeps its 170 ceiling), and it still sets/uses routes. */
+function snapSectionCfg(snap, time){
+  const cfg={ name:snap.sectionName, sub:'resumed', time, kind:snap.kind, build:()=>snap.questions };
+  if(snap.difficulty) cfg.difficulty=snap.difficulty;
+  if(snap.setsRoute) cfg.setsRoute=snap.setsRoute;
+  if(snap.usesRoute) cfg.usesRoute=snap.usesRoute;
+  return cfg;
+}
+function snapPrior(snap){ return (snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty||'medium',essay:null,detail:[]})); }
 /* Pick the section back up with its questions, answers, flags and remaining time. */
 function resumeRecovered(){
   _modalOnClose=null; closeModal();
@@ -1673,13 +1684,8 @@ function resumeRecovered(){
   // exactly — pausing at 7 seconds resumes at 7 seconds, never 30.
   let left = (typeof snap.timeLeft==='number' && isFinite(snap.timeLeft)) ? Math.max(0, Math.floor(snap.timeLeft)) : (snap.timeTotal||20*60);
   if(left<=0){ toast('Time was up on that section — save it or discard it'); renderHome(); return; }
-  const cfg={ name:snap.sectionName, sub:'resumed', time:snap.timeTotal||left, kind:snap.kind, build:()=>snap.questions };
-  // The section is scored at the difficulty it was actually run at (a hard
-  // adaptive route keeps its 170 ceiling), and it still sets/uses routes.
-  if(snap.difficulty) cfg.difficulty=snap.difficulty;
-  if(snap.setsRoute) cfg.setsRoute=snap.setsRoute;
-  if(snap.usesRoute) cfg.usesRoute=snap.usesRoute;
-  const prior=(snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty||'medium',essay:null,detail:[]}));
+  const cfg=snapSectionCfg(snap, snap.timeTotal||left);
+  const prior=snapPrior(snap);
   // A multi-section plan (the full simulation) is rebuilt around the resumed
   // section from its named sections, so the later sections still run and the
   // attempt is not recorded as complete after just this one.
@@ -1698,9 +1704,10 @@ function resumeRecovered(){
 function saveRecovered(){
   _modalOnClose=null; closeModal();
   const snap=loadActiveSnapshot(); if(!snap){ return; }
-  const cur=scoreSection({cfg:{kind:snap.kind,name:snap.sectionName},questions:snap.questions,answers:snap.answers});
-  const prior=(snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,essay:null,detail:[]}));
-  const { entry, essayRes }=buildEntryAndStore([...prior, cur], snap.mode, true);
+  // Saved at its real difficulty and with its per-question times, exactly as
+  // a resume would have scored it.
+  const cur=scoreSection({cfg:snapSectionCfg(snap, snap.timeTotal),questions:snap.questions,answers:snap.answers||{},qTime:snap.qTime||{}});
+  const { entry, essayRes }=buildEntryAndStore([...snapPrior(snap), cur], snap.mode, true);
   clearActiveSnapshot();
   renderHome();
   if(essayRes && aiReady() && S.settings.autoGradeEssay){ gradeEssayAI(essayRes, entry); }
