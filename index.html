@@ -1866,25 +1866,50 @@ function essayReviewHTML(r){
         · generated questions are GENERATE-then-VERIFY (blind re-solve) before use;
         · quant never uses AI (computed answers).
    --------------------------------------------------------------------------- */
-function aiReady(){ return !!(S.settings.provider && S.settings.apiKey && S.settings.model); }
+/* ---- Providers ----
+   Anything that speaks the OpenAI chat-completions shape works (Groq, Gemini,
+   OpenRouter, OpenAI, Ollama, LM Studio, or a custom URL). Anthropic's own
+   Messages API is different and is adapted below. Local servers need no key. */
+const LOCAL_PROVIDERS=['ollama','lmstudio'];
+function isLocalProvider(p){ return LOCAL_PROVIDERS.includes(p); }
+function keyOptional(p){ return isLocalProvider(p) || p==='custom'; }
+function aiReady(){ const s=S.settings; return !!(s.provider && s.model && (s.apiKey || keyOptional(s.provider))); }
 function providerBase(p){ return p==='groq'?'https://api.groq.com/openai/v1/chat/completions'
   : p==='openrouter'?'https://openrouter.ai/api/v1/chat/completions'
   : p==='gemini'?'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
+  : p==='openai'?'https://api.openai.com/v1/chat/completions'
+  : p==='anthropic'?'https://api.anthropic.com/v1/messages'
+  : p==='ollama'?'http://localhost:11434/v1/chat/completions'
+  : p==='lmstudio'?'http://localhost:1234/v1/chat/completions'
   : (S.settings.customUrl||''); }
 async function callAI(messages,{json=false,temperature=0.2,max_tokens=1500}={}){
-  const p=S.settings.provider; const url=providerBase(p);
-  if(!url||!S.settings.apiKey) throw new Error('AI not configured');
-  const headers={'Content-Type':'application/json','Authorization':'Bearer '+S.settings.apiKey};
-  if(p==='openrouter'){ headers['HTTP-Referer']=location.origin||'https://gre-ready.app'; headers['X-Title']='GRE Ready'; }
-  const body={ model:S.settings.model, messages, temperature };
-  if(json) body.response_format={type:'json_object'};
-  if(max_tokens) body.max_tokens=max_tokens;
-  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),60000);
+  const p=S.settings.provider; const url=providerBase(p); const key=(S.settings.apiKey||'').trim();
+  if(!url||(!key&&!keyOptional(p))) throw new Error('AI not configured');
+  const headers={'Content-Type':'application/json'};
+  let body;
+  if(p==='anthropic'){
+    // Anthropic's Messages API: the system text travels separately, and the
+    // browser-access header is how Anthropic permits calls straight from a page.
+    Object.assign(headers,{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'});
+    const sys=messages.filter(m=>m.role==='system').map(m=>m.content).join('\n\n')+(json?'\n\nRespond with a single JSON object and nothing else.':'');
+    body={ model:S.settings.model, max_tokens:max_tokens||1500, temperature, messages:messages.filter(m=>m.role!=='system').map(m=>({role:m.role,content:m.content})) };
+    if(sys.trim()) body.system=sys;
+  } else {
+    if(key) headers['Authorization']='Bearer '+key;
+    if(p==='openrouter'){ headers['HTTP-Referer']=location.origin||'https://gre-ready.app'; headers['X-Title']='GRE Ready'; }
+    body={ model:S.settings.model, messages, temperature };
+    // Hosted OpenAI-style APIs honour response_format; local servers vary, so ask in words instead.
+    if(json){ if(keyOptional(p)) body.messages=[...messages,{role:'user',content:'Respond with a single JSON object and nothing else.'}]; else body.response_format={type:'json_object'}; }
+    if(max_tokens) body.max_tokens=max_tokens;
+  }
+  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),isLocalProvider(p)?180000:60000);
   let res;
   try{ res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:ctrl.signal}); }
+  catch(e){ if(isLocalProvider(p)) throw new Error('Could not reach the local model at '+url+'. Is it running, and is this site allowed (CORS)?'); throw e; }
   finally{ clearTimeout(to); }
   if(!res.ok){ const t=await res.text().catch(()=>''); throw new Error('AI error '+res.status+': '+t.slice(0,200)); }
   const data=await res.json();
+  if(p==='anthropic') return (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('')||'';
   return data.choices?.[0]?.message?.content||'';
 }
 function parseJSON(str){ if(!str) return null;
@@ -2294,23 +2319,24 @@ function showScoreDetail(){
 
 function openSettings(){
   const s=S.settings;
-  const groqModels=['llama-3.3-70b-versatile','openai/gpt-oss-120b','deepseek-r1-distill-llama-70b','qwen-2.5-32b','llama-3.1-8b-instant'];
-  const orModels=['anthropic/claude-3.7-sonnet','openai/o4-mini','google/gemini-2.0-flash-001','deepseek/deepseek-r1','meta-llama/llama-3.3-70b-instruct'];
-  const gemModels=['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash'];
   openModal(`<div class="modal-head"><h3>Settings</h3><button class="x" onclick="closeModal()">✕</button></div>
     <div class="section-label" style="margin:0 0 8px;">AI (optional)</div>
-    <p class="hint" style="margin-bottom:12px;">Powers essay grading, live question generation, and the AI tutor. Your key is stored <b>only on this device</b> — never in the code or repo. Choose a strong <b>reasoning</b> model for best accuracy.</p>
+    <p class="hint" style="margin-bottom:12px;">Powers the AI Teacher, essay grading and live question generation. Your key is stored <b>only on this device</b> — never in the code or repo. Free options: Gemini or Groq. Your own OpenAI or Anthropic API key, or a model running on this computer (Ollama / LM Studio), also work.</p>
     <div class="field"><label>Provider</label><select id="set-provider" onchange="onProviderChange()">
       <option value="">— none —</option>
       <option value="groq" ${s.provider==='groq'?'selected':''}>Groq (free tier)</option>
       <option value="gemini" ${s.provider==='gemini'?'selected':''}>Google Gemini (free tier)</option>
-      <option value="openrouter" ${s.provider==='openrouter'?'selected':''}>OpenRouter</option>
-      <option value="custom" ${s.provider==='custom'?'selected':''}>Custom (OpenAI-compatible)</option>
+      <option value="openrouter" ${s.provider==='openrouter'?'selected':''}>OpenRouter (any model, one key)</option>
+      <option value="openai" ${s.provider==='openai'?'selected':''}>OpenAI (API key)</option>
+      <option value="anthropic" ${s.provider==='anthropic'?'selected':''}>Anthropic Claude (API key)</option>
+      <option value="ollama" ${s.provider==='ollama'?'selected':''}>Ollama — local model on this computer</option>
+      <option value="lmstudio" ${s.provider==='lmstudio'?'selected':''}>LM Studio — local model on this computer</option>
+      <option value="custom" ${s.provider==='custom'?'selected':''}>Custom (OpenAI-compatible URL)</option>
     </select></div>
     <div class="field" id="set-customurl-wrap" style="${s.provider==='custom'?'':'display:none'}"><label>Base URL (chat completions)</label><input id="set-customurl" placeholder="https://…/v1/chat/completions" value="${esc(s.customUrl||'')}"></div>
-    <div class="field"><label>API Key</label><input id="set-key" type="password" placeholder="Paste your key" value="${esc(s.apiKey||'')}"><div class="hint">Free keys: Gemini at aistudio.google.com/apikey, Groq at console.groq.com. Or an OpenRouter key at openrouter.ai/keys.</div></div>
+    <div class="field"><label>API key</label><input id="set-key" type="password" placeholder="Paste your key (not needed for a local model)" value="${esc(s.apiKey||'')}"><div class="hint" id="key-hint"></div></div>
     <div class="field"><label>Model</label><input id="set-model" list="model-list" placeholder="model id" value="${esc(s.model||'')}">
-      <datalist id="model-list">${(s.provider==='openrouter'?orModels:s.provider==='gemini'?gemModels:groqModels).map(m=>`<option value="${m}">`).join('')}</datalist>
+      <datalist id="model-list">${(MODEL_SUGGEST[s.provider]||[]).map(m=>`<option value="${m}">`).join('')}</datalist>
       <div class="hint" id="model-hint"></div></div>
     <label class="field" style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="set-autograde" ${s.autoGradeEssay?'checked':''} style="width:auto"> Auto-grade essays with AI</label>
     <div class="row"><button class="btn btn-ghost btn-sm" onclick="testAI()" id="test-btn">Test connection</button><span id="test-result" style="align-self:center;font-size:12.5px;"></span></div>
@@ -2327,12 +2353,37 @@ function openSettings(){
     <button class="btn btn-primary btn-block mt16" onclick="saveSettings()">Save settings</button>`);
   onProviderChange();
 }
+const MODEL_SUGGEST={
+  groq:['llama-3.3-70b-versatile','openai/gpt-oss-120b','deepseek-r1-distill-llama-70b','qwen-2.5-32b','llama-3.1-8b-instant'],
+  gemini:['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash'],
+  openrouter:['anthropic/claude-sonnet-4.5','openai/gpt-4.1-mini','google/gemini-2.5-flash','deepseek/deepseek-r1','meta-llama/llama-3.3-70b-instruct'],
+  openai:['gpt-4.1-mini','gpt-4.1','gpt-4o-mini','gpt-4o','o4-mini'],
+  anthropic:['claude-sonnet-5','claude-haiku-4-5-20251001','claude-opus-5-5'],
+  ollama:['llama3.1:8b','qwen2.5:14b','gemma3:12b','mistral','phi4'],
+  lmstudio:[], custom:[] };
+const MODEL_HINT={
+  groq:'Suggested: llama-3.3-70b-versatile (fast) or openai/gpt-oss-120b (stronger reasoning).',
+  gemini:'Suggested: gemini-2.5-flash (fast, free) or gemini-2.5-pro (strongest reasoning).',
+  openrouter:'Suggested: anthropic/claude-sonnet-4.5 or openai/gpt-4.1-mini. One key, any model.',
+  openai:'Suggested: gpt-4.1-mini (inexpensive and strong) or gpt-4.1.',
+  anthropic:'Suggested: claude-sonnet-5 (best balance) or claude-haiku-4-5 (fastest).',
+  ollama:'Type the model you pulled, e.g. llama3.1:8b. Models of 14B+ verify and grade more reliably.',
+  lmstudio:'Type the model id shown in LM Studio\'s server tab.',
+  custom:'' };
+const KEY_HINT={
+  groq:'Free key at console.groq.com.',
+  gemini:'Free key at aistudio.google.com/apikey.',
+  openrouter:'Key at openrouter.ai/keys (pay-as-you-go; gives access to Claude, GPT, Gemini and more with one key).',
+  openai:'Needs an OpenAI API key from platform.openai.com/api-keys (pay-as-you-go, pennies per session). A ChatGPT Plus or Pro subscription does NOT include API access.',
+  anthropic:'Needs an Anthropic API key from console.anthropic.com (pay-as-you-go). A Claude.ai subscription does NOT include API access. Claude also works via OpenRouter.',
+  ollama:'No key needed. On this computer run: OLLAMA_ORIGINS=* ollama serve, then ollama pull llama3.1:8b. Works only on the computer running Ollama (Chrome, Edge or Firefox).',
+  lmstudio:'No key needed. In LM Studio start the local server and switch on CORS. Works only on this computer (Chrome, Edge or Firefox).',
+  custom:'Any OpenAI-compatible chat-completions URL. Leave the key blank if the server does not need one.' };
 function onProviderChange(){ const p=$('set-provider').value; $('set-customurl-wrap').style.display=p==='custom'?'':'none';
-  const groqModels=['llama-3.3-70b-versatile','openai/gpt-oss-120b','deepseek-r1-distill-llama-70b','qwen-2.5-32b'];
-  const orModels=['anthropic/claude-3.7-sonnet','openai/o4-mini','deepseek/deepseek-r1','google/gemini-2.0-flash-001'];
-  const gemModels=['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash'];
-  const dl=$('model-list'); if(dl) dl.innerHTML=(p==='openrouter'?orModels:p==='gemini'?gemModels:groqModels).map(m=>`<option value="${m}">`).join('');
-  const hint=$('model-hint'); if(hint) hint.textContent=p==='groq'?'Suggested: llama-3.3-70b-versatile (fast) or openai/gpt-oss-120b (stronger reasoning).':p==='gemini'?'Suggested: gemini-2.5-flash (fast, free) or gemini-2.5-pro (strongest reasoning).':p==='openrouter'?'Suggested: anthropic/claude-3.7-sonnet or openai/o4-mini for top reasoning.':'';
+  const dl=$('model-list'); if(dl) dl.innerHTML=(MODEL_SUGGEST[p]||[]).map(m=>`<option value="${m}">`).join('');
+  const hint=$('model-hint'); if(hint) hint.textContent=MODEL_HINT[p]||'';
+  const kh=$('key-hint'); if(kh) kh.textContent=KEY_HINT[p]||'';
+  const ki=$('set-key'); if(ki) ki.placeholder=keyOptional(p)?'Not needed for a local model':'Paste your key';
 }
 function saveSettings(){
   S.settings.provider=$('set-provider').value;
@@ -2348,7 +2399,7 @@ async function testAI(){
   // temp-apply current field values
   const prev={...S.settings};
   S.settings.provider=$('set-provider').value; S.settings.apiKey=$('set-key').value.trim(); S.settings.model=$('set-model').value.trim(); S.settings.customUrl=$('set-customurl')?$('set-customurl').value.trim():'';
-  if(!aiReady()){ out.innerHTML='<span style="color:var(--red)">Fill provider, key, and model.</span>'; S.settings=prev; return; }
+  if(!aiReady()){ out.innerHTML='<span style="color:var(--red)">Fill in provider and model (and a key, unless the model runs on this computer).</span>'; S.settings=prev; return; }
   btn.disabled=true; out.innerHTML='<span class="spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;border-width:2px"></span> testing…';
   try{ const r=await callAI([{role:'user',content:'Reply with exactly the word: ready'}],{temperature:0,max_tokens:10});
     out.innerHTML=/ready/i.test(r)?'<span style="color:var(--green)">✅ Connected</span>':'<span style="color:var(--green)">✅ Responded</span>';
