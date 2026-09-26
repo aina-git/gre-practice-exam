@@ -1635,6 +1635,12 @@ function saveActiveSnapshot(){
     if(!exam || !exam.sec || !exam.inSection) return;
     const snap={ mode:exam.mode, secIdx:exam.secIdx, sectionName:exam.sec.cfg.name, kind:exam.sec.cfg.kind,
       questions:exam.sec.questions, answers:exam.sec.answers, qi:exam.sec.qi, timeLeft:exam.sec.timeLeft, timeTotal:exam.sec.cfg.time, qTime:exam.sec.qTime||{}, flags:[...exam.sec.flags],
+      // What scoring and the rest of the exam need back: the section's actual
+      // difficulty (or the adaptive route it was given), the routes so far, and
+      // the plan's named sections so a full simulation continues after this one.
+      difficulty: exam.sec.cfg.difficulty || (exam.sec.cfg.usesRoute && exam.routes ? exam.routes[exam.sec.cfg.usesRoute] : null) || null,
+      setsRoute: exam.sec.cfg.setsRoute||null, usesRoute: exam.sec.cfg.usesRoute||null, routes: exam.routes||null,
+      planKeys: (exam.plan||[]).map(p=>typeof p==='string'?p:null),
       prior:exam.sectionResults.map(r=>({name:r.name,kind:r.kind,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty})),
       startedAt:exam.startedAt, savedAt:new Date().toISOString() };
     localStorage.setItem(ACTIVE_KEY, JSON.stringify(snap));
@@ -1654,7 +1660,7 @@ function checkUnfinished(){
   openModal(`<div class="modal-head"><h3>⏸️ Unfinished practice</h3></div>
     <p class="muted" style="font-size:13.5px;">You left a <b>${esc(modeLabel(snap.mode))}</b> unfinished${when?' ('+esc(when)+')':''} — <b>${answered}</b> of ${total} answered, <b>${fmtTime(snap.timeLeft|0)}</b> on the clock.</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
-      <button class="btn btn-primary btn-block" onclick="resumeRecovered()">▶️ Resume where I left off</button>
+      ${(snap.timeLeft|0)>0?`<button class="btn btn-primary btn-block" onclick="resumeRecovered()">▶️ Resume where I left off</button>`:`<p class="muted" style="font-size:12.5px;margin:0;">⏱ Time had run out, so it can only be saved or discarded.</p>`}
       <button class="btn btn-green btn-block" onclick="saveRecovered()">💾 Save it as an attempt now</button>
       <button class="btn btn-ghost btn-block" onclick="discardRecovered()">Discard it</button>
     </div>`);
@@ -1663,11 +1669,28 @@ function checkUnfinished(){
 function resumeRecovered(){
   _modalOnClose=null; closeModal();
   const snap=loadActiveSnapshot(); if(!snap || !snap.questions || !snap.questions.length){ toast('Nothing to resume'); return; }
-  const cfg={ name:snap.sectionName, sub:'resumed', time:snap.timeTotal||snap.timeLeft||20*60, kind:snap.kind, build:()=>snap.questions };
+  // Only an invalid or missing clock gets a fallback; a saved value is restored
+  // exactly — pausing at 7 seconds resumes at 7 seconds, never 30.
+  let left = (typeof snap.timeLeft==='number' && isFinite(snap.timeLeft)) ? Math.max(0, Math.floor(snap.timeLeft)) : (snap.timeTotal||20*60);
+  if(left<=0){ toast('Time was up on that section — save it or discard it'); renderHome(); return; }
+  const cfg={ name:snap.sectionName, sub:'resumed', time:snap.timeTotal||left, kind:snap.kind, build:()=>snap.questions };
+  // The section is scored at the difficulty it was actually run at (a hard
+  // adaptive route keeps its 170 ceiling), and it still sets/uses routes.
+  if(snap.difficulty) cfg.difficulty=snap.difficulty;
+  if(snap.setsRoute) cfg.setsRoute=snap.setsRoute;
+  if(snap.usesRoute) cfg.usesRoute=snap.usesRoute;
   const prior=(snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty||'medium',essay:null,detail:[]}));
-  exam={ mode:snap.mode, plan:[cfg], secIdx:0, sectionResults:prior, startedAt:snap.startedAt||new Date().toISOString(), routes:{verbal:null,quant:null}, resumed:true };
+  // A multi-section plan (the full simulation) is rebuilt around the resumed
+  // section from its named sections, so the later sections still run and the
+  // attempt is not recorded as complete after just this one.
+  const keys=Array.isArray(snap.planKeys)?snap.planKeys:null;
+  const idx=keys?Math.min(Math.max(0,snap.secIdx|0), keys.length-1):0;
+  const restorable = !!keys && keys.length>1 && keys.every((k,i)=> i===idx || typeof k==='string');
+  const plan = restorable ? keys.map((k,i)=> i===idx ? cfg : k) : [cfg];
+  exam={ mode:snap.mode, plan, secIdx: restorable?idx:0, sectionResults:prior, startedAt:snap.startedAt||new Date().toISOString(),
+    routes: snap.routes||{verbal:null,quant:null}, resumed:true };
   exam.sec={ cfg, questions:snap.questions, answers:snap.answers||{}, flags:new Set(snap.flags||[]), qi:Math.min(snap.qi||0, snap.questions.length-1),
-    timeLeft:Math.max(30, snap.timeLeft|0), qTime:snap.qTime||{}, shownIdx:null, qShownAt:null };
+    timeLeft:left, qTime:snap.qTime||{}, shownIdx:null, qShownAt:null };
   exam.inSection=true;
   goPage('page-exam'); renderQuestion(); startTimer();
   toast('▶️ Resumed — '+fmtTime(exam.sec.timeLeft)+' left');
@@ -2240,7 +2263,7 @@ function renderResume(){
   host.innerHTML=`<div class="card resume-card" style="margin-bottom:14px;padding:14px 16px;">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <div style="flex:1;min-width:180px;"><b style="color:var(--warn)">⏸ Paused: ${esc(modeLabel(snap.mode))}</b><div class="muted" style="font-size:12.5px;margin-top:2px;">${esc(snap.sectionName||'')} · ${answered} of ${n} answered · ${fmtTime(snap.timeLeft|0)} left</div></div>
-      <div class="row" style="margin:0;"><button class="btn btn-sm btn-primary" onclick="resumeRecovered()">▶️ Resume</button><button class="btn btn-sm btn-ghost" onclick="saveRecovered()">💾 Save</button><button class="btn btn-sm btn-ghost" onclick="discardRecovered()">Discard</button></div>
+      <div class="row" style="margin:0;">${(snap.timeLeft|0)>0?`<button class="btn btn-sm btn-primary" onclick="resumeRecovered()">▶️ Resume</button>`:''}<button class="btn btn-sm btn-ghost" onclick="saveRecovered()">💾 Save</button><button class="btn btn-sm btn-ghost" onclick="discardRecovered()">Discard</button></div>
     </div></div>`;
 }
 /* Weak spots from recent sessions, each with the drill that targets it. */
