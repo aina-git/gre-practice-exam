@@ -1,14 +1,16 @@
 # Builds the GRE Ready desktop app for Mac and Windows.
 #
 # Run it by hand from the Actions tab (the installers appear as downloadable
-# artifacts), or push a tag like `desktop-v3.0.0` to also publish them as a
-# GitHub Release with install instructions.
+# artifacts), or publish a GitHub Release with install instructions by pushing
+# a tag like `desktop-v3.0.0` — or, where tags cannot be pushed, a branch named
+# `desktop-release/v3.0.0` (the release job derives the tag from the branch).
 name: Desktop app
 
 on:
   workflow_dispatch:
   push:
     tags: ['desktop-v*']
+    branches: ['desktop-release/**']
 
 permissions:
   contents: write
@@ -50,7 +52,7 @@ jobs:
 
   release:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    if: startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/desktop-release/')
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -58,9 +60,32 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Release tag
+        id: tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref="${{ github.ref_name }}"
+          case "$ref" in
+            desktop-release/*)
+              tag="desktop-${ref#desktop-release/}"
+              # A release tag is immutable. A second push to the same release
+              # branch would rebuild the installers from a new commit while the
+              # tag still pointed at the first one, so it is refused: bump the
+              # version in desktop/package.json and push a new release branch.
+              if gh api "repos/${{ github.repository }}/git/ref/tags/$tag" >/dev/null 2>&1; then
+                echo "::error::Tag $tag already exists — a release was already published for this version. Bump desktop/package.json and push desktop-release/v<new-version>."
+                exit 1
+              fi ;;
+            *) tag="$ref" ;;
+          esac
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - uses: softprops/action-gh-release@v2
         with:
-          name: GRE Ready desktop ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: GRE Ready desktop ${{ steps.tag.outputs.tag }}
           files: dist/*
           body: |
             ## GRE Ready — desktop app
