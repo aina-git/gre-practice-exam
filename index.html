@@ -302,6 +302,11 @@ a{color:var(--blue);}
 .row{display:flex;gap:10px;flex-wrap:wrap;}
 .row .btn{flex:1;min-width:140px;}
 kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px;}
+.exam-top .stop-btn{width:auto;padding:0 10px;font-size:12px;font-weight:800;letter-spacing:.2px;white-space:nowrap;}
+.pace{display:inline-block;margin-top:2px;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,.12);white-space:nowrap;}
+.pace:empty{display:none;}
+.pace.on{color:#9be7a5;} .pace.ahead{color:#9bd0ff;} .pace.behind{color:#ffd166;}
+.resume-card{background:var(--warn-soft);border:1px solid var(--warn);box-shadow:none;}
 </style>
 </head>
 <body>
@@ -323,6 +328,7 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
       <p id="hero-sub">Dynamic, exam-accurate GRE practice. Every session is freshly generated.</p>
       <div class="hero-stats" id="hero-stats"></div>
     </div>
+    <div id="resume-host"></div>
 
     <div class="section-label">Full Simulation</div>
     <div class="opt-grid">
@@ -342,6 +348,8 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
       <div class="opt ai" onclick="startExam('aiVerbal')"><div class="em">🤖</div><h3>AI Fresh Verbal</h3><p>Live-generated & self-verified<span class="tag">AI</span></p></div>
       <div class="opt" onclick="openCustom()"><div class="em">⏱️</div><h3>Custom Timed</h3><p>Choose minutes & mix</p></div>
     </div>
+
+    <div id="focus-host"></div>
 
     <div class="section-label">Drill a Topic</div>
     <div class="opt-grid" id="topic-grid"></div>
@@ -366,8 +374,8 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
 <!-- ============ EXAM ============ -->
 <div id="page-exam" class="page">
   <div class="exam-top">
-    <button class="icon-btn" onclick="exitPractice()" title="Exit practice">✕</button>
-    <div class="sec"><span id="exam-sec-name">Section</span><small id="exam-sec-sub"></small></div>
+    <button class="icon-btn stop-btn" onclick="exitPractice()" title="Stop — save your score, pause, or discard">⏹ Stop</button>
+    <div class="sec"><span id="exam-sec-name">Section</span><small id="exam-sec-sub"></small><span class="pace" id="exam-pace"></span></div>
     <div class="timer" id="exam-timer">00:00</div>
     <button class="icon-btn" onclick="openDrawer()" title="Question navigator">☰</button>
   </div>
@@ -609,7 +617,7 @@ function pickVerbalByType(t, n){
   // record fingerprints as seen (bounded)
   const fps = chosen.map(i=>fingerprint(bank[i]));
   const prev = S.seen[seenKey(t)]||[];
-  S.seen[seenKey(t)] = [...fps, ...prev].slice(0,120);
+  S.seen[seenKey(t)] = [...fps, ...prev].slice(0,400);
   return chosen.map(i=>shuffleVerbal(bank[i]));
 }
 function fingerprint(q){ return (q.stem||q.passage||'').slice(0,40); }
@@ -903,8 +911,8 @@ function startExam(mode, opts){
   opts = opts || {};
   let plan; // array of section keys OR special
   if(mode==='full') plan=['writing','verbal1','verbal2','quant1','quant2'];
-  else if(mode==='verbalMix') plan=[{name:'Verbal Practice Set',sub:'15 questions · 23 min',time:23*60,kind:'verbal',difficulty:'medium',build:()=>buildVerbalSection(15,'medium')}];
-  else if(mode==='quantMix') plan=[{name:'Quant Practice Set',sub:'15 questions · 26 min',time:26*60,kind:'quant',difficulty:'medium',build:()=>buildQuantSection(15,'medium')}];
+  else if(mode==='verbalMix'){ const lv=recentLevel('verbal'); plan=[{name:'Verbal Practice Set',sub:`15 questions · 23 min · ${lv} level (adapts to your recent sets)`,time:23*60,kind:'verbal',difficulty:lv,build:()=>buildVerbalSection(15,lv)}]; }
+  else if(mode==='quantMix'){ const lv=recentLevel('quant'); plan=[{name:'Quant Practice Set',sub:`15 questions · 26 min · ${lv} level (adapts to your recent sets)`,time:26*60,kind:'quant',difficulty:lv,build:()=>buildQuantSection(15,lv)}]; }
   else if(mode==='quick') plan=[{name:'Quick Mixed Practice',sub:'~15 questions · 20 min',time:20*60,kind:'mixed',difficulty:'medium',build:()=>shuffle([...buildVerbalSection(7,'medium'),...buildQuantSection(8,'medium')])}];
   else if(mode==='writing') plan=['writing'];
   else if(mode==='custom'){ const m=opts.minutes||30; const n=Math.max(5,Math.min(40,Math.round(m))); const which=opts.mix||'mixed';
@@ -917,6 +925,19 @@ function startExam(mode, opts){
   showSectionIntro();
 }
 
+/* The level a practice set opens at: the route your last few sections of that
+   measure would have earned (same rule the full simulation uses). */
+function recentLevel(kind){
+  const secs=[];
+  for(let i=S.history.length-1;i>=0 && secs.length<6;i--){
+    for(const x of (S.history[i].sections||[])){
+      const k=x.kind||(/Verbal/.test(x.name)?'verbal':/Quant/.test(x.name)?'quant':'');
+      if(k===kind && x.total>=5) secs.push(x);
+    }
+  }
+  if(secs.length<2) return 'medium';
+  return routeFor(secs.reduce((a,x)=>a+x.raw,0)/secs.length);
+}
 function resolveSection(idx){
   const s = exam.plan[idx];
   return (typeof s==='string') ? SECTIONS[s] : s;
@@ -954,7 +975,7 @@ function beginSection(){
   let questions;
   try{ questions = cfg.build(); }catch(e){ console.error(e); questions=[genQuant('mc')]; }
   save(); // persist rotation "seen" updates
-  exam.sec = { cfg, questions, answers:{}, flags:new Set(), qi:0, timeLeft:cfg.time };
+  exam.sec = { cfg, questions, answers:{}, flags:new Set(), qi:0, timeLeft:cfg.time, qTime:{}, shownIdx:null, qShownAt:null };
   exam.inSection = true;
   goPage('page-exam');
   renderQuestion();
@@ -963,32 +984,62 @@ function beginSection(){
 }
 
 /* -------- Timer -------- */
+/* The clock is a DEADLINE, not a countdown of ticks. Browsers throttle timers
+   in background tabs and on phones, so a tick-based countdown drifted and
+   quietly handed out extra time. Every tick now re-reads the wall clock, so a
+   section ends exactly when it should — even after switching apps. Pausing
+   (the Stop dialog) re-anchors the deadline from the seconds left. */
 function startTimer(){
   stopTimer();
-  updateTimer();
-  tick = setInterval(()=>{
-    exam.sec.timeLeft--;
-    updateTimer();
-    if(exam.sec.timeLeft<=0){ stopTimer(); submitSection(true); }
-  },1000);
+  exam.sec.endAt = Date.now() + Math.max(0, exam.sec.timeLeft)*1000;
+  exam.sec.qShownAt = Date.now();
+  updateTimer();            // paint the clock now, even when nothing has changed yet
+  timerStep();
+  tick = setInterval(timerStep, 250);
 }
-function stopTimer(){ if(tick){ clearInterval(tick); tick=null; } }
+function timerStep(){
+  if(!exam || !exam.sec){ stopTimer(); return; }
+  const left = Math.max(0, Math.ceil((exam.sec.endAt - Date.now())/1000));
+  if(left !== exam.sec.timeLeft){ exam.sec.timeLeft = left; updateTimer(); }
+  if(left<=0){ stopTimer(); submitSection(true); }
+}
+function stopTimer(){ if(tick){ clearInterval(tick); tick=null; } noteQuestionTime(); }
+/* Seconds spent on the question currently shown, accumulated per question. */
+function noteQuestionTime(){
+  const s=exam && exam.sec; if(!s || s.qShownAt==null || s.shownIdx==null) return;
+  const q=s.questions[s.shownIdx];
+  if(q){ s.qTime=s.qTime||{}; s.qTime[q._id]=(s.qTime[q._id]||0)+Math.max(0,(Date.now()-s.qShownAt)/1000); }
+  s.qShownAt=Date.now();
+}
 function updateTimer(){
   const el=$('exam-timer'); if(!el) return;
   el.textContent=fmtTime(exam.sec.timeLeft);
   el.className='timer'+(exam.sec.timeLeft<=60?' danger':exam.sec.timeLeft<=300?' warn':'');
+  updatePace();
+}
+/* Pace: where you are versus where the clock says you should be. */
+function updatePace(){
+  const el=$('exam-pace'); if(!el||!exam||!exam.sec) return;
+  const s=exam.sec; const total=s.cfg.time||0; const n=s.questions.length;
+  if(s.cfg.kind==='writing' || !total || n<2){ el.textContent=''; el.className='pace'; return; }
+  const elapsed=total-s.timeLeft; const expectedDone=(elapsed/total)*n; const diff=s.qi-expectedDone;
+  const [txt,cls] = diff>=1 ? ['ahead of pace','ahead'] : diff<=-1 ? ['behind pace','behind'] : ['on pace','on'];
+  el.textContent=txt; el.className='pace '+cls;
 }
 
 /* -------- Render a question -------- */
 function curQ(){ return exam.sec.questions[exam.sec.qi]; }
 function renderQuestion(){
+  noteQuestionTime();
   const q=curQ(); if(!q) return;
+  exam.sec.shownIdx=exam.sec.qi; exam.sec.qShownAt=Date.now();
   const cfg=exam.sec.cfg;
   $('exam-sec-name').textContent=cfg.name;
   const done=totalQuestions(exam.sec.questions.slice(0,exam.sec.qi));
   const totalQ=totalQuestions(exam.sec.questions);
   $('exam-sec-sub').textContent=`Question ${exam.sec.qi+1} of ${exam.sec.questions.length}`;
   $('exam-progress-fill').style.width=(exam.sec.qi/(exam.sec.questions.length))*100+'%';
+  updatePace();
   $('flag-btn').classList.toggle('on',exam.sec.flags.has(exam.sec.qi));
   $('btn-prev').style.visibility=exam.sec.qi===0?'hidden':'visible';
   $('btn-next').textContent=exam.sec.qi===exam.sec.questions.length-1?'Submit ✓':'Next →';
@@ -1165,6 +1216,9 @@ function scoreSection(sec){
       detail.push({q,userAns:ua,ok,skipped:ua==null});
     }
   });
+  // Time spent, per question (a passage's time is shared across its questions).
+  const qt=sec.qTime||{};
+  detail.forEach(d=>{ const t=qt[d.q._id]; if(t!=null){ d.secs = d.q.type==='rc' ? Math.round(t/(d.q.subs.length||1)) : Math.round(t); } });
   const diff = cfg.difficulty || (cfg.usesRoute && exam && exam.routes ? (exam.routes[cfg.usesRoute]||'medium') : 'medium');
   return { kind:cfg.kind, name:cfg.name, difficulty:diff, correct, total, essay, detail, raw: total?correct/total:0 };
 }
@@ -1215,10 +1269,28 @@ function buildEntryAndStore(R, mode, partial){
   const answered=allDetail.filter(d=>!d.skipped).length + (essayRes && (essayRes.essay.text||'').trim()?1:0);
   const totalQ=allDetail.length + (essayRes?1:0);
   const base=modeLabel(mode);
+  // Per-topic accuracy and pacing travel with the entry so the home screen can
+  // point at weak spots without keeping every question.
+  const topics={}; allDetail.forEach(d=>{ const t=d.q.topic||typeLabel(d.q); topics[t]=topics[t]||{ok:0,n:0}; topics[t].n++; if(d.ok) topics[t].ok++; });
+  const secsBy={verbal:[],quant:[]}; allDetail.forEach(d=>{ if(d.secs!=null) secsBy[isVerbalQ(d.q)?'verbal':'quant'].push(d.secs); });
+  const avgOfArr=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
+  const avgSecs={ verbal:avgOfArr(secsBy.verbal), quant:avgOfArr(secsBy.quant) };
+  // Remember what was missed so it can be redone: verbal by fingerprint (the
+  // exact item), quant by generator family (a fresh instance of the same kind).
+  S.missed=S.missed||[]; S.missedGen=S.missedGen||{};
+  allDetail.forEach(d=>{
+    if(d.q.type==='issue') return;
+    if(isVerbalQ(d.q)){ const fp=fingerprint(d.q);
+      if(d.ok){ S.missed=S.missed.filter(m=>m.fp!==fp); }
+      else if(!d.q._ai && !S.missed.some(m=>m.fp===fp)) S.missed.push({fp,type:d.q.type,at:Date.now()}); }
+    else if(d.q._gen){ if(d.ok){ if(S.missedGen[d.q._gen]>0) S.missedGen[d.q._gen]-=1; if(S.missedGen[d.q._gen]<=0) delete S.missedGen[d.q._gen]; }
+      else S.missedGen[d.q._gen]=(S.missedGen[d.q._gen]||0)+1; }
+  });
+  S.missed=S.missed.slice(-150);
   const entry={ date:new Date().toISOString(), mode, modeLabel: partial?base+' · partial':base,
     partial:!!partial, answered, totalQ, vRoute:vT?vRoute:null, qRoute:qT?qRoute:null,
-    verbal:vScore, quant:qScore, essay:essayScore, combined,
-    sections:R.map(r=>({name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty})) };
+    verbal:vScore, quant:qScore, essay:essayScore, combined, topics, avgSecs,
+    sections:R.map(r=>({name:r.name,kind:r.kind,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty})) };
   S.history.push(entry);
   S.lastSession={ results:R, entry };
   save();
@@ -1240,14 +1312,16 @@ function exitPractice(){
   stopTimer();
   const answered=exam.sec.questions.filter(isAnswered).length;
   const total=exam.sec.questions.length;
-  openModal(`<div class="modal-head"><h3>Leave this practice?</h3><button class="x" onclick="closeModal()">✕</button></div>
-    <p class="muted" style="font-size:13.5px;">You've answered <b>${answered}</b> of ${total} in this section. Save this attempt to your history, or discard it? Unanswered questions count as incorrect.</p>
+  openModal(`<div class="modal-head"><h3>Stop this practice?</h3><button class="x" onclick="closeModal()">✕</button></div>
+    <p class="muted" style="font-size:13.5px;">You've answered <b>${answered}</b> of ${total} in this section with <b>${fmtTime(exam.sec.timeLeft)}</b> left. <b>Save</b> records your score now (unanswered questions count as incorrect). <b>Pause</b> keeps your place and the clock so you can pick it up later from the home screen.</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
-      <button class="btn btn-green btn-block" onclick="saveAndExit()">💾 Save attempt &amp; exit</button>
-      <button class="btn btn-red btn-block" onclick="discardAndExit()">🗑️ Discard &amp; exit</button>
+      <button class="btn btn-green btn-block" onclick="saveAndExit()">💾 Save my score &amp; stop</button>
+      <button class="btn btn-ghost btn-block" onclick="pauseAndExit()">⏸ Pause — resume later</button>
+      <button class="btn btn-red btn-block" onclick="discardAndExit()">🗑️ Discard &amp; stop</button>
       <button class="btn btn-ghost btn-block" onclick="closeModal()">↩︎ Keep practicing</button>
     </div>`, resumeAfterExit);
 }
+function pauseAndExit(){ _modalOnClose=null; closeModal(); stopTimer(); saveActiveSnapshot(); exam=null; goHome(); toast('⏸ Paused — resume any time from the home screen'); }
 function resumeAfterExit(){ if(exam && exam.sec) startTimer(); }
 function saveAndExit(){ _modalOnClose=null; closeModal(); stopTimer();
   if(exam.sec){ exam.inSection=false; exam.sectionResults.push(scoreSection(exam.sec)); }
@@ -1261,8 +1335,8 @@ function saveActiveSnapshot(){
   try{
     if(!exam || !exam.sec || !exam.inSection) return;
     const snap={ mode:exam.mode, secIdx:exam.secIdx, sectionName:exam.sec.cfg.name, kind:exam.sec.cfg.kind,
-      questions:exam.sec.questions, answers:exam.sec.answers, qi:exam.sec.qi, timeLeft:exam.sec.timeLeft, flags:[...exam.sec.flags],
-      prior:exam.sectionResults.map(r=>({name:r.name,kind:r.kind,correct:r.correct,total:r.total,raw:r.raw})),
+      questions:exam.sec.questions, answers:exam.sec.answers, qi:exam.sec.qi, timeLeft:exam.sec.timeLeft, timeTotal:exam.sec.cfg.time, qTime:exam.sec.qTime||{}, flags:[...exam.sec.flags],
+      prior:exam.sectionResults.map(r=>({name:r.name,kind:r.kind,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty})),
       startedAt:exam.startedAt, savedAt:new Date().toISOString() };
     localStorage.setItem(ACTIVE_KEY, JSON.stringify(snap));
   }catch(e){}
@@ -1279,11 +1353,25 @@ function checkUnfinished(){
   const total=res.detail.length + (res.essay?1:0);
   const when=snap.savedAt? new Date(snap.savedAt).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
   openModal(`<div class="modal-head"><h3>⏸️ Unfinished practice</h3></div>
-    <p class="muted" style="font-size:13.5px;">You left a <b>${esc(modeLabel(snap.mode))}</b> unfinished${when?' ('+esc(when)+')':''}. You had answered <b>${answered}</b> of ${total}. Save it as an attempt in your history?</p>
+    <p class="muted" style="font-size:13.5px;">You left a <b>${esc(modeLabel(snap.mode))}</b> unfinished${when?' ('+esc(when)+')':''} — <b>${answered}</b> of ${total} answered, <b>${fmtTime(snap.timeLeft|0)}</b> on the clock.</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
-      <button class="btn btn-green btn-block" onclick="saveRecovered()">💾 Save this attempt</button>
+      <button class="btn btn-primary btn-block" onclick="resumeRecovered()">▶️ Resume where I left off</button>
+      <button class="btn btn-green btn-block" onclick="saveRecovered()">💾 Save it as an attempt now</button>
       <button class="btn btn-ghost btn-block" onclick="discardRecovered()">Discard it</button>
     </div>`);
+}
+/* Pick the section back up with its questions, answers, flags and remaining time. */
+function resumeRecovered(){
+  _modalOnClose=null; closeModal();
+  const snap=loadActiveSnapshot(); if(!snap || !snap.questions || !snap.questions.length){ toast('Nothing to resume'); return; }
+  const cfg={ name:snap.sectionName, sub:'resumed', time:snap.timeTotal||snap.timeLeft||20*60, kind:snap.kind, build:()=>snap.questions };
+  const prior=(snap.prior||[]).map(r=>({kind:r.kind,name:r.name,correct:r.correct,total:r.total,raw:r.raw,difficulty:r.difficulty||'medium',essay:null,detail:[]}));
+  exam={ mode:snap.mode, plan:[cfg], secIdx:0, sectionResults:prior, startedAt:snap.startedAt||new Date().toISOString(), routes:{verbal:null,quant:null}, resumed:true };
+  exam.sec={ cfg, questions:snap.questions, answers:snap.answers||{}, flags:new Set(snap.flags||[]), qi:Math.min(snap.qi||0, snap.questions.length-1),
+    timeLeft:Math.max(30, snap.timeLeft|0), qTime:snap.qTime||{}, shownIdx:null, qShownAt:null };
+  exam.inSection=true;
+  goPage('page-exam'); renderQuestion(); startTimer();
+  toast('▶️ Resumed — '+fmtTime(exam.sec.timeLeft)+' left');
 }
 function saveRecovered(){
   _modalOnClose=null; closeModal();
@@ -1296,7 +1384,7 @@ function saveRecovered(){
   if(essayRes && aiReady() && S.settings.autoGradeEssay){ gradeEssayAI(essayRes, entry); }
   toast('✅ Attempt saved to your history');
 }
-function discardRecovered(){ _modalOnClose=null; closeModal(); clearActiveSnapshot(); }
+function discardRecovered(){ _modalOnClose=null; closeModal(); clearActiveSnapshot(); renderHome(); }
 function isVerbalQ(q){ return ['tc1','tc2','tc3','se','rc','issue'].includes(q.type); }
 function modeLabel(m){ return ({full:'Full Simulation',verbalMix:'Verbal Set',quantMix:'Quant Set',quick:'Quick Practice',writing:'Issue Essay',custom:'Custom',aiVerbal:'AI Verbal',topic:'Topic Drill'})[m]||m; }
 
@@ -1345,6 +1433,15 @@ function renderResults(entry, R, essayRes){
     const p=Math.round(r.raw*100); const col=p>=70?'var(--green)':p>=50?'var(--warn)':'var(--red)';
     return `<div class="bd-row"><div class="bd-head"><b>${esc(r.name)}</b><span style="color:${col};font-weight:800;">${r.correct}/${r.total} · ${p}%</span></div><div class="bar"><div class="f" style="width:${p}%;background:${col}"></div></div></div>`;
   }).join('')||'<p class="muted center">Essay-only session.</p>'}</div>`;
+  // Pacing — the real GRE allows ~1:30 per verbal and ~1:45 per quant question.
+  const secsV=[],secsQ=[]; R.flatMap(r=>r.detail||[]).forEach(d=>{ if(d.secs!=null) (isVerbalQ(d.q)?secsV:secsQ).push(d.secs); });
+  const paceLine=(arr,label,target)=>{ if(!arr.length) return '';
+    const avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length); const slow=arr.filter(x=>x>target*1.6).length;
+    const col=avg<=target?'var(--green)':avg<=target*1.25?'var(--warn)':'var(--red)';
+    return `<div class="bd-row"><div class="bd-head"><b>${label}</b><span style="color:${col};font-weight:800;">${fmtTime(avg)} per question · target ${fmtTime(target)}</span></div>
+      ${slow?`<div class="muted" style="font-size:12px;margin-top:3px;">${slow} question${slow>1?'s':''} took over ${fmtTime(Math.round(target*1.6))} — on the real test, flag those and move on.</div>`:''}</div>`; };
+  const paceHtml=paceLine(secsV,'Verbal pacing',90)+paceLine(secsQ,'Quant pacing',105);
+  if(paceHtml) html+=`<div class="section-label">Pacing</div><div class="card breakdown">${paceHtml}</div>`;
   // Adaptive route + scoring-method note
   const routeBits=[];
   if(entry.vRoute) routeBits.push(`Verbal route: <b>${entry.vRoute}</b>`);
@@ -1415,7 +1512,7 @@ function reviewCardHTML(d,idx){
     return `<div class="${cls}"><span class="mark">${LET[ci]}</span><span class="ctext">${/[<]/.test(c)?c:esc(c)}</span>${tag}</div>`;
   }).join('');
   const exp = isRC? q.subs[d.sub].explanation : q.explanation;
-  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}</div></div></div>
+  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}${d.secs!=null?' · ⏱ '+fmtTime(d.secs):''}</div></div></div>
     <div class="rev-body">${passage}<div class="q-text" style="font-size:15px;">${isRC||/[<]/.test(stem)?stem:blanksToHTML(stem)}</div>
     <div class="choices">${optHTML}</div>
     <div class="mini-exp"><div class="h">💡 Explanation</div>${esc(exp||'')}</div>
@@ -1434,7 +1531,7 @@ function multiBlankReviewHTML(d,head,headTxt,icon){
         else if(isU){cls+=' wrong';tag='<span class="q-diff" style="margin-left:auto;color:var(--red);font-weight:800;">your answer</span>';}
         return `<div class="${cls}"><span class="mark">${LET[ci]}</span><span class="ctext">${esc(c)}</span>${tag}</div>`;}).join('')+`</div></div>`;
   }).join('');
-  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}</div></div></div>
+  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}${d.secs!=null?' · ⏱ '+fmtTime(d.secs):''}</div></div></div>
     <div class="rev-body"><div class="q-text" style="font-size:15px;">${blanksToHTML(q.stem)}</div>${groups}
     <div class="mini-exp"><div class="h">💡 Explanation</div>${esc(q.explanation||'')}</div>
     <div id="aiexp-${q._id}-0"></div>
@@ -1442,7 +1539,7 @@ function multiBlankReviewHTML(d,head,headTxt,icon){
 }
 function neReviewHTML(d,head,headTxt,icon){
   const q=d.q;
-  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}</div></div></div>
+  return `<div class="rev"><div class="rev-head ${head}"><span class="ic">${icon}</span><div><div class="t">${typeLabel(q)}</div><div class="s">${headTxt}${d.secs!=null?' · ⏱ '+fmtTime(d.secs):''}</div></div></div>
     <div class="rev-body"><div class="q-text" style="font-size:15px;">${q.stem}</div>
     <div class="row" style="gap:8px;"><div class="score-box" style="flex:1;box-shadow:none;border:1.5px solid var(--line);"><div class="r">Your answer</div><div class="n" style="font-size:22px;color:${d.ok?'var(--green)':'var(--red)'}">${d.userAns==null||d.userAns===''?'—':esc(String(d.userAns))}</div></div>
     <div class="score-box" style="flex:1;box-shadow:none;border:1.5px solid var(--green);"><div class="r">Correct</div><div class="n" style="font-size:22px;color:var(--green)">${q.answer}</div></div></div>
@@ -1472,6 +1569,7 @@ function essayReviewHTML(r){
 function aiReady(){ return !!(S.settings.provider && S.settings.apiKey && S.settings.model); }
 function providerBase(p){ return p==='groq'?'https://api.groq.com/openai/v1/chat/completions'
   : p==='openrouter'?'https://openrouter.ai/api/v1/chat/completions'
+  : p==='gemini'?'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
   : (S.settings.customUrl||''); }
 async function callAI(messages,{json=false,temperature=0.2,max_tokens=1500}={}){
   const p=S.settings.provider; const url=providerBase(p);
@@ -1526,15 +1624,20 @@ async function gradeEssayAI(essayRes, entry){
   try{
     const sys=`You are an official GRE Analytical Writing rater. Score the "Analyze an Issue" essay from 0 to 6 in HALF-POINT increments using the real ETS rubric: (1) articulates a clear position, (2) supports ideas with relevant reasons/examples, (3) sustained organization and coherence, (4) sentence variety and precise vocabulary, (5) command of standard written English. Be fair but rigorous. Return STRICT JSON: {"score":number,"summary":string,"strengths":[string],"improvements":[string],"rubric":{"thesis":number,"development":number,"organization":number,"language":number}} where rubric sub-scores are 0-6.`;
     const usr=`Prompt: ${e.prompt}\n\nEssay:\n"""${e.text}"""\n\nGrade it. Quote or reference specific parts in your feedback.`;
-    const out=await callAI([{role:'system',content:sys},{role:'user',content:usr}],{json:true,temperature:0.1,max_tokens:900});
-    const j=parseJSON(out); if(!j||typeof j.score!=='number') throw new Error('bad json');
-    e.score=Math.round(j.score*2)/2; e.ai=j;
+    // Two independent readers, as ETS does; a third adjudicates when they differ by more than a point.
+    const rate=async(persona)=>{ const out=await callAI([{role:'system',content:sys+' '+persona},{role:'user',content:usr}],{json:true,temperature:0.1,max_tokens:900});
+      const j=parseJSON(out); if(!j||typeof j.score!=='number') throw new Error('bad json'); j.score=Math.max(0,Math.min(6,Math.round(j.score*2)/2)); return j; };
+    const [r1,r2]=await Promise.all([rate('You are Reader 1: hold strictly to the rubric bands.'),rate('You are Reader 2: score holistically, calibrated to published ETS sample essays at each band.')]);
+    const raters=[r1.score,r2.score]; let score=(r1.score+r2.score)/2;
+    if(Math.abs(r1.score-r2.score)>1){ const r3=await rate('You are the adjudicating senior reader: two readers disagreed; score independently.'); raters.push(r3.score); score=(r1.score+r2.score+r3.score)/3; }
+    const j=Object.assign({}, r1, {raters});
+    e.score=Math.round(score*2)/2; e.ai=j;
     // update persisted history entry
     entry.essay=e.score; const hi=S.history[S.history.length-1]; if(hi) hi.essay=e.score;
     if(S.lastSession) S.lastSession.entry.essay=e.score;
     save();
     const numEl=$('essay-num'); if(numEl) numEl.textContent=e.score;
-    if(pcEl) pcEl.textContent='AI-graded';
+    if(pcEl) pcEl.textContent='AI-graded · '+raters.length+' readers';
     const fb=$('essay-ai-feedback'); // only present if review open
     if(fb) fb.innerHTML=renderEssayFeedback(j);
     toast('✅ Essay graded by AI');
@@ -1544,7 +1647,7 @@ function gradeEssayNow(){ const R=(S.lastSession&&S.lastSession.results)||[]; co
 function renderEssayFeedback(j){
   if(!j) return '';
   const bars=j.rubric?Object.entries(j.rubric).map(([k,v])=>`<div class="bd-row" style="margin-bottom:8px;"><div class="bd-head" style="font-size:12.5px;"><b style="text-transform:capitalize">${esc(k)}</b><span>${v}/6</span></div><div class="bar"><div class="f" style="width:${v/6*100}%;background:#7c3aed"></div></div></div>`).join(''):'';
-  return `<div class="ai-exp" style="background:#f5f3ff;border-color:#c4b5fd;"><div class="h" style="color:#7c3aed;">🤖 AI feedback</div>
+  return `<div class="ai-exp" style="background:#f5f3ff;border-color:#c4b5fd;"><div class="h" style="color:#7c3aed;">🤖 AI feedback${j.raters?` <span style="font-weight:600;opacity:.75;">· readers scored ${j.raters.join(' / ')}</span>`:''}</div>
     ${j.summary?`<p style="margin-bottom:8px;">${esc(j.summary)}</p>`:''}
     ${bars}
     ${j.strengths&&j.strengths.length?`<div style="margin-top:8px;"><b style="font-size:12.5px;color:var(--green)">Strengths</b><ul style="margin:4px 0 0 18px;font-size:13px;">${j.strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`:''}
@@ -1552,42 +1655,67 @@ function renderEssayFeedback(j){
     </div>`;
 }
 
-/* ---- Live verbal generation: GENERATE then blind VERIFY ---- */
+/* ---- Live verbal generation: GENERATE, then BLIND-SOLVE, then a hostile CRITIC ----
+   An AI-written item reaches the student only if (1) a second, independent pass that
+   never saw the key solves it to the same answer, and (2) a reviewer that IS shown the
+   key cannot find another defensible choice or a flaw. Anything else is discarded. */
 async function aiGenerateVerbal(type,difficulty){
-  const typeName={tc1:'single-blank Text Completion',se:'Sentence Equivalence',rc:'Reading Comprehension'}[type];
-  const genSys=`You are an ETS GRE verbal item writer. Produce ONE ${difficulty} ${typeName} item at genuine GRE difficulty. Exactly one defensible answer (or exactly one correct pair for Sentence Equivalence). Include tempting distractors and a clear logical clue. Return STRICT JSON.`;
-  let genUsr, schema;
-  if(type==='tc1'){ genUsr=`JSON: {"stem": sentence with the blank as "__________","choices":[5 strings],"answerIndex":int,"explanation":string}`; }
-  else if(type==='se'){ genUsr=`JSON: {"stem": sentence with one blank "__________","choices":[6 strings],"answerIndices":[two ints],"explanation":string}. The two answers must be near-synonyms that produce equivalent sentences; include a trap synonym pair that does NOT fit.`; }
-  else { genUsr=`JSON: {"passage":"120-180 word academic passage","stem":question,"choices":[5 strings],"answerIndex":int,"explanation":string}`; }
-  const gen=parseJSON(await callAI([{role:'system',content:genSys},{role:'user',content:genUsr}],{json:true,temperature:0.8,max_tokens:900}));
+  const typeName={tc1:'single-blank Text Completion',tc2:'two-blank Text Completion',se:'Sentence Equivalence',rc:'Reading Comprehension'}[type];
+  const genSys=`You are an ETS GRE verbal item writer. Produce ONE ${difficulty} ${typeName} item at genuine GRE difficulty. The sentence's (or passage's) own logic must determine the answer — never outside knowledge. Exactly one defensible answer per blank (exactly one correct PAIR for Sentence Equivalence). Include tempting but clearly wrong distractors. Return STRICT JSON only.`;
+  let genUsr;
+  if(type==='tc1') genUsr=`JSON: {"stem": sentence with the blank as "__________","choices":[5 strings],"answerIndex":int,"explanation":string}`;
+  else if(type==='tc2') genUsr=`JSON: {"stem": sentence with two blanks written as "(i) __________" and "(ii) __________","groups":[[3 strings],[3 strings]],"answerIndices":[int for blank (i), int for blank (ii)],"explanation":string}. The blanks must interact.`;
+  else if(type==='se') genUsr=`JSON: {"stem": sentence with one blank "__________","choices":[6 strings],"answerIndices":[two ints],"explanation":string}. The two answers must be near-synonyms that produce equivalent sentences; include a tempting decoy that does NOT fit.`;
+  else genUsr=`JSON: {"passage":"140-200 word academic passage","questions":[{"stem":string,"choices":[5 strings],"answerIndex":int,"explanation":string},{"stem":string,"choices":[5 strings],"answerIndex":int,"explanation":string}]} — exactly 2 questions: one primary purpose/main idea, one inference or specific detail.`;
+  const gen=parseJSON(await callAI([{role:'system',content:genSys},{role:'user',content:genUsr}],{json:true,temperature:0.8,max_tokens:1200}));
   if(!gen) throw new Error('gen-parse');
-  // Blind verify
-  const vSys=`You are a meticulous GRE test-taker. Solve the item from scratch. Return STRICT JSON {"answer":[indices you believe correct],"valid":boolean,"reason":string}. valid=false if ambiguous or flawed.`;
-  let vUsr;
-  if(type==='se') vUsr=`Sentence: ${gen.stem}\nChoices:\n${gen.choices.map((c,i)=>i+') '+c).join('\n')}\nPick the TWO indices.`;
-  else if(type==='rc') vUsr=`Passage: ${gen.passage}\nQuestion: ${gen.stem}\nChoices:\n${gen.choices.map((c,i)=>i+') '+c).join('\n')}\nPick the ONE index.`;
-  else vUsr=`Sentence: ${gen.stem}\nChoices:\n${gen.choices.map((c,i)=>i+') '+c).join('\n')}\nPick the ONE index.`;
-  const ver=parseJSON(await callAI([{role:'system',content:vSys},{role:'user',content:vUsr}],{json:true,temperature:0,max_tokens:400}));
-  if(!ver||!ver.valid) throw new Error('verify-invalid');
-  const claimed = type==='se'? (gen.answerIndices||[]).slice().sort() : [gen.answerIndex];
-  const got = (ver.answer||[]).slice().sort();
-  const agree = claimed.length===got.length && claimed.every((v,i)=>v===got[i]);
-  if(!agree) throw new Error('verify-mismatch');
-  // Build unified question
-  if(type==='tc1') return {type:'tc1',_id:uid(),_ai:true,difficulty,stem:gen.stem,choices:gen.choices,answer:[gen.answerIndex],explanation:gen.explanation};
-  if(type==='se') return {type:'se',_id:uid(),_ai:true,difficulty,stem:gen.stem,choices:gen.choices,answer:(gen.answerIndices||[]).slice().sort((a,b)=>a-b),explanation:gen.explanation};
-  return {type:'rc',_id:uid(),_ai:true,difficulty,passage:gen.passage,subs:[{stem:gen.stem,choices:gen.choices,answer:gen.answerIndex,explanation:gen.explanation}]};
+  const solveSys=`You are a meticulous GRE test-taker. Solve the item from scratch. Return STRICT JSON {"answer":[indices you believe correct],"valid":boolean,"reason":string}. valid=false if the item is ambiguous or flawed.`;
+  const critSys=`You are a hostile ETS reviewer. You are shown an item AND its intended key. Decide whether ANY other choice is also defensible, whether the key is wrong, or whether the item is flawed (ambiguous, ungrammatical, needs outside knowledge). Return STRICT JSON {"flawed":boolean,"reason":string}. Be strict: a second workable answer means flawed.`;
+  const list=ch=>ch.map((c,i)=>i+') '+c).join('\n');
+  const same=(a,b)=>a.length===b.length && a.every((v,i)=>v===b[i]);
+  async function verify(itemText, key, howMany, ordered){
+    const sv=parseJSON(await callAI([{role:'system',content:solveSys},{role:'user',content:itemText+`\nPick ${howMany}.`}],{json:true,temperature:0,max_tokens:300}));
+    if(!sv||!sv.valid||!Array.isArray(sv.answer)) throw new Error('verify-invalid');
+    const got=ordered?sv.answer.slice():sv.answer.slice().sort((x,y)=>x-y); const want=ordered?key.slice():key.slice().sort((x,y)=>x-y);
+    if(!same(got,want)) throw new Error('verify-mismatch');
+    const cr=parseJSON(await callAI([{role:'system',content:critSys},{role:'user',content:itemText+'\nIntended key: '+JSON.stringify(want)}],{json:true,temperature:0,max_tokens:300}));
+    if(!cr||cr.flawed) throw new Error('critique-flawed');
+  }
+  const isInt=x=>Number.isInteger(x);
+  if(type==='tc1'){
+    if(!Array.isArray(gen.choices)||gen.choices.length!==5||!isInt(gen.answerIndex)||gen.answerIndex<0||gen.answerIndex>4) throw new Error('shape');
+    await verify(`Sentence: ${gen.stem}\nChoices:\n${list(gen.choices)}`,[gen.answerIndex],'the ONE index',false);
+    return {type:'tc1',_id:uid(),_ai:true,difficulty,stem:gen.stem,choices:gen.choices,answer:[gen.answerIndex],explanation:gen.explanation};
+  }
+  if(type==='se'){
+    const key=(gen.answerIndices||[]).slice().sort((x,y)=>x-y);
+    if(!Array.isArray(gen.choices)||gen.choices.length!==6||key.length!==2||!key.every(i=>isInt(i)&&i>=0&&i<6)||key[0]===key[1]) throw new Error('shape');
+    await verify(`Sentence: ${gen.stem}\nChoices:\n${list(gen.choices)}`,key,'the TWO indices',false);
+    return {type:'se',_id:uid(),_ai:true,difficulty,stem:gen.stem,choices:gen.choices,answer:key,explanation:gen.explanation};
+  }
+  if(type==='tc2'){
+    const key=gen.answerIndices||[];
+    if(!Array.isArray(gen.groups)||gen.groups.length!==2||!gen.groups.every(g=>Array.isArray(g)&&g.length===3)||key.length!==2||!key.every(i=>isInt(i)&&i>=0&&i<3)) throw new Error('shape');
+    await verify(`Sentence: ${gen.stem}\nBlank (i) choices:\n${list(gen.groups[0])}\nBlank (ii) choices:\n${list(gen.groups[1])}\nAnswer as [index for (i), index for (ii)]`,key,'one index per blank, in order',true);
+    return {type:'tc2',_id:uid(),_ai:true,difficulty,stem:gen.stem,groups:gen.groups,answer:key,explanation:gen.explanation};
+  }
+  // rc — each question is verified on its own; the passage ships with whichever survive.
+  const cand=Array.isArray(gen.questions)?gen.questions.filter(x=>x&&x.stem&&Array.isArray(x.choices)&&x.choices.length===5&&isInt(x.answerIndex)&&x.answerIndex>=0&&x.answerIndex<5):[];
+  if(!gen.passage||!cand.length) throw new Error('shape');
+  const subs=[];
+  for(const x of cand){ try{ await verify(`Passage: ${gen.passage}\nQuestion: ${x.stem}\nChoices:\n${list(x.choices)}`,[x.answerIndex],'the ONE index',false); subs.push({stem:x.stem,choices:x.choices,answer:x.answerIndex,explanation:x.explanation}); }catch(e){} }
+  if(!subs.length) throw new Error('verify-mismatch');
+  return {type:'rc',_id:uid(),_ai:true,difficulty,passage:gen.passage,subs};
 }
 async function startAIVerbal(opts){
   if(!aiReady()){ toast('Connect an AI provider first'); openSettings(); return; }
   goPage('page-instr');
   $('instr-body').innerHTML=`<div class="card center"><h1 style="font-size:19px;font-weight:800;">🤖 Generating fresh verbal questions…</h1>
-    <p class="muted mt8" style="font-size:13px;">Each item is generated, then independently re-solved to confirm the answer before you see it. Discarded if the two disagree.</p>
+    <p class="muted mt8" style="font-size:13px;">Each item is written, then solved again by a pass that never saw the answer, then attacked by a critic looking for a second defensible choice. It reaches you only if all three agree.</p>
     <div class="load-box"><div class="spinner"></div><p id="aigen-status">Starting…</p></div>
     <button class="btn btn-ghost btn-sm mt12" onclick="goHome()">Cancel</button></div>`;
-  const target=opts&&opts.n?opts.n:8;
-  const plan=shuffle(['tc1','tc1','tc1','se','se','se','rc','rc','tc1','se']).slice(0,target+3);
+  const target=opts&&opts.n?opts.n:10;
+  const plan=shuffle(['tc1','tc1','tc2','se','se','rc','tc1','se','tc2','rc','tc1','se','rc','tc2']).slice(0,target+4);
   const qs=[]; let attempts=0;
   for(const t of plan){
     if(qs.length>=target) break;
@@ -1601,7 +1729,7 @@ async function startAIVerbal(opts){
     toast('AI unavailable — using verified bank instead');
     startExam('verbalMix'); return;
   }
-  exam={ mode:'aiVerbal', plan:[{name:'AI Fresh Verbal',sub:qs.length+' verified AI questions · '+Math.max(8,qs.length*90/60|0)+' min',time:Math.max(8*60,qs.length*90),kind:'verbal',build:()=>qs}], secIdx:0, sectionResults:[], startedAt:new Date().toISOString() };
+  exam={ mode:'aiVerbal', plan:[{name:'AI Fresh Verbal',sub:totalQuestions(qs)+' verified AI questions · '+Math.max(8,totalQuestions(qs)*90/60|0)+' min',time:Math.max(8*60,totalQuestions(qs)*90),kind:'verbal',build:()=>qs}], secIdx:0, sectionResults:[], startedAt:new Date().toISOString() };
   beginSection();
 }
 
@@ -1646,10 +1774,19 @@ const TOPICS=[
   {key:'geometry',em:'📐',name:'Geometry',gen:()=>Array.from({length:10},()=>{const g=pick(['pythagoras','rectangle','circleSector','polygonAngles']);const q=GEN[g]();q._id=uid();q.kind='quant';return q;})},
   {key:'data',em:'📊',name:'Data & Probability',gen:()=>{const a=Array.from({length:8},()=>{const g=pick(['average','median','probability','permutation','combination','setUnion','qcMeanMedian']);const q=GEN[g]();q._id=uid();q.kind='quant';return q;});return shuffle([...a,...genDataSet()]);}},
   {key:'qc',em:'⚖️',name:'Quant Comparison',gen:()=>Array.from({length:10},()=>genQuant('qc'))},
-  {key:'vocab',em:'📚',name:'Vocabulary (TC/SE)',gen:()=>[...pickVerbalByType('tc1',5),...pickVerbalByType('se',5)]},
+  {key:'vocab',em:'📚',name:'Vocabulary (TC/SE)',kind:'verbal',gen:()=>[...pickVerbalByType('tc1',5),...pickVerbalByType('se',5)]},
+  {key:'reading',em:'📄',name:'Reading Comp',kind:'verbal',desc:'4 passages · ~12 questions',gen:()=>pickVerbalByType('rc',4)},
+  {key:'multiblank',em:'🧩',name:'Multi-blank TC',kind:'verbal',desc:'2- and 3-blank completions',gen:()=>[...pickVerbalByType('tc2',6),...pickVerbalByType('tc3',4)]},
+  // Redo drills — offered from the Focus Areas card, not the grid.
+  {key:'missed',em:'🔁',name:'Redo Missed Verbal',kind:'verbal',hidden:true,gen:()=>{ const out=[]; for(const m of (S.missed||[]).slice().reverse()){ const q=(VBANK[m.type]||[]).find(b=>fingerprint(b)===m.fp); if(q) out.push(shuffleVerbal(q)); if(out.length>=12) break; } return shuffle(out); }},
+  {key:'missedQuant',em:'🔁',name:'Redo Missed Quant',kind:'quant',hidden:true,gen:()=>{ const keys=Object.entries(S.missedGen||{}).sort((a,b)=>b[1]-a[1]).map(e=>e[0]).filter(k=>GEN[k]).slice(0,8); if(!keys.length) return [];
+    return Array.from({length:10},()=>{ const k=pick(keys); const q=GEN[k](); q._id=uid(); q.kind='quant'; q._gen=k; q.difficulty=GEN_DIFF[k]||q.difficulty; return q; }); }},
 ];
+/* Which drill fixes which weak topic on the results/home screens. */
+const TOPIC_DRILL={ 'Algebra':'algebra','Arithmetic':'arithmetic','Problem Solving':'arithmetic','Geometry':'geometry','Data Analysis':'data','Data Interpretation':'data','Numeric Entry':'data','Quantitative Comparison':'qc',
+  'Text Completion':'multiblank','Sentence Equivalence':'vocab','Reading Comprehension':'reading' };
 function startTopicDrill(key){ const t=TOPICS.find(x=>x.key===key); if(!t) return;
-  const qs=t.gen(); const kind=key==='vocab'?'verbal':'quant';
+  const qs=t.gen(); if(!qs.length){ toast('Nothing to redo yet — nice'); return; } const kind=t.kind||'quant';
   exam={ mode:'topic', plan:[{name:t.name+' Drill',sub:totalQuestions(qs)+' questions · untimed-ish',time:20*60,kind,build:()=>qs}], secIdx:0, sectionResults:[], startedAt:new Date().toISOString() };
   showSectionIntro();
 }
@@ -1671,10 +1808,39 @@ function renderHome(){
     <div class="hero-stat"><div class="v">${avgQ!=null?avgQ:'—'}</div><div class="l">Avg Quant</div></div>
     <div class="hero-stat"><div class="v">${sessions}</div><div class="l">Sessions</div></div>`;
   $('essay-ai-tag').innerHTML = aiReady()&&S.settings.autoGradeEssay?' <span class="tag">AI graded</span>':'';
-  $('topic-grid').innerHTML=TOPICS.map(t=>`<div class="opt" onclick="startExam('topic',{topic:'${t.key}'})"><div class="em">${t.em}</div><h3>${t.name}</h3><p>10-question drill</p></div>`).join('');
+  $('topic-grid').innerHTML=TOPICS.filter(t=>!t.hidden).map(t=>`<div class="opt" onclick="startExam('topic',{topic:'${t.key}'})"><div class="em">${t.em}</div><h3>${t.name}</h3><p>${t.desc||'10-question drill'}</p></div>`).join('');
+  renderResume();
+  renderFocus();
   renderHistory();
   updateScoreChips();
   if(!name && !S.profile.namePrompted && !loadActiveSnapshot()){ S.profile.namePrompted=true; save(); setTimeout(askName,600); }
+}
+/* A paused practice, offered back at the top of the home screen. */
+function renderResume(){
+  const host=$('resume-host'); if(!host) return;
+  const snap=loadActiveSnapshot();
+  if(!snap || !snap.questions || !snap.questions.length || (exam && exam.inSection)){ host.innerHTML=''; return; }
+  const n=snap.questions.length; const answered=snap.questions.filter(q=>{ const a=snap.answers||{}; if(q.type==='issue') return (a[q._id]||'').trim().length>40; if(q.type==='se'||q.type==='mca') return (a[q._id]||[]).length>0; if(q.type==='tc2'||q.type==='tc3') return q.groups.every((_,gi)=>a[q._id+'_g'+gi]!=null); if(q.type==='rc') return q.subs.some((_,si)=>a[q._id+'_'+si]!=null); return a[q._id]!=null && String(a[q._id]).trim()!==''; }).length;
+  host.innerHTML=`<div class="card resume-card" style="margin-bottom:14px;padding:14px 16px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:180px;"><b style="color:var(--warn)">⏸ Paused: ${esc(modeLabel(snap.mode))}</b><div class="muted" style="font-size:12.5px;margin-top:2px;">${esc(snap.sectionName||'')} · ${answered} of ${n} answered · ${fmtTime(snap.timeLeft|0)} left</div></div>
+      <div class="row" style="margin:0;"><button class="btn btn-sm btn-primary" onclick="resumeRecovered()">▶️ Resume</button><button class="btn btn-sm btn-ghost" onclick="saveRecovered()">💾 Save</button><button class="btn btn-sm btn-ghost" onclick="discardRecovered()">Discard</button></div>
+    </div></div>`;
+}
+/* Weak spots from recent sessions, each with the drill that targets it. */
+function renderFocus(){
+  const host=$('focus-host'); if(!host) return;
+  const recent=S.history.slice(-10); const agg={};
+  recent.forEach(h=>{ for(const [t,v] of Object.entries(h.topics||{})){ agg[t]=agg[t]||{ok:0,n:0}; agg[t].ok+=v.ok; agg[t].n+=v.n; } });
+  const weak=Object.entries(agg).filter(([_,v])=>v.n>=3).map(([t,v])=>({t,acc:v.ok/v.n,n:v.n})).filter(x=>x.acc<0.75).sort((a,b)=>a.acc-b.acc).slice(0,3);
+  const missedN=(S.missed||[]).length; const missedQ=Object.keys(S.missedGen||{}).length;
+  if(!weak.length && !missedN && !missedQ){ host.innerHTML=''; return; }
+  host.innerHTML=`<div class="section-label">Focus Areas</div><div class="card">
+    ${weak.length?`<div style="font-size:13px;color:var(--muted);">From your last ${recent.length} session${recent.length>1?'s':''}, lowest accuracy first.</div>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">${weak.map(w=>{ const k=TOPIC_DRILL[w.t];
+      return `<div style="display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><b style="font-size:13.5px;">${esc(w.t)}</b><div class="muted" style="font-size:12px;">${Math.round(w.acc*100)}% correct over ${w.n} questions</div></div>${k?`<button class="btn btn-sm btn-navy" onclick="startExam('topic',{topic:'${k}'})">Drill</button>`:''}</div>`; }).join('')}</div>`:''}
+    ${missedN||missedQ?`<div class="row ${weak.length?'mt12':''}">${missedN?`<button class="btn btn-sm btn-gold" onclick="startExam('topic',{topic:'missed'})">🔁 Redo ${missedN} missed verbal</button>`:''}${missedQ?`<button class="btn btn-sm btn-gold" onclick="startExam('topic',{topic:'missedQuant'})">🔁 Redo missed quant types</button>`:''}</div>`:''}
+  </div>`;
 }
 function avgOf(k){ const vals=S.history.map(h=>h[k]).filter(v=>v!=null); return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null; }
 function renderHistory(){
@@ -1739,19 +1905,21 @@ function openSettings(){
   const s=S.settings;
   const groqModels=['llama-3.3-70b-versatile','openai/gpt-oss-120b','deepseek-r1-distill-llama-70b','qwen-2.5-32b','llama-3.1-8b-instant'];
   const orModels=['anthropic/claude-3.7-sonnet','openai/o4-mini','google/gemini-2.0-flash-001','deepseek/deepseek-r1','meta-llama/llama-3.3-70b-instruct'];
+  const gemModels=['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash'];
   openModal(`<div class="modal-head"><h3>Settings</h3><button class="x" onclick="closeModal()">✕</button></div>
     <div class="section-label" style="margin:0 0 8px;">AI (optional)</div>
     <p class="hint" style="margin-bottom:12px;">Powers essay grading, live question generation, and the AI tutor. Your key is stored <b>only on this device</b> — never in the code or repo. Choose a strong <b>reasoning</b> model for best accuracy.</p>
     <div class="field"><label>Provider</label><select id="set-provider" onchange="onProviderChange()">
       <option value="">— none —</option>
-      <option value="groq" ${s.provider==='groq'?'selected':''}>Groq</option>
+      <option value="groq" ${s.provider==='groq'?'selected':''}>Groq (free tier)</option>
+      <option value="gemini" ${s.provider==='gemini'?'selected':''}>Google Gemini (free tier)</option>
       <option value="openrouter" ${s.provider==='openrouter'?'selected':''}>OpenRouter</option>
       <option value="custom" ${s.provider==='custom'?'selected':''}>Custom (OpenAI-compatible)</option>
     </select></div>
     <div class="field" id="set-customurl-wrap" style="${s.provider==='custom'?'':'display:none'}"><label>Base URL (chat completions)</label><input id="set-customurl" placeholder="https://…/v1/chat/completions" value="${esc(s.customUrl||'')}"></div>
-    <div class="field"><label>API Key</label><input id="set-key" type="password" placeholder="Paste your key" value="${esc(s.apiKey||'')}"><div class="hint">Get a free Groq key at console.groq.com, or an OpenRouter key at openrouter.ai/keys.</div></div>
+    <div class="field"><label>API Key</label><input id="set-key" type="password" placeholder="Paste your key" value="${esc(s.apiKey||'')}"><div class="hint">Free keys: Gemini at aistudio.google.com/apikey, Groq at console.groq.com. Or an OpenRouter key at openrouter.ai/keys.</div></div>
     <div class="field"><label>Model</label><input id="set-model" list="model-list" placeholder="model id" value="${esc(s.model||'')}">
-      <datalist id="model-list">${(s.provider==='openrouter'?orModels:groqModels).map(m=>`<option value="${m}">`).join('')}</datalist>
+      <datalist id="model-list">${(s.provider==='openrouter'?orModels:s.provider==='gemini'?gemModels:groqModels).map(m=>`<option value="${m}">`).join('')}</datalist>
       <div class="hint" id="model-hint"></div></div>
     <label class="field" style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="set-autograde" ${s.autoGradeEssay?'checked':''} style="width:auto"> Auto-grade essays with AI</label>
     <div class="row"><button class="btn btn-ghost btn-sm" onclick="testAI()" id="test-btn">Test connection</button><span id="test-result" style="align-self:center;font-size:12.5px;"></span></div>
@@ -1771,8 +1939,9 @@ function openSettings(){
 function onProviderChange(){ const p=$('set-provider').value; $('set-customurl-wrap').style.display=p==='custom'?'':'none';
   const groqModels=['llama-3.3-70b-versatile','openai/gpt-oss-120b','deepseek-r1-distill-llama-70b','qwen-2.5-32b'];
   const orModels=['anthropic/claude-3.7-sonnet','openai/o4-mini','deepseek/deepseek-r1','google/gemini-2.0-flash-001'];
-  const dl=$('model-list'); if(dl) dl.innerHTML=(p==='openrouter'?orModels:groqModels).map(m=>`<option value="${m}">`).join('');
-  const hint=$('model-hint'); if(hint) hint.textContent=p==='groq'?'Suggested: llama-3.3-70b-versatile (fast) or openai/gpt-oss-120b (stronger reasoning).':p==='openrouter'?'Suggested: anthropic/claude-3.7-sonnet or openai/o4-mini for top reasoning.':'';
+  const gemModels=['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash'];
+  const dl=$('model-list'); if(dl) dl.innerHTML=(p==='openrouter'?orModels:p==='gemini'?gemModels:groqModels).map(m=>`<option value="${m}">`).join('');
+  const hint=$('model-hint'); if(hint) hint.textContent=p==='groq'?'Suggested: llama-3.3-70b-versatile (fast) or openai/gpt-oss-120b (stronger reasoning).':p==='gemini'?'Suggested: gemini-2.5-flash (fast, free) or gemini-2.5-pro (strongest reasoning).':p==='openrouter'?'Suggested: anthropic/claude-3.7-sonnet or openai/o4-mini for top reasoning.':'';
 }
 function saveSettings(){
   S.settings.provider=$('set-provider').value;
@@ -1833,7 +2002,8 @@ function showAbout(){ openModal(`<div class="modal-head"><h3>About GRE Ready</h3
   <div style="font-size:13.5px;line-height:1.7;">
   <p><b>Dynamic practice.</b> Quant questions are generated fresh every time by code, so you never repeat one and every answer is exact. Verbal questions are drawn from an adversarially-verified bank, with answer choices reshuffled each time.</p>
   <p class="mt8"><b>Real GRE format.</b> Text Completion, Sentence Equivalence, Reading Comprehension, Quantitative Comparison, multiple-answer, numeric entry, data interpretation, and one Analyze-an-Issue essay.</p>
-  <p class="mt8"><b>AI, zero hallucinations.</b> The AI only ever <i>explains a known-correct answer</i>; any AI-generated question is independently re-solved and discarded unless both passes agree.</p>
+  <p class="mt8"><b>AI, zero hallucinations.</b> Multiple-choice and numeric answers are graded by code against a fixed key — never by an AI. The AI only ever <i>explains a known-correct answer</i>; an AI-written question is solved again by a pass that never saw the key and then attacked by a critic, and is discarded unless all three agree. Essays are scored by two independent AI readers (a third settles disagreements), like ETS.</p>
+  <p class="mt8"><b>Honest timing.</b> The clock is a deadline, not a countdown — it stays exact even when you switch apps — and every question's time is recorded so your results show your pacing. Stop any time: save the score, or pause and resume later.</p>
   <p class="mt8"><b>Your data.</b> Everything is saved locally on your device and shown across every screen. No account, no password.</p>
   <p class="muted mt12" style="font-size:12px;">Practice simulation for study purposes. Not affiliated with ETS.</p>
   </div><button class="btn btn-primary btn-block mt16" onclick="closeModal()">Close</button>`); }
@@ -1857,7 +2027,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); clo
 // Warn + persist if the user closes/refreshes mid-practice (so nothing is silently lost).
 window.addEventListener('beforeunload',e=>{ if(exam && exam.sec && exam.inSection){ saveActiveSnapshot(); e.preventDefault(); e.returnValue=''; } });
 window.addEventListener('pagehide',()=>{ if(exam && exam.sec && exam.inSection) saveActiveSnapshot(); });
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && exam && exam.sec && exam.inSection) saveActiveSnapshot(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden' && exam && exam.sec && exam.inSection) saveActiveSnapshot(); if(document.visibilityState==='visible' && tick) timerStep(); });
 renderHome();
 updateScoreChips();
 checkUnfinished();   // offer to save any attempt left unfinished by a previous close/refresh
