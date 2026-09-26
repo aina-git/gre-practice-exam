@@ -1,0 +1,102 @@
+{
+  "name": "gre-ready-desktop",
+  "productName": "GRE Ready",
+  "version": "3.0.0",
+  "description": "GRE Ready \u2014 adaptive GRE practice with an AI Teacher. Desktop edition.",
+  "main": "main.js",
+  "private": true,
+  "author": "aina-git",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aina-git/gre-practice-exam.git"
+  },
+  "scripts": {
+    "prepare-app": "node scripts/prepare-app.js",
+    "start": "npm run prepare-app && electron .",
+    "test": "npm run prepare-app && node scripts/test-desktop.js",
+    "build:mac": "npm run prepare-app && electron-builder --mac --arm64 --x64 --publish never",
+    "build:win": "npm run prepare-app && electron-builder --win --x64 --publish never",
+    "build:linux": "npm run prepare-app && electron-builder --linux AppImage --x64 --publish never",
+    "build:dir": "npm run prepare-app && electron-builder --dir --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "playwright-core": "^1.49.1"
+  },
+  "build": {
+    "appId": "com.greready.desktop",
+    "productName": "GRE Ready",
+    "artifactName": "GRE-Ready-${version}-${os}-${arch}.${ext}",
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        {
+          "target": "dmg"
+        }
+      ],
+      "icon": "build/icon.png",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis"
+        },
+        {
+          "target": "portable"
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "GRE Ready",
+      "artifactName": "GRE-Ready-${version}-windows-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "GRE-Ready-${version}-windows-portable.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education",
+      "icon": "build/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "aina-git",
+      "repo": "gre-practice-exam",
+      "releaseType": "release"
+    }
+  }
+}
