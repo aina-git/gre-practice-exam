@@ -307,6 +307,27 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
 .pace:empty{display:none;}
 .pace.on{color:#9be7a5;} .pace.ahead{color:#9bd0ff;} .pace.behind{color:#ffd166;}
 .resume-card{background:var(--warn-soft);border:1px solid var(--warn);box-shadow:none;}
+/* AI Teacher sheet */
+.teach-back{position:fixed;inset:0;background:rgba(8,15,30,.55);z-index:90;display:none;}
+.teach-back.open{display:block;}
+.teach{position:fixed;left:0;right:0;bottom:0;z-index:91;background:var(--card);color:var(--ink);border-radius:18px 18px 0 0;max-height:88vh;max-height:88dvh;display:none;flex-direction:column;box-shadow:0 -8px 30px rgba(0,0,0,.28);}
+.teach.open{display:flex;}
+@media(min-width:768px){.teach{left:50%;right:auto;transform:translateX(-50%);width:min(680px,96vw);bottom:12px;border-radius:18px;max-height:86vh;}}
+.teach-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);}
+.teach-head .t{flex:1;min-width:0;font-weight:800;font-size:15px;}
+.teach-head .s{font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.teach-head .icon-btn{color:var(--ink);}
+.teach-msgs{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;min-height:160px;}
+.tmsg{max-width:92%;padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.6;}
+.tmsg.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px;}
+.tmsg.ai{align-self:flex-start;background:var(--blue-soft);border:1px solid rgba(37,99,235,.25);border-bottom-left-radius:4px;}
+.tmsg.ai p{margin:0 0 6px;} .tmsg.ai p:last-child{margin-bottom:0;} .tmsg.ai ul{margin:4px 0 6px 18px;} .tmsg.ai li{margin:2px 0;}
+.teach-chips{display:flex;gap:6px;overflow-x:auto;padding:8px 14px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.teach-chips::-webkit-scrollbar{display:none;}
+.teach-chips .chip{white-space:nowrap;flex:0 0 auto;font-size:12px;padding:6px 11px;border-radius:20px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-weight:600;}
+.teach-chips .chip.word{border-color:rgba(37,99,235,.4);color:var(--blue);font-weight:700;}
+.teach-in{display:flex;gap:8px;padding:8px 14px 14px;border-top:1px solid var(--line);}
+.teach-in input{flex:1;min-width:0;padding:11px 13px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;background:var(--bg);color:var(--ink);}
 </style>
 </head>
 <body>
@@ -422,6 +443,14 @@ kbd{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:
 
 <!-- ============ MODAL ============ -->
 <div class="modal-back" id="modal-back"><div class="modal" id="modal"></div></div>
+<!-- ============ AI TEACHER ============ -->
+<div class="teach-back" id="teach-back" onclick="closeTeacher()"></div>
+<div class="teach" id="teach" role="dialog" aria-label="AI Teacher">
+  <div class="teach-head"><div style="font-size:22px;">🎓</div><div class="t"><div id="teach-title">AI Teacher</div><div class="s" id="teach-sub"></div></div><button class="icon-btn" onclick="closeTeacher()" title="Close">✕</button></div>
+  <div class="teach-msgs" id="teach-msgs"></div>
+  <div class="teach-chips" id="teach-chips"></div>
+  <div class="teach-in"><input id="teach-input" placeholder="Ask anything — a word, a step, why…" autocomplete="off" onkeydown="if(event.key==='Enter'){sendTeacher();}"><button class="btn btn-primary btn-sm" onclick="sendTeacher()">Ask</button></div>
+</div>
 
 <!-- ============ TOAST ============ -->
 <div class="toast" id="toast"></div>
@@ -1724,6 +1753,7 @@ function renderResults(entry, R, essayRes){
       </div></div>`;
   html+=`<div class="row mt16">
       <button class="btn btn-primary" onclick="showReview('all')">📖 Review answers</button>
+      <button class="btn btn-navy" onclick="openTeacher({session:true})">🎓 Ask the Teacher</button>
       <button class="btn btn-gold" onclick="startExam('${entry.mode}')">🔄 New attempt</button>
       <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button></div>
     <div id="results-extra"></div>
@@ -1787,7 +1817,7 @@ function reviewCardHTML(d,idx){
     <div class="choices">${optHTML}</div>
     <div class="mini-exp"><div class="h">💡 Explanation</div>${esc(exp||'')}</div>
     <div id="aiexp-${d.q._id}-${d.sub||0}"></div>
-    <button class="btn btn-sm btn-outline mt12" onclick='explainAI(${JSON.stringify(reviewRef(d)).replace(/'/g,"&#39;")})'>🤖 Explain with AI</button>
+    <button class="btn btn-sm btn-outline mt12" onclick='openTeacher(${JSON.stringify(reviewRef(d)).replace(/'/g,"&#39;")})'>🎓 Ask the Teacher</button>
     </div></div>`;
 }
 function reviewRef(d){ return { id:d.q._id, sub:(d.sub||0) }; }
@@ -1805,7 +1835,7 @@ function multiBlankReviewHTML(d,head,headTxt,icon){
     <div class="rev-body"><div class="q-text" style="font-size:15px;">${blanksToHTML(q.stem)}</div>${groups}
     <div class="mini-exp"><div class="h">💡 Explanation</div>${esc(q.explanation||'')}</div>
     <div id="aiexp-${q._id}-0"></div>
-    <button class="btn btn-sm btn-outline mt12" onclick='explainAI(${JSON.stringify({id:q._id,sub:0}).replace(/'/g,"&#39;")})'>🤖 Explain with AI</button></div></div>`;
+    <button class="btn btn-sm btn-outline mt12" onclick='openTeacher(${JSON.stringify({id:q._id,sub:0}).replace(/'/g,"&#39;")})'>🎓 Ask the Teacher</button></div></div>`;
 }
 function neReviewHTML(d,head,headTxt,icon){
   const q=d.q;
@@ -1814,7 +1844,7 @@ function neReviewHTML(d,head,headTxt,icon){
     <div class="row" style="gap:8px;"><div class="score-box" style="flex:1;box-shadow:none;border:1.5px solid var(--line);"><div class="r">Your answer</div><div class="n" style="font-size:22px;color:${d.ok?'var(--green)':'var(--red)'}">${d.userAns==null||d.userAns===''?'—':esc(String(d.userAns))}</div></div>
     <div class="score-box" style="flex:1;box-shadow:none;border:1.5px solid var(--green);"><div class="r">Correct</div><div class="n" style="font-size:22px;color:var(--green)">${q.answer}</div></div></div>
     <div class="mini-exp"><div class="h">💡 Explanation</div>${esc(q.explanation||'')}</div>
-    <button class="btn btn-sm btn-outline mt12" onclick='explainAI(${JSON.stringify({id:q._id,sub:0}).replace(/'/g,"&#39;")})'>🤖 Explain with AI</button></div></div>`;
+    <button class="btn btn-sm btn-outline mt12" onclick='openTeacher(${JSON.stringify({id:q._id,sub:0}).replace(/'/g,"&#39;")})'>🎓 Ask the Teacher</button></div></div>`;
 }
 function essayReviewHTML(r){
   const e=r.essay;
@@ -2001,6 +2031,97 @@ async function startAIVerbal(opts){
   }
   exam={ mode:'aiVerbal', plan:[{name:'AI Fresh Verbal',sub:totalQuestions(qs)+' verified AI questions · '+Math.max(8,totalQuestions(qs)*90/60|0)+' min',time:Math.max(8*60,totalQuestions(qs)*90),kind:'verbal',build:()=>qs}], secIdx:0, sectionResults:[], startedAt:new Date().toISOString() };
   beginSection();
+}
+
+/* ---- AI Teacher: a conversation grounded on the verified answer ----
+   After results, the student can ask for a step-by-step lesson, why their
+   answer was wrong, what any word means, a similar example… The verified key
+   is handed to the model as authoritative, so the Teacher explains but can
+   never "correct" the answer key. Threads are kept with the session, so
+   re-opening the review keeps the conversation. */
+let teach={ key:null, ctx:null, msgs:[], busy:false };
+function teacherThreads(){ if(!S.lastSession) S.lastSession={results:[],entry:{}}; S.lastSession.teacher=S.lastSession.teacher||{}; return S.lastSession.teacher; }
+function teacherContext(ref){
+  const R=(S.lastSession&&S.lastSession.results)||[];
+  if(!ref||ref.session){
+    const summary=R.map(r=>`${r.name}: ${r.correct}/${r.total}`).join('; ')||'no scored sections';
+    const details=R.flatMap(r=>r.detail||[]);
+    const byT={}; details.filter(d=>!d.ok).forEach(d=>{ const t=d.q.topic||typeLabel(d.q); byT[t]=(byT[t]||0)+1; });
+    const list=Object.entries(byT).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${t} (${n} missed)`).join(', ')||'nothing missed';
+    const er=R.find(r=>r.essay); const essay=er&&er.essay&&er.essay.score!=null?`\nEssay: ${er.essay.score}/6${er.essay.ai&&er.essay.ai.summary?' — '+er.essay.ai.summary:''}`:'';
+    return { key:'session', title:'This session', sub:summary.slice(0,90), words:[],
+      text:`Section results: ${summary}.\nMissed by topic: ${list}.${essay}`,
+      chips:['What should I study first?','Explain my weakest area with an example','Make me a 1-week study plan','How do I manage my time better?'] };
+  }
+  const details=R.flatMap(r=>r.detail||[]);
+  const d=details.find(x=>x.q._id===ref.id && (x.sub||0)===(ref.sub||0)) || details.find(x=>x.q._id===ref.id);
+  if(!d) return null;
+  const q=d.q; const isRC=q.type==='rc'; const multi=q.type==='tc2'||q.type==='tc3'; const RN=['i','ii','iii'];
+  const stem=isRC?q.subs[d.sub||0].stem:(q.stem||''); const passage=isRC?q.passage:'';
+  let choicesTxt='', correctTxt='', userTxt='', words=[];
+  if(isRC||q.choices){
+    const ch=isRC?q.subs[d.sub||0].choices:q.choices; const corr=isRC?[q.subs[d.sub||0].answer]:(Array.isArray(q.answer)?q.answer:[q.answer]);
+    choicesTxt=ch.map((c,i)=>LET[i]+') '+c).join('\n'); correctTxt=corr.map(i=>LET[i]+') '+ch[i]).join('; ');
+    const ua=d.userAns==null?[]:(Array.isArray(d.userAns)?d.userAns:[d.userAns]); userTxt=ua.length?ua.map(i=>LET[i]+') '+ch[i]).join('; '):'(not answered)';
+    if(isVerbalQ(q)&&!isRC) words=ch.slice();
+  } else if(multi){
+    choicesTxt=q.groups.map((g,gi)=>`Blank (${RN[gi]}): `+g.map((c,i)=>LET[i]+') '+c).join(', ')).join('\n');
+    correctTxt=q.answer.map((a,gi)=>`(${RN[gi]}) ${q.groups[gi][a]}`).join('; ');
+    const ua=d.userAns||[]; userTxt=ua.some(v=>v!=null)?ua.map((a,gi)=>`(${RN[gi]}) ${a==null?'—':q.groups[gi][a]}`).join('; '):'(not answered)';
+    words=q.groups.flat();
+  } else { correctTxt=String(q.answer)+(q.unit?' '+q.unit:''); userTxt=(d.userAns==null||d.userAns==='')?'(not answered)':String(d.userAns); }
+  const expl=isRC?q.subs[d.sub||0].explanation:q.explanation; const isVerbal=isVerbalQ(q);
+  const text=`${passage?'Passage: '+passage+'\n\n':''}Question type: ${typeLabel(q)}${q.topic?' — '+q.topic:''}\nQuestion: ${stem}\n${choicesTxt?'Choices:\n'+choicesTxt+'\n':''}VERIFIED CORRECT ANSWER (authoritative): ${correctTxt}\nStudent's answer: ${userTxt} — ${d.skipped?'skipped':d.ok?'CORRECT':'INCORRECT'}\n${expl?'Reference explanation: '+expl:''}`;
+  const chips=['Teach me this step by step']; if(!d.ok&&!d.skipped) chips.push('Why is my answer wrong?'); if(isVerbal) chips.push('Define every word here'); chips.push('Show me a similar example','How do I spot this next time?'); if(!isVerbal) chips.push('Is there a faster method?');
+  return { key:q._id+'_'+(d.sub||0), title:typeLabel(q), sub:(stem||'').replace(/__________/g,'____').slice(0,80), words:[...new Set(words)], text, chips };
+}
+function openTeacher(ref){
+  if(!aiReady()){
+    openModal(`<div class="modal-head"><h3>🎓 Meet your AI Teacher</h3><button class="x" onclick="closeModal()">✕</button></div>
+      <p class="muted" style="font-size:13.5px;">The Teacher explains any question step by step, tells you what every word means, and answers your follow-up questions. It runs on a free AI key that stays on your device — Google Gemini and Groq both give one at no cost (about a minute to set up).</p>
+      <div class="row mt16"><button class="btn btn-ghost" onclick="closeModal()">Not now</button><button class="btn btn-primary" onclick="closeModal();openSettings()">Add a free key →</button></div>`);
+    return;
+  }
+  const ctx=teacherContext(ref); if(!ctx){ toast('Question not found'); return; }
+  teach={ key:ctx.key, ctx, msgs:(teacherThreads()[ctx.key]||[]).slice(), busy:false };
+  $('teach-title').textContent='AI Teacher · '+ctx.title; $('teach-sub').textContent=ctx.sub||'';
+  const attr=v=>JSON.stringify(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  $('teach-chips').innerHTML=[...ctx.chips.map(c=>`<button class="chip" onclick="askTeacher(${attr(c)})">${esc(c)}</button>`),
+    ...ctx.words.map(w=>`<button class="chip word" title="What does this word mean?" onclick="teacherWord(${attr(w)})">📖 ${esc(w)}</button>`)].join('');
+  $('teach-back').classList.add('open'); $('teach').classList.add('open');
+  renderTeacher();
+  if(!teach.msgs.length) askTeacher(ctx.key==='session'?'Give me a short, encouraging lesson on what my results show and the two things to fix first.':'Teach me this question step by step in simple English, then explain why each other choice is wrong.');
+}
+function closeTeacher(){ $('teach-back').classList.remove('open'); $('teach').classList.remove('open'); }
+function renderTeacher(){
+  const m=$('teach-msgs'); if(!m) return;
+  m.innerHTML=teach.msgs.map(x=>`<div class="tmsg ${x.role==='user'?'user':'ai'}">${x.role==='user'?esc(x.content):mdLite(x.content)}</div>`).join('')
+    +(teach.busy?`<div class="tmsg ai"><span class="spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;border-width:2px;"></span> thinking…</div>`:'');
+  m.scrollTop=m.scrollHeight;
+}
+function sendTeacher(){ const i=$('teach-input'); const t=(i.value||'').trim(); if(!t) return; i.value=''; askTeacher(t); }
+function teacherWord(w){ askTeacher(`What does "${w}" mean? Give a simple definition, the part of speech, a memory hook, two example sentences, two synonyms and one antonym.`); }
+async function askTeacher(text){
+  if(!teach.ctx||teach.busy) return;
+  teach.msgs.push({role:'user',content:text}); teach.busy=true; renderTeacher();
+  const sys=`You are a warm, expert GRE teacher helping one student learn from a practice result. Teach in plain, simple English for a learner who may not be a native speaker: short paragraphs or bullet points, define hard words as you go (meaning + a short example), and show every reasoning step (for math, every calculation step). You are given the VERIFIED CORRECT ANSWER; it is authoritative — explain why it is right and never claim a different choice is correct or that the key is wrong. Stay specific to this question; do not invent facts about the passage. Keep replies under about 220 words unless the student asks for more. Use **bold** for key terms and "-" for bullet points. When asked what a word means, give: meaning, part of speech, a memory hook, two example sentences, synonyms and an antonym.`;
+  const history=teach.msgs.slice(-10).map(x=>({role:x.role,content:x.content}));
+  try{
+    const out=await callAI([{role:'system',content:sys},{role:'user',content:'CONTEXT (for you, the teacher):\n'+teach.ctx.text},{role:'assistant',content:'Understood. I will teach from this and treat the verified answer as correct.'},...history],{temperature:0.4,max_tokens:700});
+    teach.msgs.push({role:'assistant',content:out||'(no reply)'});
+  }catch(e){ teach.msgs.push({role:'assistant',content:"I couldn't reach the AI just now ("+String(e.message||e).slice(0,80)+"). Check Settings → AI and try again."}); }
+  teach.busy=false; teacherThreads()[teach.key]=teach.msgs.slice(-40); save(); renderTeacher();
+}
+/* Tiny markdown for Teacher replies: **bold**, bullet lines, paragraphs. Escaped first. */
+function mdLite(str){
+  const lines=esc(str||'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').split('\n');
+  let html='', inList=false;
+  for(const ln of lines){ const t=ln.trim();
+    if(/^[-*•]\s+/.test(t)){ if(!inList){ html+='<ul>'; inList=true; } html+='<li>'+t.replace(/^[-*•]\s+/,'')+'</li>'; continue; }
+    if(inList){ html+='</ul>'; inList=false; }
+    if(t==='') continue; html+='<p>'+t+'</p>'; }
+  if(inList) html+='</ul>';
+  return html;
 }
 
 /* ---- Coach insight on results (weak areas) ---- */
@@ -2273,6 +2394,7 @@ function showAbout(){ openModal(`<div class="modal-head"><h3>About GRE Ready</h3
   <p><b>Dynamic practice.</b> Quant questions are generated fresh every time by code, so you never repeat one and every answer is exact. Verbal questions are drawn from an adversarially-verified bank, with answer choices reshuffled each time.</p>
   <p class="mt8"><b>Real GRE format.</b> Text Completion, Sentence Equivalence, Reading Comprehension, Quantitative Comparison, multiple-answer, numeric entry, data interpretation, and one Analyze-an-Issue essay.</p>
   <p class="mt8"><b>AI, zero hallucinations.</b> Multiple-choice and numeric answers are graded by code against a fixed key — never by an AI. The AI only ever <i>explains a known-correct answer</i>; an AI-written question is solved again by a pass that never saw the key and then attacked by a critic, and is discarded unless all three agree. Essays are scored by two independent AI readers (a third settles disagreements), like ETS.</p>
+  <p class="mt8"><b>Your AI Teacher.</b> After any result, ask the Teacher about a question: a step-by-step lesson, why your answer was wrong, what any word means (tap a word), a similar example, or anything else. It is always handed the verified answer, so it explains rather than guesses.</p>
   <p class="mt8"><b>Honest timing.</b> The clock is a deadline, not a countdown — it stays exact even when you switch apps — and every question's time is recorded so your results show your pacing. Stop any time: save the score, or pause and resume later.</p>
   <p class="mt8"><b>Your data.</b> Everything is saved locally on your device and shown across every screen. No account, no password.</p>
   <p class="muted mt12" style="font-size:12px;">Practice simulation for study purposes. Not affiliated with ETS.</p>
@@ -2293,7 +2415,7 @@ function showScoringInfo(){ openModal(`<div class="modal-head"><h3>How scoring w
 /* ---------------------------------------------------------------------------
    11. Boot
    --------------------------------------------------------------------------- */
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeDrawer(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeDrawer(); closeTeacher(); } });
 // Warn + persist if the user closes/refreshes mid-practice (so nothing is silently lost).
 window.addEventListener('beforeunload',e=>{ if(exam && exam.sec && exam.inSection){ saveActiveSnapshot(); e.preventDefault(); e.returnValue=''; } });
 window.addEventListener('pagehide',()=>{ if(exam && exam.sec && exam.inSection) saveActiveSnapshot(); });
