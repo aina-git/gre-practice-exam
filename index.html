@@ -795,7 +795,7 @@ const GEN = {
     const correct=cands.map((v,i)=>({v,i})).filter(o=>o.v>lo && o.v<hi).map(o=>o.i);
     return {type:'mca',topic:'Algebra',difficulty:'medium',stem:`Select <b>all</b> values of x that satisfy ${lo} < x < ${hi}.`,choices:cands.map(String),answer:correct,
       explanation:`The values strictly between ${lo} and ${hi} are ${cands.filter(v=>v>lo&&v<hi).join(', ')}.`}; },
-  mcaFactors(){ const n=pick([24,36,48,60,72]); const cands=shuffle([2,4,5,6,7,8,9,10,12,15,16,18]).slice(0,6).sort((a,b)=>a-b);
+  mcaFactors(){ const n=pick([24,36,48,60,72]); let cands; do{ cands=shuffle([2,4,5,6,7,8,9,10,12,15,16,18]).slice(0,6).sort((a,b)=>a-b); }while(!cands.some(v=>n%v===0)); // never a choice set with no factor
     const correct=cands.map((v,i)=>({v,i})).filter(o=>n%o.v===0).map(o=>o.i);
     return {type:'mca',topic:ARI,difficulty:'medium',stem:`Select <b>all</b> of the following that are factors of ${n}.`,choices:cands.map(String),answer:correct,
       explanation:`The factors of ${n} among the choices are ${cands.filter(v=>n%v===0).join(', ')}.`}; },
@@ -812,6 +812,275 @@ const GEN = {
 function factorial(n){ let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
 function primesUpTo(n){ const s=[]; for(let i=2;i<=n;i++){ let p=true; for(let j=2;j*j<=i;j++) if(i%j===0){p=false;break;} if(p)s.push(i);} return s; }
 
+/* __GEN_NEW_SPLICE__ */
+// ---- Additional quant generators (spliced after GEN). Same contract as GEN:
+//      { type, topic, difficulty, stem, choices?, answer, explanation }.
+//      Stems are raw HTML (use &lt; / &gt;), explanations are plain text.
+//      Extra fields beginning with "_" (_A, _B, _truth) are test hooks the app ignores.
+const GEN_NEW = {
+  // (1) remainders / divisibility -------------------------------------------------
+  remainderLinear(){ const d=pick([5,6,7,8,9,11]); const r=ri(1,d-1); const a=ri(2,6); const b=ri(1,12); const raw=a*r+b; const ans=raw%d;
+    const {choices,answer}=mc(ans,[raw, r, (a*r)%d, (ans+1)%d, (a+b)%d, (r+b)%d]);
+    return {type:'mc',topic:ARI,difficulty:'medium',stem:`When the positive integer n is divided by ${d}, the remainder is ${r}. What is the remainder when ${a}n + ${b} is divided by ${d}?`,choices,answer,
+      explanation:`Write n = ${d}k + ${r}. Then ${a}n + ${b} = ${a*d}k + ${a}(${r}) + ${b} = ${a*d}k + ${raw}. The ${a*d}k part is divisible by ${d}, and ${raw} = ${Math.floor(raw/d)}(${d}) + ${ans}, so the remainder is ${ans}.`}; },
+  neRemainderPower(){ const base=pick([2,3,4,6,7,8,9]); let m=pick([3,5,7,9,11,13]); while(gcd(base,m)!==1) m=pick([3,5,7,9,11,13]); const n=ri(10,40);
+    // cycle of remainders of base^k mod m
+    const cyc=[]; let v=1; const seen=new Map(); let k=0; while(!seen.has(v)){ seen.set(v,k); v=(v*base)%m; k++; cyc.push(v); } // cyc[i] = base^(i+1) mod m
+    const L=cyc.length; const ans=cyc[(n-1)%L]; const show=cyc.slice(0,L).join(', ');
+    return {type:'ne',topic:NE,difficulty:'hard',stem:`What is the remainder when ${base}<sup>${n}</sup> is divided by ${m}?`,answer:ans,
+      explanation:`Remainders of ${base}¹, ${base}², ${base}³, … divided by ${m} cycle every ${L} powers: ${show}. Since ${n} = ${L}(${Math.floor((n-1)/L)}) + ${((n-1)%L)+1}, ${base}^${n} has the same remainder as the ${ordinal(((n-1)%L)+1)} in the cycle, which is ${ans}.`}; },
+  // (2) exponent rules & roots -------------------------------------------------------
+  exponentSimplify(){ let a,b,c,e; do{ a=ri(2,9); b=ri(1,5); c=ri(1,4); e=a+2*b-3*c; }while(e<1||e>12);
+    const f=v=>`2<sup>${v}</sup>`;
+    const {choices,answer}=mc(e,[a+b-c, a+2*b+3*c, a+2*b-c, a+b+c, e+1, e-1],f);
+    return {type:'mc',topic:ALG,difficulty:'medium',stem:`(2<sup>${a}</sup> · 4<sup>${b}</sup>) ÷ 8<sup>${c}</sup> = 2<sup>x</sup>. What is 2<sup>x</sup>?`,choices,answer,
+      explanation:`Rewrite with base 2: 4^${b} = 2^${2*b} and 8^${c} = 2^${3*c}. Then 2^${a} · 2^${2*b} ÷ 2^${3*c} = 2^(${a} + ${2*b} − ${3*c}) = 2^${e}.`}; },
+  qcExponent(){ const x=pick([2,3,5,7]); const m=ri(2,6), n=ri(2,5); const form=ri(0,2); let eA, textA, textB, eB, expl;
+    if(form===0){ eA=m+n; eB=pick([m+n-1,m+n,m+n+1,m*n]); textA=`${x}<sup>${m}</sup> × ${x}<sup>${n}</sup>`; textB=`${x}<sup>${eB}</sup>`; expl=`${x}^${m} × ${x}^${n} = ${x}^(${m}+${n}) = ${x}^${eA}`; }
+    else if(form===1){ eA=m*n; eB=pick([m+n,m*n,m*n+1,m*n-1]); textA=`(${x}<sup>${m}</sup>)<sup>${n}</sup>`; textB=`${x}<sup>${eB}</sup>`; expl=`(${x}^${m})^${n} = ${x}^(${m}·${n}) = ${x}^${eA}`; }
+    else { const p=m+n; eA=p-n; eB=pick([p-n,p-n+1,p-n-1,m+1]); textA=`${x}<sup>${p}</sup> ÷ ${x}<sup>${n}</sup>`; textB=`${x}<sup>${eB}</sup>`; expl=`${x}^${p} ÷ ${x}^${n} = ${x}^(${p}−${n}) = ${x}^${eA}`; }
+    const A=Math.pow(x,eA), B=Math.pow(x,eB);
+    return {type:'qc',topic:QC,difficulty:'medium',stem:`<b>Quantity A:</b> ${textA}  <br><b>Quantity B:</b> ${textB}`,choices:QC_CHOICES,answer:qcRel(A,B),_A:A,_B:B,
+      explanation:`${expl}. Since the base ${x} is greater than 1, compare exponents: ${eA} vs ${eB}. ${eA>eB?'Quantity A is greater.':eA<eB?'Quantity B is greater.':'The two quantities are equal.'}`}; },
+  // (3) inequalities / absolute value ---------------------------------------------
+  mcaAbsInequality(){ const a=pick([1,2,2,3]); const b=ri(1,9); const c=ri(2,12); const strict=Math.random()<.5; const greater=Math.random()<.35;
+    const lo=(b-c)/a, hi=(b+c)/a;                                     // |ax − b| < c  ⇔  lo < x < hi
+    const ok=x=>{ const v=Math.abs(a*x-b); return greater ? (strict? v>c : v>=c) : (strict? v<c : v<=c); };
+    const fl=Math.floor(lo), ch=Math.ceil(hi);
+    let cands; let tries=0;
+    do{ cands=Array.from(new Set(shuffle([fl-1,fl,fl+1,Math.round((lo+hi)/2),ch-1,ch,ch+1,fl-3,ch+3]).slice(0,6))).sort((p,q)=>p-q); tries++; }
+    while((cands.filter(ok).length===0 || cands.filter(ok).length===cands.length || cands.length<5) && tries<40);
+    const truth=cands.map(ok); const answer=truth.map((t,i)=>t?i:-1).filter(i=>i>=0);
+    const sym=greater?(strict?'&gt;':'≥'):(strict?'&lt;':'≤'); const symT=greater?(strict?'>':'≥'):(strict?'<':'≤');
+    const lhs=`|${a===1?'':a}x − ${b}|`;
+    const region = greater ? `x ${strict?'<':'≤'} ${lo} or x ${strict?'>':'≥'} ${hi}` : `${lo} ${strict?'<':'≤'} x ${strict?'<':'≤'} ${hi}`;
+    return {type:'mca',topic:ALG,difficulty:'medium',stem:`Select <b>all</b> values of x that satisfy ${lhs} ${sym} ${c}.`,choices:cands.map(String),answer,_truth:truth,
+      explanation:`${lhs} ${symT} ${c} means ${greater?`${a===1?'':a}x − ${b} ${symT} ${c} or ${a===1?'':a}x − ${b} ${strict?'<':'≤'} −${c}`:`−${c} ${symT} ${a===1?'':a}x − ${b} ${symT} ${c}`}, i.e. ${region}. Checking each choice: ${cands.map((v,i)=>`|${a*v} − ${b}| = ${Math.abs(a*v-b)} ${truth[i]?'✓':'✗'}`).join('; ')}. Correct: ${cands.filter((v,i)=>truth[i]).join(', ')}.`}; },
+  // (4) counting with restrictions ----------------------------------------------------
+  arrangeRestriction(){ const n=ri(4,7); const v=ri(0,2); const all=factorial(n); const together=2*factorial(n-1); let ans, stem, expl;
+    if(v===0){ ans=together; stem=`In how many ways can ${n} people be seated in a row of ${n} chairs if two particular people, Ana and Ben, must sit next to each other?`; expl=`Treat Ana and Ben as one block: ${n-1} units can be arranged in ${n-1}! = ${factorial(n-1)} ways, and the two can swap within the block (× 2). Total = 2 × ${factorial(n-1)} = ${ans}.`; }
+    else if(v===1){ ans=all-together; stem=`In how many ways can ${n} people be seated in a row of ${n} chairs if two particular people, Ana and Ben, must NOT sit next to each other?`; expl=`All arrangements: ${n}! = ${all}. Arrangements with Ana and Ben together: 2 × ${n-1}! = ${together}. Not together = ${all} − ${together} = ${ans}.`; }
+    else { ans=2*factorial(n-1); stem=`In how many ways can ${n} different books be arranged on a shelf if a particular book, the atlas, must be at one of the two ends?`; expl=`Place the atlas at either end (2 ways); the remaining ${n-1} books fill the other spots in ${n-1}! = ${factorial(n-1)} ways. Total = 2 × ${factorial(n-1)} = ${ans}.`; }
+    const {choices,answer}=mc(ans,[all, factorial(n-1), together, all-together, all/2, factorial(n-2)*2]);
+    return {type:'mc',topic:DA,difficulty:'hard',stem,choices,answer,explanation:expl}; },
+  committeeRequired(){ const n=ri(6,10), k=ri(3,4); const C=(N,K)=>factorial(N)/(factorial(K)*factorial(N-K)); const must=Math.random()<.5;
+    const ans= must? C(n-1,k-1) : C(n-1,k);
+    const {choices,answer}=mc(ans,[C(n,k), must?C(n-1,k):C(n-1,k-1), C(n,k-1), ans*k, C(n,k)-ans]);
+    return {type:'mc',topic:DA,difficulty:'hard',stem:`A committee of ${k} people is to be selected from a group of ${n} people. If Maria ${must?'must be':'cannot be'} on the committee, how many different committees are possible?`,choices,answer,
+      explanation: must ? `Maria takes one seat, so choose the other ${k-1} members from the remaining ${n-1} people: C(${n-1}, ${k-1}) = ${n-1}! / (${k-1}!·${n-k}!) = ${ans}.`
+                        : `Remove Maria and choose all ${k} members from the remaining ${n-1} people: C(${n-1}, ${k}) = ${n-1}! / (${k}!·${n-1-k}!) = ${ans}.`}; },
+  // (5) probability: dependent / independent ------------------------------------------
+  probNoReplace(){ const r=ri(3,7), b=ri(2,7); const N=r+b; const v=ri(0,1); const fr=(p,q)=>{ const g=gcd(p,q); return `${p/g}/${q/g}`; };
+    let num, den=N*(N-1), stem, expl;
+    if(v===0){ num=r*(r-1); stem=`A jar contains ${r} red and ${b} blue marbles. Two marbles are drawn at random without replacement. What is the probability that both are red?`;
+      expl=`P(first red) = ${r}/${N}; then ${r-1} red remain among ${N-1}: P(second red) = ${r-1}/${N-1}. Multiply: (${r}/${N}) × (${r-1}/${N-1}) = ${num}/${den} = ${fr(num,den)}.`; }
+    else { num=r*b; stem=`A jar contains ${r} red and ${b} blue marbles. Two marbles are drawn at random without replacement. What is the probability that the first is red and the second is blue?`;
+      expl=`P(first red) = ${r}/${N}; then ${b} blue remain among ${N-1}: P(second blue) = ${b}/${N-1}. Multiply: (${r}/${N}) × (${b}/${N-1}) = ${num}/${den} = ${fr(num,den)}.`; }
+    const correct=fr(num,den);
+    const {choices,answer}=mc(correct,[ fr(v===0?r*r:r*b,N*N), fr(v===0?r*(r-1):r*b, N*N), fr(2*num,den), fr(v===0?r:b, N), fr(v===0?r*(r-1):r*(b-1), N*(N-1)), fr(r-1,N-1) ]);
+    return {type:'mc',topic:DA,difficulty:'medium',stem,choices,answer,explanation:expl}; },
+  neProbability(){ const v=ri(0,2); let ans, stem, expl;
+    if(v===0){ const n=pick([3,4]); const k=ri(1,n-1); const ways=factorial(n)/(factorial(k)*factorial(n-k)); const tot=Math.pow(2,n); const g=gcd(ways,tot); ans=ways/tot;
+      stem=`A fair coin is tossed ${n} times. What is the probability of getting exactly ${k} heads?`; expl=`There are 2^${n} = ${tot} equally likely outcomes, and C(${n}, ${k}) = ${ways} of them have exactly ${k} heads. P = ${ways}/${tot} = ${ways/g}/${tot/g}.`; }
+    else if(v===1){ const s=ri(4,10); let cnt=0; const pairs=[]; for(let i=1;i<=6;i++) for(let j=1;j<=6;j++) if(i+j===s){ cnt++; if(i<=j) pairs.push(`${i}+${j}`); } const g=gcd(cnt,36); ans=cnt/36;
+      stem=`Two fair six-sided dice are rolled. What is the probability that the sum of the two numbers is ${s}?`; expl=`36 equally likely outcomes. Sums of ${s}: ${pairs.join(', ')} (counting order) give ${cnt} outcomes. P = ${cnt}/36 = ${cnt/g}/${36/g}.`; }
+    else { const p=pick([2,3,4,5]), q=pick([3,4,5,6]); const num=(p-1)*(q-1), den=p*q; const g=gcd(num,den); ans=num/den;
+      stem=`The probability that machine A fails on a given day is 1/${p}, and independently the probability that machine B fails is 1/${q}. What is the probability that neither machine fails?`; expl=`P(A works) = 1 − 1/${p} = ${p-1}/${p}; P(B works) = 1 − 1/${q} = ${q-1}/${q}. Independent, so multiply: (${p-1}/${p}) × (${q-1}/${q}) = ${num}/${den} = ${num/g}/${den/g}.`; }
+    return {type:'ne',topic:NE,difficulty:'medium',stem,answer:ans,explanation:expl}; },
+  // (6) statistics ------------------------------------------------------------------
+  statsCombo(){ const mode=ri(3,20); let arr=[mode,mode,mode]; while(arr.length<7){ const x=ri(1,25); if(x!==mode && arr.filter(y=>y===x).length<2) arr.push(x); }
+    arr=shuffle(arr); const sorted=arr.slice().sort((p,q)=>p-q); const range=sorted[6]-sorted[0]; const med=sorted[3]; const v=ri(0,2); let ans, what, expl;
+    if(v===0){ ans=range; what='range'; expl=`Range = greatest − least = ${sorted[6]} − ${sorted[0]} = ${range}.`; }
+    else if(v===1){ ans=mode; what='mode'; expl=`Sorted: ${sorted.join(', ')}. The value ${mode} appears 3 times, more than any other, so the mode is ${mode}.`; }
+    else { ans=mode+range; what='sum of the mode and the range'; expl=`Mode = ${mode} (appears 3 times). Range = ${sorted[6]} − ${sorted[0]} = ${range}. Sum = ${mode} + ${range} = ${ans}.`; }
+    const {choices,answer}=mc(ans,[med, sorted[6], sorted[0], v===2?mode:range, v===2?range:mode, Math.round(arr.reduce((p,q)=>p+q,0)/7)]);
+    return {type:'mc',topic:DA,difficulty:'easy',stem:`What is the ${what} of the data set ${arr.join(', ')}?`,choices,answer,explanation:expl}; },
+  qcStdDev(){ const x=ri(8,30), d=ri(1,5); const v=ri(0,2); const setOf=(c,s)=>[c-2*s,c-s,c,c+s,c+2*s]; const A=setOf(x,d); let B, sdA=d*Math.SQRT2, sdB, expl;
+    if(v===0){ let e=ri(1,6); if(e===d) e=d+1; const y=ri(8,30); B=setOf(y,e); sdB=e*Math.SQRT2;
+      expl=`Each set is evenly spaced around its mean. Set A's values are ${d} apart (deviations −${2*d}, −${d}, 0, ${d}, ${2*d}), set B's are ${e} apart (deviations −${2*e}, −${e}, 0, ${e}, ${2*e}). Standard deviation grows with spread, so ${d>e?'set A has the larger standard deviation. Quantity A is greater.':'set B has the larger standard deviation. Quantity B is greater.'}`; }
+    else if(v===1){ const k=ri(2,9)*pick([1,-1]); B=A.map(t=>t+k); sdB=sdA;
+      expl=`Set B is set A with ${k>0?k+' added to':Math.abs(k)+' subtracted from'} every value. Shifting every value by the same amount moves the mean but leaves every deviation from the mean unchanged, so the standard deviations are equal.`; }
+    else { const k=pick([2,3]); B=A.map(t=>t*k); sdB=sdA*k;
+      expl=`Set B is set A with every value multiplied by ${k}. Multiplying every value by ${k} multiplies every deviation from the mean by ${k}, so set B's standard deviation is ${k} times set A's. Quantity B is greater.`; }
+    return {type:'qc',topic:QC,difficulty:'medium',stem:`Set A: {${A.join(', ')}}<br>Set B: {${B.join(', ')}}<br><b>Quantity A:</b> the standard deviation of set A  <br><b>Quantity B:</b> the standard deviation of set B`,choices:QC_CHOICES,answer:qcRel(sdA,sdB),_A:sdA,_B:sdB,explanation:expl}; },
+  neMeanChange(){ const n=ri(4,9); const m=ri(10,40); const m2=m+ri(-4,6)*1; const x=m2*(n+1)-m*n;
+    return {type:'ne',topic:NE,difficulty:'medium',stem:`The average (arithmetic mean) of ${n} numbers is ${m}. When one more number is added to the set, the average of the ${n+1} numbers becomes ${m2}. What is the number that was added?`,answer:x,
+      explanation:`Original sum = ${n} × ${m} = ${n*m}. New sum = ${n+1} × ${m2} = ${(n+1)*m2}. Added number = ${(n+1)*m2} − ${n*m} = ${x}.`}; },
+  // (7) percent-change chains ----------------------------------------------------------
+  qcPercentChain(){ const p=pick([10,15,20,25,30,40,50]); const q=pick([10,15,20,25,30,40,50]); const upFirst=Math.random()<.5;
+    const after1= upFirst? 100+p : 100-q; const final=Math.round(after1*(upFirst?(100-q):(100+p)))/100; // exact to 2 dp
+    const stem=`The price of an item was ${upFirst?`increased by ${p}%`:`decreased by ${q}%`}, and the new price was then ${upFirst?`decreased by ${q}%`:`increased by ${p}%`}.<br><b>Quantity A:</b> the final price  <br><b>Quantity B:</b> the original price`;
+    return {type:'qc',topic:QC,difficulty:'medium',stem,choices:QC_CHOICES,answer:qcRel(final,100),_A:final,_B:100,
+      explanation:`Let the original price be 100. After the first change: 100 × ${upFirst?(100+p)/100:(100-q)/100} = ${after1}. After the second: ${after1} × ${upFirst?(100-q)/100:(100+p)/100} = ${final}. Compare ${final} with 100: ${final>100?'Quantity A is greater.':final<100?'Quantity B is greater.':'they are equal.'}`}; },
+  // (8) coordinate geometry --------------------------------------------------------------
+  coordGeom(){ const trip=pick([[3,4,5],[6,8,10],[5,12,13],[8,15,17],[9,12,15]]); const x1=ri(-6,6), y1=ri(-6,6); const sx=rsign(), sy=rsign(); const x2=x1+sx*trip[0], y2=y1+sy*trip[1]; const v=ri(0,2);
+    const P=`(${x1}, ${y1})`, Q=`(${x2}, ${y2})`; const dx=x2-x1, dy=y2-y1; const fr=(p,q)=>{ if(q<0){p=-p;q=-q;} const g=gcd(p,q); return q/g===1?String(p/g):`${p/g}/${q/g}`; };
+    if(v===0){ const ans=trip[2]; const {choices,answer}=mc(ans,[Math.abs(dx)+Math.abs(dy), dx*dx+dy*dy, Math.abs(dx), Math.abs(dy), ans+1]);
+      return {type:'mc',topic:GEO,difficulty:'medium',stem:`In the xy-plane, what is the distance between the points ${P} and ${Q}?`,choices,answer,
+        explanation:`Distance = √[(${x2} − ${x1<0?'('+x1+')':x1})² + (${y2} − ${y1<0?'('+y1+')':y1})²] = √(${dx*dx} + ${dy*dy}) = √${dx*dx+dy*dy} = ${ans}.`}; }
+    if(v===1){ const ans=fr(dy,dx); const {choices,answer}=mc(ans,[fr(dx,dy), fr(-dy,dx), fr(-dx,dy), fr(dy+dx,dx), fr(dy+1,dx), fr(dy,dx*2)]);
+      return {type:'mc',topic:GEO,difficulty:'easy',stem:`In the xy-plane, what is the slope of the line passing through the points ${P} and ${Q}?`,choices,answer,
+        explanation:`Slope = (y₂ − y₁)/(x₂ − x₁) = (${y2} − ${y1<0?'('+y1+')':y1})/(${x2} − ${x1<0?'('+x1+')':x1}) = ${dy}/${dx}${ans!==`${dy}/${dx}`?' = '+ans:''}.`}; }
+    const mx=(x1+x2)/2, my=(y1+y2)/2; const ans=`(${mx}, ${my})`;
+    const {choices,answer}=mc(ans,[`(${dx/2}, ${dy/2})`, `(${my}, ${mx})`, `(${x1+x2}, ${y1+y2})`, `(${mx+1}, ${my})`, `(${mx}, ${my+1})`, `(${mx-1}, ${my-1})`, `(${dx}, ${dy})`]);
+    return {type:'mc',topic:GEO,difficulty:'easy',stem:`In the xy-plane, what is the midpoint of the segment joining ${P} and ${Q}?`,choices,answer,
+      explanation:`Midpoint = ((${x1} + ${x2})/2, (${y1} + ${y2})/2) = (${x1+x2}/2, ${y1+y2}/2) = ${ans}.`}; },
+  neLineThrough(){ const m=ri(1,5)*rsign(); const b=ri(1,9)*rsign(); const x1=ri(-5,5); let x2=ri(-5,5); while(x2===x1) x2=ri(-5,5); const y1=m*x1+b, y2=m*x2+b; const v=ri(0,2);
+    const P=`(${x1}, ${y1})`, Q=`(${x2}, ${y2})`; const mS= m===1?'':m===-1?'−':String(m); const base=`Slope = (${y2} − ${y1<0?'('+y1+')':y1})/(${x2} − ${x1<0?'('+x1+')':x1}) = ${y2-y1}/${x2-x1} = ${m}. Using y = mx + b at ${P}: ${y1} = ${m}(${x1}) + b, so b = ${b}.`;
+    if(v===0) return {type:'ne',topic:NE,difficulty:'medium',stem:`In the xy-plane, a line passes through the points ${P} and ${Q}. What is the y-intercept of the line?`,answer:b,explanation:`${base} The y-intercept is ${b}.`};
+    if(v===1){ const x3=ri(6,12)*rsign(); const y3=m*x3+b; return {type:'ne',topic:NE,difficulty:'medium',stem:`In the xy-plane, a line passes through the points ${P} and ${Q}. What is the value of y when x = ${x3} on this line?`,answer:y3,explanation:`${base} The line is y = ${mS}x ${b<0?'− '+(-b):'+ '+b}. At x = ${x3}: y = ${m}(${x3}) ${b<0?'− '+(-b):'+ '+b} = ${y3}.`}; }
+    const g=gcd(b,m); let num=-b/g, den=m/g; if(den<0){ num=-num; den=-den; } const xiStr= den===1? String(num) : `${num}/${den}`; const rawStr= Math.abs(m)===1? xiStr : `${-b}/${m}`;
+    return {type:'ne',topic:NE,difficulty:'hard',stem:`In the xy-plane, a line passes through the points ${P} and ${Q}. What is the x-intercept of the line?`,answer:-b/m,explanation:`${base} The line is y = ${mS}x ${b<0?'− '+(-b):'+ '+b}. Set y = 0: ${mS}x = ${-b}, so x = ${rawStr}${xiStr!==rawStr?' = '+xiStr:''}.`}; },
+  // (9) circles & composite areas ----------------------------------------------------------
+  circleComposite(){ const v=ri(0,1);
+    if(v===0){ const r=ri(3,9); const ans=`${r*r}π − ${2*r*r}`; const {choices,answer}=mc(ans,[`${r*r}π − ${r*r}`, `${r*r}π − ${4*r*r}`, `${2*r}π − ${2*r*r}`, `${r*r}π − ${2*r}`, `${4*r*r}π − ${2*r*r}`, `${r*r}π`, `${2*r*r}π − ${2*r*r}`]);
+      return {type:'mc',topic:GEO,difficulty:'hard',stem:`A square is inscribed in a circle of radius ${r}. What is the area of the region inside the circle but outside the square?`,choices,answer,
+        explanation:`Circle area = π(${r})² = ${r*r}π. The square's diagonal is the diameter ${2*r}, so its side is ${2*r}/√2 and its area = diagonal²/2 = ${4*r*r}/2 = ${2*r*r}. Shaded area = ${r*r}π − ${2*r*r}.`}; }
+    const s=ri(2,9)*2; const q=s*s/4; const ans=`${s*s} − ${q}π`; const {choices,answer}=mc(ans,[`${s*s} − ${s*s}π`, `${s*s} − ${2*s}π`, `${q}π − ${s*s}`, `${4*s} − ${q}π`, `${s*s} − ${s}π`, `${2*s*s} − ${q}π`, `${s*s} − ${q}`, `${q}π`]);
+    return {type:'mc',topic:GEO,difficulty:'medium',stem:`A circle is inscribed in a square with side ${s}. What is the area of the region inside the square but outside the circle?`,choices,answer,
+      explanation:`Square area = ${s}² = ${s*s}. The circle's diameter equals the side ${s}, so r = ${s/2} and circle area = π(${s/2})² = ${q}π. Region = ${s*s} − ${q}π.`}; },
+  circleArc(){ const r=pick([3,4,5,6,8,9,10,12,15,18]); const ang=pick([30,45,60,90,120,135,150,180,240,270]);
+    const piFrac=(num,den)=>{ const g=gcd(num,den); num/=g; den/=g; return den===1?`${num}π`:`${num}π/${den}`; };
+    const correct=piFrac(r*ang,180);                                     // (θ/360)·2πr = (r·θ/180)π
+    const {choices,answer}=mc(correct,[ piFrac(r*r*ang,360), piFrac(r*ang,360), piFrac(2*r,1), piFrac(2*r*ang,180), piFrac(r*r,1), piFrac(r*(360-ang),180), piFrac(r*r*ang,180), piFrac((r+2)*ang,180), piFrac(r*ang,720), piFrac(r*ang+180,180) ]);
+    return {type:'mc',topic:GEO,difficulty:'medium',stem:`In a circle of radius ${r}, what is the length of an arc that subtends a central angle of ${ang}°?`,choices,answer,
+      explanation:`Arc length = (θ/360) × 2πr = (${ang}/360) × 2π(${r}) = (${ang}/360) × ${2*r}π = ${correct}.`}; },
+  // (10) triangles ----------------------------------------------------------------------------
+  similarTriangles(){ const trip=pick([[3,4,5],[5,12,13],[6,8,10],[7,24,25],[4,5,6],[5,7,9],[6,7,8]]); const k=pick([2,3,4,1.5,2.5]); const a=trip[0],b=trip[1],c=trip[2]; const ka=a*k, kb=b*k, kc=c*k;
+    const ask=ri(0,1); const ans=ask?kc:kb; const {choices,answer}=mc(ans,[ (ask?c:b)+(ka-a), ask?kb:kc, (ask?c:b)*a/k, ka, ans+k ]);
+    return {type:'mc',topic:GEO,difficulty:'medium',stem:`Triangle ABC is similar to triangle DEF, with vertices corresponding in that order. AB = ${a}, BC = ${b}, AC = ${c}, and DE = ${ka}. What is the length of ${ask?'DF':'EF'}?`,choices,answer,
+      explanation:`Corresponding sides are proportional: DE/AB = ${ka}/${a} = ${k}. So ${ask?'DF':'EF'} = ${k} × ${ask?'AC':'BC'} = ${k} × ${ask?c:b} = ${ans}.`}; },
+  qcTriangle(){ const v=ri(0,3);
+    if(v===0){ const a=ri(3,12); let b=ri(3,12); while(b===a) b=ri(3,12); const lo=Math.abs(a-b), hi=a+b; const mode=ri(0,2); const B= mode===0? hi+ri(0,3) : mode===1? Math.max(1,lo-ri(0,2)) : ri(lo+1,hi-1);
+      const ans = mode===0?1 : mode===1?0 : 3;
+      const expl = `By the triangle inequality the third side x satisfies ${lo} < x < ${hi}. ` + (mode===0?`Quantity B = ${B} ≥ ${hi}, so every possible third side is less than ${B}. Quantity B is greater.`: mode===1?`Quantity B = ${B} ≤ ${lo}, so every possible third side is greater than ${B}. Quantity A is greater.`:`Quantity B = ${B} lies inside that range: the third side could be less than, equal to, or greater than ${B}. The relationship cannot be determined.`);
+      return {type:'qc',topic:QC,difficulty:'hard',stem:`Two sides of a triangle have lengths ${a} and ${b}.<br><b>Quantity A:</b> the length of the third side  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:ans,explanation:expl}; }
+    if(v===1){ const s=ri(2,9); const h=2*s; const long=s*Math.sqrt(3); const B=pick([h-1,h-2,h,s+ri(2,4)]); const A=long;
+      return {type:'qc',topic:QC,difficulty:'medium',stem:`In a right triangle, one acute angle measures 30° and the hypotenuse is ${h}.<br><b>Quantity A:</b> the length of the longer leg  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(A,B),_A:A,_B:B,
+        explanation:`In a 30-60-90 triangle the sides are in ratio 1 : √3 : 2. Hypotenuse ${h} → shorter leg ${s}, longer leg ${s}√3 ≈ ${Math.round(long*100)/100}. Compare with ${B}: ${A>B?'Quantity A is greater.':A<B?'Quantity B is greater.':'they are equal.'}`}; }
+    if(v===2){ const L=ri(2,10); const A=L*Math.SQRT2; const B=pick([L+1,L+2,2*L-1,L+Math.floor(L/2)]);
+      return {type:'qc',topic:QC,difficulty:'medium',stem:`An isosceles right triangle has legs of length ${L}.<br><b>Quantity A:</b> the length of the hypotenuse  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(A,B),_A:A,_B:B,
+        explanation:`In a 45-45-90 triangle the hypotenuse is leg × √2 = ${L}√2 ≈ ${Math.round(A*100)/100}. Compare with ${B}: ${A>B?'Quantity A is greater.':A<B?'Quantity B is greater.':'they are equal.'}`}; }
+    const a=ri(3,9); const k=pick([2,3]); const b=a+ri(1,4); const A=k*b; const B=pick([A,A+1,A-1,b+(k*a-a)]);
+    return {type:'qc',topic:QC,difficulty:'medium',stem:`Triangles PQR and XYZ are similar, with P, Q, R corresponding to X, Y, Z. PQ = ${a}, QR = ${b}, and XY = ${k*a}.<br><b>Quantity A:</b> YZ  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(A,B),_A:A,_B:B,
+      explanation:`Scale factor = XY/PQ = ${k*a}/${a} = ${k}, so YZ = ${k} × QR = ${k} × ${b} = ${A}. Compare with ${B}: ${A>B?'Quantity A is greater.':A<B?'Quantity B is greater.':'they are equal.'}`}; },
+  mcaThirdSide(){ const a=ri(3,12); const b=a+ri(0,8); const lo=b-a, hi=a+b; const pool=[lo-1,lo,lo+1,Math.round((lo+hi)/2),hi-1,hi,hi+1,hi+3].filter(x=>x>0);
+    let cands, truth, tries=0; do{ cands=Array.from(new Set(shuffle(pool).slice(0,6))).sort((p,q)=>p-q); truth=cands.map(x=>x>lo&&x<hi); tries++; }while((truth.every(t=>t)||!truth.some(t=>t)||cands.length<5)&&tries<40);
+    return {type:'mca',topic:GEO,difficulty:'easy',stem:`Two sides of a triangle have lengths ${a} and ${b}. Select <b>all</b> of the following that could be the length of the third side.`,choices:cands.map(String),answer:truth.map((t,i)=>t?i:-1).filter(i=>i>=0),_truth:truth,
+      explanation:`The third side must be greater than ${b} − ${a} = ${lo} and less than ${a} + ${b} = ${hi} (strictly). Of the choices, ${cands.filter((c,i)=>truth[i]).join(', ')} lie strictly between ${lo} and ${hi}; ${cands.filter((c,i)=>!truth[i]).join(', ')} do not.`}; },
+  neTriangle(){ const v=ri(0,3);
+    if(v===0){ const s=ri(2,12); return {type:'ne',topic:NE,difficulty:'easy',stem:`In a right triangle with angles of 30°, 60°, and 90°, the side opposite the 30° angle has length ${s}. What is the length of the hypotenuse?`,answer:2*s,explanation:`In a 30-60-90 triangle the hypotenuse is twice the shorter leg (the side opposite 30°): 2 × ${s} = ${2*s}.`}; }
+    if(v===1){ const h=ri(2,12)*2; return {type:'ne',topic:NE,difficulty:'easy',stem:`In a right triangle with angles of 30°, 60°, and 90°, the hypotenuse has length ${h}. What is the length of the shorter leg?`,answer:h/2,explanation:`The shorter leg (opposite 30°) is half the hypotenuse: ${h} ÷ 2 = ${h/2}.`}; }
+    const a=ri(3,12), b=ri(3,12); if(v===2){ const third=a+b-1; return {type:'ne',topic:NE,difficulty:'medium',stem:`Two sides of a triangle have lengths ${a} and ${b}. If the third side has an integer length, what is the greatest possible perimeter of the triangle?`,answer:a+b+third,explanation:`The third side must be less than ${a} + ${b} = ${a+b}, so its greatest integer value is ${third}. Perimeter = ${a} + ${b} + ${third} = ${a+b+third}.`}; }
+    const lo=Math.abs(a-b), hi=a+b; const cnt=(hi-1)-(lo+1)+1; return {type:'ne',topic:NE,difficulty:'hard',stem:`Two sides of a triangle have lengths ${a} and ${b}. How many different integer values are possible for the length of the third side?`,answer:cnt,explanation:`The third side x satisfies ${lo} < x < ${hi}, so the integers from ${lo+1} to ${hi-1} inclusive qualify: ${hi-1} − ${lo+1} + 1 = ${cnt}.`}; },
+  // (11) sequences -------------------------------------------------------------------------
+  arithSum(){ const a=ri(1,12), d=ri(2,9), n=ri(8,25); const last=a+(n-1)*d; const S=n*(a+last)/2;
+    const {choices,answer}=mc(S,[n*(a+last), last, n*a, n*last, S+d, n*(a+last)/2+a]);
+    return {type:'mc',topic:ALG,difficulty:'medium',stem:`The first term of an arithmetic sequence is ${a} and each term after the first is ${d} more than the preceding term. What is the sum of the first ${n} terms?`,choices,answer,
+      explanation:`The ${n}th term = ${a} + (${n} − 1)(${d}) = ${last}. Sum = n × (first + last)/2 = ${n} × (${a} + ${last})/2 = ${n} × ${(a+last)/2} = ${S}.`}; },
+  geomTerm(){ const a=pick([1,2,3,5,4]); const r=pick([2,3,-2,4]); const v=ri(0,1); let n; do{ n=ri(v===1?5:4,7); }while(Math.abs(a*Math.pow(r,n-1))>3000); const term=a*Math.pow(r,n-1);
+    if(v===0){ const {choices,answer}=mc(term,[a*Math.pow(r,n), a*Math.pow(r,n-2), a+(n-1)*r, a*r*n, -term]);
+      return {type:'mc',topic:ALG,difficulty:'medium',stem:`In a geometric sequence the first term is ${a} and the common ratio is ${r}. What is the ${ordinal(n)} term?`,choices,answer,
+        explanation:`aₙ = a₁ · r^(n−1) = ${a} × (${r})^${n-1} = ${a} × ${Math.pow(r,n-1)} = ${term}.`}; }
+    const seq=Array.from({length:4},(_,i)=>a*Math.pow(r,i)); const n2=Math.max(n,5); const term2=a*Math.pow(r,n2-1); const {choices,answer}=mc(term2,[a*Math.pow(r,n2), seq[3]+(n2-4)*(seq[3]-seq[2]), a*Math.pow(r,n2-2), term2*r*r, -term2]);
+    return {type:'mc',topic:ALG,difficulty:'medium',stem:`The first four terms of a sequence are ${seq.join(', ')}, and each term after the first is obtained by multiplying the preceding term by the same constant. What is the ${ordinal(n2)} term?`,choices,answer,
+      explanation:`The ratio is ${seq[1]}/${seq[0]} = ${r}, so the ${ordinal(n2)} term = ${a} × (${r})^${n2-1} = ${a} × ${Math.pow(r,n2-1)} = ${term2}.`}; },
+  // (12) rates ------------------------------------------------------------------------------
+  twoTravelers(){ const v=ri(0,1);
+    if(v===0){ const v1=pick([30,40,45,50,55,60]), v2=pick([35,40,50,60,65,70]); const t=ri(2,5); const D=(v1+v2)*t;
+      const {choices,answer}=mc(t,[Math.round(D/v1*10)/10, Math.round(D/v2*10)/10, Math.abs(v1-v2)?Math.round(D/Math.abs(v1-v2)*10)/10:t+3, t+1, t*2],x=>x+' hours');
+      return {type:'mc',topic:PS,difficulty:'medium',stem:`Two cyclists start at the same time from towns ${D} miles apart and ride toward each other along the same road, one at ${v1} miles per hour and the other at ${v2} miles per hour. After how many hours do they meet?`,choices,answer,
+        explanation:`They close the gap at ${v1} + ${v2} = ${v1+v2} mph combined. Time = ${D} ÷ ${v1+v2} = ${t} hours.`}; }
+    const v1=pick([30,40,45,50,60]); const diff=pick([10,15,20,30]); const v2=v1+diff; const t0=ri(1,3); const lead=v1*t0; let t=lead/diff; t=Math.round(t*100)/100; // hours after B leaves
+    const {choices,answer}=mc(t,[Math.round(lead/v2*100)/100, t+t0, t0, Math.round(lead/v1*100)/100, t*2],x=>x+' hours');
+    return {type:'mc',topic:PS,difficulty:'hard',stem:`Car A leaves a town traveling at a constant ${v1} miles per hour. ${t0===1?'One hour':t0+' hours'} later, car B leaves the same town along the same road at a constant ${v2} miles per hour. How many hours after car B leaves does it catch up with car A?`,choices,answer,
+      explanation:`When B starts, A is ${v1} × ${t0} = ${lead} miles ahead. B gains ${v2} − ${v1} = ${diff} miles per hour. Time = ${lead} ÷ ${diff} = ${t} hours.`}; },
+  neUnitConversion(){ const v=ri(0,2);
+    if(v===0){ const kmh=ri(2,30)*3; const mpm=kmh*1000/60; return {type:'ne',topic:NE,difficulty:'easy',stem:`A train travels at a constant ${kmh} kilometers per hour. How many meters does it travel per minute? (1 kilometer = 1,000 meters)`,answer:mpm,explanation:`${kmh} km/h = ${kmh*1000} meters per hour = ${kmh*1000} ÷ 60 = ${mpm} meters per minute.`}; }
+    if(v===1){ const mph=ri(1,6)*15; const fps=mph*5280/3600; return {type:'ne',topic:NE,difficulty:'medium',stem:`A car travels at a constant ${mph} miles per hour. What is its speed in feet per second? (1 mile = 5,280 feet)`,answer:fps,explanation:`${mph} mi/h = ${mph} × 5,280 = ${mph*5280} feet per hour = ${mph*5280} ÷ 3,600 = ${fps} feet per second.`}; }
+    const p=ri(2,12); const secs=pick([3,4,5,6,10,12,15,20]); const mins=ri(2,6)*5; const items=p*(mins*60/secs);
+    return {type:'ne',topic:NE,difficulty:'easy',stem:`A machine stamps ${p} parts every ${secs} seconds. At this rate, how many parts does it stamp in ${mins} minutes?`,answer:items,explanation:`${mins} minutes = ${mins*60} seconds = ${mins*60/secs} intervals of ${secs} seconds. Parts = ${p} × ${mins*60/secs} = ${items}.`}; },
+  // (13) interest & word problems ------------------------------------------------------------
+  simpleInterest(){ const P=ri(2,20)*500; const r=pick([2,3,4,5,6,8]); const t=ri(2,6); const I=P*r*t/100; const total=P+I; const ask=ri(0,1); const ans=ask?total:I; const money=x=>'$'+x.toLocaleString('en-US');
+    const {choices,answer}=mc(ans,[ask?I:total, P*r/100, P*r*t, P*(1+r/100)*t, I+P*r/100],money);
+    return {type:'mc',topic:ARI,difficulty:'easy',stem:`$${P.toLocaleString('en-US')} is deposited in an account that earns ${r}% simple annual interest. ${ask?'What is the total amount in the account':'How much interest is earned'} after ${t} years?`,choices,answer,
+      explanation:`Simple interest = P × r × t = ${P.toLocaleString('en-US')} × ${r/100} × ${t} = $${I.toLocaleString('en-US')}.${ask?` Total = $${P.toLocaleString('en-US')} + $${I.toLocaleString('en-US')} = $${total.toLocaleString('en-US')}.`:''}`}; },
+  ageProblem(){ const m=pick([2,3]); const k=ri(m+1,5); let B; do{ B=ri(3,12); }while(((B*(k-m))%(m-1))!==0); const y=B*(k-m)/(m-1); const A=k*B;
+    const {choices,answer}=mc(B,[A, B+y, y, A+y, k*B-y]);
+    return {type:'mc',topic:ALG,difficulty:'medium',stem:`Today, Alex is ${k} times as old as Bella. In ${y} years, Alex will be ${m} times as old as Bella. How old is Bella today?`,choices,answer,
+      explanation:`Let Bella be b years old, so Alex is ${k}b. In ${y} years: ${k}b + ${y} = ${m}(b + ${y}) → ${k}b + ${y} = ${m}b + ${m*y} → ${k-m===1?'':k-m}b = ${(m-1)*y} → b = ${B}. (Check: Alex ${A} → ${A+y}, Bella ${B} → ${B+y}, and ${A+y} = ${m} × ${B+y}.)`}; },
+  neConsecutive(){ const v=ri(0,2);
+    if(v===0){ const n=pick([3,4,5]); const step=pick([1,2]); const first= step===1? ri(4,40) : ri(2,20)*2+pick([0,1]); const terms=Array.from({length:n},(_,i)=>first+i*step); const S=terms.reduce((p,q)=>p+q,0);
+      return {type:'ne',topic:NE,difficulty:'easy',stem:`The sum of ${n} consecutive ${step===2?(first%2?'odd ':'even '):''}integers is ${S}. What is the greatest of these integers?`,answer:terms[n-1],explanation:`Let the integers be x, x + ${step}, …, x + ${step*(n-1)}. Sum = ${n}x + ${step*(n*(n-1)/2)} = ${S}, so x = ${first}. The integers are ${terms.join(', ')}; the greatest is ${terms[n-1]}.`}; }
+    if(v===1){ const a=ri(4,15); const P=a*(a+1); return {type:'ne',topic:NE,difficulty:'medium',stem:`The product of two consecutive positive integers is ${P}. What is the sum of the two integers?`,answer:2*a+1,explanation:`${P} = ${a} × ${a+1}, so the integers are ${a} and ${a+1}. Sum = ${a} + ${a+1} = ${2*a+1}.`}; }
+    const a=ri(3,20); const b=a+ri(2,6); const gap=b-a; const cnt=gap-1; const S=cnt*(a+b)/2;
+    return {type:'ne',topic:NE,difficulty:'medium',stem:`What is the sum of all the integers strictly between ${a} and ${b}?`,answer:S,explanation:`The integers from ${a+1} to ${b-1} number ${cnt}, with average (${a+1} + ${b-1})/2 = ${(a+b)/2}. Sum = ${cnt} × ${(a+b)/2} = ${S}.`}; },
+  // (14) data interpretation from a table ----------------------------------------------------
+  dataTable(){ const cats=shuffle(['Rent','Food','Transport','Utilities','Savings','Leisure']).slice(0,4); const T=pick([200,400,500,800,1000,2000]);
+    let pcts; do{ const a=ri(2,10)*5, b=ri(2,10)*5, c=ri(2,8)*5; pcts=[a,b,c,100-a-b-c]; }while(pcts[3]<5 || new Set(pcts).size<4);
+    const vals=pcts.map(p=>T*p/100); const table={headers:['Category','Amount ($)'],rows:cats.map((c,i)=>[c,String(vals[i])])}; const title='Monthly Budget';
+    const v=ri(0,2); const i=ri(0,3); let j=ri(0,3); while(j===i) j=ri(0,3);
+    if(v===0){ const ans=pcts[i]; const {choices,answer}=mc(ans,[Math.round(vals[i]/(T-vals[i])*100), 100-pcts[i], Math.round(pcts[i]/2), pcts[j], pcts[i]+5],x=>x+'%');
+      return {type:'mc',topic:'Data Interpretation',difficulty:'medium',table,tableTitle:title,stem:`The table shows a monthly budget of $${T.toLocaleString('en-US')} split among four categories (${cats.map((c,q)=>`${c} $${vals[q]}`).join(', ')}). ${cats[i]} accounts for what percent of the total budget?`,choices,answer,
+        explanation:`Total = ${vals.join(' + ')} = ${T}. ${cats[i]} share = ${vals[i]}/${T} × 100% = ${ans}%.`}; }
+    if(v===1){ const g=gcd(vals[i],vals[j]); const ans=`${vals[i]/g}:${vals[j]/g}`; const {choices,answer}=mc(ans,[`${vals[j]/g}:${vals[i]/g}`, `${vals[i]/g}:${(vals[i]+vals[j])/g}`, (()=>{ const h=gcd(vals[i],T); return `${vals[i]/h}:${T/h}`; })(), `${pcts[i]}:${pcts[j]+5}`, `${vals[i]/g+1}:${vals[j]/g}`]);
+      return {type:'mc',topic:'Data Interpretation',difficulty:'medium',table,tableTitle:title,stem:`The table shows a monthly budget of $${T.toLocaleString('en-US')} split among four categories (${cats.map((c,q)=>`${c} $${vals[q]}`).join(', ')}). What is the ratio of the amount for ${cats[i]} to the amount for ${cats[j]}?`,choices,answer,
+        explanation:`${cats[i]} : ${cats[j]} = ${vals[i]} : ${vals[j]}. Divide both by ${g}: ${ans}.`}; }
+    const avg=T/4; let ii=i; if(pcts[ii]===25) ii=j; const diff=vals[ii]-avg; const ans=Math.abs(diff); const fmt=x=>'$'+x; const {choices,answer}=mc(ans,[vals[ii], avg, Math.abs(vals[ii]-vals[j===ii?i:j]), ans+avg/4, ans*2, T-vals[ii]],fmt);
+    return {type:'mc',topic:'Data Interpretation',difficulty:'medium',table,tableTitle:title,stem:`The table shows a monthly budget of $${T.toLocaleString('en-US')} split among four categories (${cats.map((c,q)=>`${c} $${vals[q]}`).join(', ')}). The amount for ${cats[ii]} is how much ${diff>0?'greater':'less'} than the average (arithmetic mean) amount per category?`,choices,answer,
+      explanation:`Average per category = ${T}/4 = ${avg}. ${cats[ii]} is ${vals[ii]}, so the difference is ${diff>0?`${vals[ii]} − ${avg}`:`${avg} − ${vals[ii]}`} = $${ans} (${cats[ii]} is $${ans} ${diff>0?'above':'below'} the average).`}; },
+  mcaData(){ const cats=shuffle(['Nova','Orion','Vega','Lyra','Atlas','Zenith']).slice(0,5); const v=ri(0,1); const thr=pick([10,15,20,25]); let vals, T, avg, truth, tries=0;
+    do{ do{ vals=cats.map(()=>ri(2,20)*5); }while(new Set(vals).size<5); T=vals.reduce((p,q)=>p+q,0); avg=T/5;
+        truth = v===0 ? vals.map(x=>x>avg) : vals.map(x=>x*100>thr*T); tries++; }while((!truth.some(t=>t)||truth.every(t=>t))&&tries<60);
+    let stem, expl;
+    if(v===0){ stem=`The table shows the number of units sold by five sales teams (${cats.map((c,q)=>`${c} ${vals[q]}`).join(', ')}). Select <b>all</b> of the teams whose sales were greater than the average (arithmetic mean) for the five teams.`;
+      expl=`Total = ${vals.join(' + ')} = ${T}; average = ${T}/5 = ${avg}. Teams above ${avg}: ${cats.filter((c,q)=>truth[q]).join(', ')}.`; }
+    else { stem=`The table shows the number of units sold by five sales teams (${cats.map((c,q)=>`${c} ${vals[q]}`).join(', ')}). Select <b>all</b> of the teams that accounted for more than ${thr}% of the total units sold.`;
+      expl=`Total = ${T}; ${thr}% of ${T} = ${thr*T/100}. Teams with more than ${thr*T/100} units: ${cats.filter((c,q)=>truth[q]).join(', ')}. (${cats.map((c,q)=>`${c}: ${Math.round(vals[q]/T*1000)/10}%`).join(', ')}.)`; }
+    return {type:'mca',topic:'Data Interpretation',difficulty:'medium',table:{headers:['Team','Units sold'],rows:cats.map((c,q)=>[c,String(vals[q])])},tableTitle:'Units Sold by Team',stem,choices:cats.slice(),answer:truth.map((t,q)=>t?q:-1).filter(q=>q>=0),_truth:truth,explanation:expl}; },
+  // (15) number properties as QC ----------------------------------------------------------------
+  qcNumberProps(){ const v=ri(0,3);
+    const factorize=N=>{ const f={}; let n=N; for(let p=2;p*p<=n;p++) while(n%p===0){ f[p]=(f[p]||0)+1; n/=p; } if(n>1) f[n]=(f[n]||0)+1; return f; };
+    if(v===0){ const N=pick([30,42,60,66,70,72,84,90,105,120,126,150,180,210,240,300,360]); const f=factorize(N); const cnt=Object.keys(f).length; const B=ri(2,4);
+      return {type:'qc',topic:QC,difficulty:'medium',stem:`<b>Quantity A:</b> the number of distinct prime factors of ${N}  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(cnt,B),_A:cnt,_B:B,
+        explanation:`${N} = ${Object.entries(f).map(([p,e])=>e>1?`${p}^${e}`:p).join(' × ')}, so it has ${cnt} distinct prime factors (${Object.keys(f).join(', ')}). Quantity B = ${B}. ${cnt>B?'Quantity A is greater.':cnt<B?'Quantity B is greater.':'The two quantities are equal.'}`}; }
+    if(v===1){ const N=pick([12,16,18,20,24,28,30,36,40,45,48,60,64,72,100]); const f=factorize(N); const cnt=Object.values(f).reduce((p,e)=>p*(e+1),1); const B=cnt+pick([-2,-1,0,0,1,2]);
+      return {type:'qc',topic:QC,difficulty:'hard',stem:`<b>Quantity A:</b> the number of positive divisors of ${N}  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(cnt,B),_A:cnt,_B:B,
+        explanation:`${N} = ${Object.entries(f).map(([p,e])=>e>1?`${p}^${e}`:p).join(' × ')}. Number of divisors = ${Object.values(f).map(e=>`(${e} + 1)`).join(' × ')} = ${cnt}. Quantity B = ${B}. ${cnt>B?'Quantity A is greater.':cnt<B?'Quantity B is greater.':'The two quantities are equal.'}`}; }
+    if(v===2){ const lo=pick([10,20,30]); const hi=lo+pick([10,20]); const B=pick([3,4,4,5]);
+      return {type:'qc',topic:QC,difficulty:'hard',stem:`p and q are distinct prime numbers between ${lo} and ${hi}.<br><b>Quantity A:</b> the number of positive divisors of pq  <br><b>Quantity B:</b> ${B}`,choices:QC_CHOICES,answer:qcRel(4,B),_A:4,_B:B,
+        explanation:`For distinct primes p and q, the divisors of pq are exactly 1, p, q, and pq — always 4, whichever primes are chosen (e.g. ${primesUpTo(hi).filter(x=>x>lo).slice(0,2).join(' and ')}). Quantity B = ${B}. ${4>B?'Quantity A is greater.':4<B?'Quantity B is greater.':'The two quantities are equal.'}`}; }
+    const w=ri(0,2);
+    if(w===0) return {type:'qc',topic:QC,difficulty:'hard',stem:`n is an integer.<br><b>Quantity A:</b> (−1)<sup>2n</sup>  <br><b>Quantity B:</b> (−1)<sup>n</sup>`,choices:QC_CHOICES,answer:3,
+      explanation:`(−1)^(2n) = ((−1)²)^n = 1 for every integer n. (−1)^n is 1 when n is even and −1 when n is odd. So the quantities are equal for even n and A is greater for odd n: the relationship cannot be determined.`};
+    if(w===1){ const k=ri(2,6); return {type:'qc',topic:QC,difficulty:'hard',stem:`m is an even integer and k is an odd integer.<br><b>Quantity A:</b> the remainder when m + k is divided by 2  <br><b>Quantity B:</b> the remainder when m × k is divided by 2`,choices:QC_CHOICES,answer:0,_A:1,_B:0,
+      explanation:`even + odd = odd, so m + k leaves remainder 1 when divided by 2. even × odd = even, so m × k leaves remainder 0. Quantity A (1) is greater than Quantity B (0).`}; }
+    return {type:'qc',topic:QC,difficulty:'hard',stem:`x is a positive integer greater than 1.<br><b>Quantity A:</b> the number of positive divisors of x  <br><b>Quantity B:</b> the number of positive divisors of x + 1`,choices:QC_CHOICES,answer:3,
+      explanation:`If x = 2 (prime, 2 divisors) then x + 1 = 3 (also 2 divisors): equal. If x = 3 then x + 1 = 4 has 3 divisors: B greater. If x = 4 (3 divisors) then x + 1 = 5 (2 divisors): A greater. The relationship cannot be determined.`}; },
+  mcaParity(){ const odd=Math.random()<.5; const want=Math.random()<.5?'even':'odd'; const n=odd?7:8; const L=pick(['n','k','m','x']);   // n: test value used only to explain
+    const exprs=[ {t:`${L} + 1`, f:x=>x+1}, {t:`2${L}`, f:x=>2*x}, {t:`${L}²`, f:x=>x*x}, {t:`${L}(${L} + 1)`, f:x=>x*(x+1)}, {t:`3${L}`, f:x=>3*x}, {t:`${L} + 2`, f:x=>x+2}, {t:`(${L} + 1)²`, f:x=>(x+1)*(x+1)}, {t:`2${L} + 1`, f:x=>2*x+1}, {t:`${L}² + ${L}`, f:x=>x*x+x}, {t:`5${L} + 3`, f:x=>5*x+3}, {t:`${L}³`, f:x=>x*x*x}, {t:`${L}² − 1`, f:x=>x*x-1}, {t:`${L}(${L} + 2)`, f:x=>x*(x+2)} ];
+    let cands, truth, tries=0; do{ cands=shuffle(exprs).slice(0,6); truth=cands.map(e=>((e.f(n)%2===0)?'even':'odd')===want); tries++; }while((truth.every(t=>t)||!truth.some(t=>t))&&tries<40);
+    return {type:'mca',topic:ARI,difficulty:'medium',stem:`If ${L} is an ${odd?'odd':'even'} integer, which of the following must be ${want}? Select <b>all</b> that apply.`,choices:cands.map(e=>e.t),answer:truth.map((t,i)=>t?i:-1).filter(i=>i>=0),_truth:truth,
+      explanation:`Parity rules: even ± even = even, odd ± odd = even, even ± odd = odd; a product is even if any factor is even. With ${L} ${odd?'odd':'even'} (test ${L} = ${n}): ${cands.map((e,i)=>`${e.t} = ${e.f(n)} (${e.f(n)%2===0?'even':'odd'})`).join('; ')}. Must be ${want}: ${cands.filter((e,i)=>truth[i]).map(e=>e.t).join(', ')}.`}; },
+  // (16) numeric entry with fraction answers ------------------------------------------------------
+  neFraction(){ const v=ri(0,2); const red=(p,q)=>{ const g=gcd(p,q); const r=q/g===1?String(p/g):`${p/g}/${q/g}`; return r===`${p}/${q}`? r : `${p}/${q} = ${r}`; };
+    if(v===0){ const b=pick([2,3,4,5,6,8]), d=pick([2,3,4,5,6,8,9]); const a=ri(1,b-1), c=ri(1,d-1); const num=a*d+c*b, den=b*d;
+      return {type:'ne',topic:NE,difficulty:'easy',stem:`What is the value of ${a}/${b} + ${c}/${d}? (Give your answer as a fraction or decimal.)`,answer:num/den,explanation:`Common denominator ${den}: ${a}/${b} = ${a*d}/${den} and ${c}/${d} = ${c*b}/${den}. Sum = ${red(num,den)}.`}; }
+    if(v===1){ const a=ri(2,9); let b=ri(2,9); while(b===a) b=ri(2,9); const num=a*b, den=a+b;
+      return {type:'ne',topic:NE,difficulty:'medium',stem:`What is the reciprocal of 1/${a} + 1/${b}? (Give your answer as a fraction or decimal.)`,answer:num/den,explanation:`1/${a} + 1/${b} = ${b}/${a*b} + ${a}/${a*b} = ${den}/${num}. Its reciprocal is ${red(num,den)}.`}; }
+    const b=pick([3,4,5,6,8]), d=pick([2,3,4,5,7]); const a=ri(1,b-1), c=ri(1,d-1); const num=a*d, den=b*c;
+    return {type:'ne',topic:NE,difficulty:'medium',stem:`What is (${a}/${b}) ÷ (${c}/${d})? (Give your answer as a fraction or decimal.)`,answer:num/den,explanation:`Dividing by ${c}/${d} is multiplying by ${d}/${c}: (${a}/${b}) × (${d}/${c}) = ${red(num,den)}.`}; },
+};
+const GEN_DIFF_NEW = {
+  remainderLinear:'medium', neRemainderPower:'hard', exponentSimplify:'medium', qcExponent:'medium', mcaAbsInequality:'medium',
+  arrangeRestriction:'hard', committeeRequired:'hard', probNoReplace:'medium', neProbability:'medium', statsCombo:'easy', qcStdDev:'medium',
+  neMeanChange:'medium', qcPercentChain:'medium', coordGeom:'medium', neLineThrough:'medium', circleComposite:'hard', circleArc:'medium',
+  similarTriangles:'medium', qcTriangle:'hard', mcaThirdSide:'easy', neTriangle:'medium', arithSum:'medium', geomTerm:'medium',
+  twoTravelers:'medium', neUnitConversion:'easy', simpleInterest:'easy', ageProblem:'medium', neConsecutive:'easy', dataTable:'medium',
+  mcaData:'medium', qcNumberProps:'hard', mcaParity:'medium', neFraction:'easy',
+};
+Object.assign(GEN, GEN_NEW);
+/* __GEN_NEW_END__ */
 const QUANT_GEN_KEYS = Object.keys(GEN);
 const QC_KEYS = QUANT_GEN_KEYS.filter(k=>k.startsWith('qc'));
 const MCA_KEYS = QUANT_GEN_KEYS.filter(k=>k.startsWith('mca'));
@@ -829,6 +1098,7 @@ const GEN_DIFF = {
   markupDiscount:'hard', qcSquareCube:'hard', quadratic:'hard', absValue:'hard', exponent:'hard',
   combination:'hard', mixture:'hard', qcPrimes:'hard', mcaInequality:'hard',
 };
+Object.assign(GEN_DIFF, GEN_DIFF_NEW);
 QUANT_GEN_KEYS.forEach(k=>{ if(!GEN_DIFF[k]) GEN_DIFF[k]='medium'; });
 
 function pickByDifficulty(pool, difficulty){
