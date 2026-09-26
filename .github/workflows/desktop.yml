@@ -1,14 +1,16 @@
 # Builds the GRE Ready desktop app for Mac and Windows.
 #
 # Run it by hand from the Actions tab (the installers appear as downloadable
-# artifacts), or push a tag like `desktop-v3.0.0` to also publish them as a
-# GitHub Release with install instructions.
+# artifacts), or publish a GitHub Release with install instructions by pushing
+# a tag like `desktop-v3.0.0` — or, where tags cannot be pushed, a branch named
+# `desktop-release/v3.0.0` (the release job derives the tag from the branch).
 name: Desktop app
 
 on:
   workflow_dispatch:
   push:
     tags: ['desktop-v*']
+    branches: ['desktop-release/**']
 
 permissions:
   contents: write
@@ -50,7 +52,7 @@ jobs:
 
   release:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    if: startsWith(github.ref, 'refs/tags/desktop-v') || startsWith(github.ref, 'refs/heads/desktop-release/')
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -58,9 +60,20 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Release tag
+        id: tag
+        shell: bash
+        run: |
+          ref="${{ github.ref_name }}"
+          case "$ref" in
+            desktop-release/*) echo "tag=desktop-${ref#desktop-release/}" >> "$GITHUB_OUTPUT" ;;
+            *)                 echo "tag=$ref" >> "$GITHUB_OUTPUT" ;;
+          esac
       - uses: softprops/action-gh-release@v2
         with:
-          name: GRE Ready desktop ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: GRE Ready desktop ${{ steps.tag.outputs.tag }}
           files: dist/*
           body: |
             ## GRE Ready — desktop app
