@@ -60,10 +60,10 @@ function createWindow() {
       const choice = process.env.GRE_DESKTOP_TEST ? 0 : dialog.showMessageBoxSync(win, {
         type: 'question', buttons: ['Pause and quit', 'Keep practicing'], defaultId: 0, cancelId: 1,
         title: 'Practice in progress', message: 'You are in the middle of a practice.',
-        detail: 'Pause and quit keeps your place and the clock — you can resume from the home screen next time you open GRE Ready.',
+        detail: 'Your answers, current question, and remaining time are saved. Resume from the home screen next time you open GRE Ready.',
       });
       if (choice !== 0) return;
-      try { await win.webContents.executeJavaScript('(function(){ try { saveActiveSnapshot(); } catch (e) {} return true; })()', true); } catch {}
+      try { await win.webContents.executeJavaScript('(function(){ try { pauseClock(); saveActiveSnapshot(); } catch (e) {} return true; })()', true); } catch {}
     }
     closing = true;
     saveBounds();

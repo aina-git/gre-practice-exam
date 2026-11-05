@@ -1,0 +1,11 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const bank=JSON.parse(fs.readFileSync(path.join(root,'content/verbal-expansion.json'),'utf8'));
+const file=path.join(root,'index.html');
+let html=fs.readFileSync(file,'utf8');
+const block='/* GRE_EXTRA_BANK_START */\nconst EXTRA_BANK='+JSON.stringify(bank)+';\nfor(const k of Object.keys(EXTRA_BANK)) VBANK[k].push(...EXTRA_BANK[k]);\n/* GRE_EXTRA_BANK_END */';
+if(html.includes('/* GRE_EXTRA_BANK_START */')) html=html.replace(/\/\* GRE_EXTRA_BANK_START \*\/[\s\S]*?\/\* GRE_EXTRA_BANK_END \*\//,()=>block);
+else html=html.replace('/* Rotation: prefer questions not seen recently.',block+'\n\n/* Rotation: prefer questions not seen recently.');
+fs.writeFileSync(file,html);
+console.log('Synced original verbal expansion into the offline app.');

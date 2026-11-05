@@ -1,0 +1,1693 @@
+{
+  "tc1": [
+    {
+      "type": "tc1",
+      "stem": "Although the committee called its recommendation final, it promised to reconsider the recommendation after the pilot, making its position effectively __________.",
+      "choices": [
+        "inflexible",
+        "provisional",
+        "punitive",
+        "comprehensive",
+        "transparent"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "The contrast with “final” requires something open to revision or qualification: provisional. Numerous exceptions do not establish punishment, comprehensiveness, or transparency.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The historian does not deny that the reform benefited some workers; she disputes the much broader claim that its benefits were __________.",
+      "choices": [
+        "universal",
+        "accidental",
+        "temporary",
+        "expensive",
+        "measurable"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "The contrast is between benefits for some workers and benefits for everyone. Universal expresses the broader claim without adding an unsupported claim about duration or measurement.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Because the experiment changed both temperature and pressure at once, its result cannot __________ the effect of either variable.",
+      "choices": [
+        "amplify",
+        "replicate",
+        "isolate",
+        "predict",
+        "eliminate"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Changing two variables prevents separating their individual effects. Isolate captures that methodological problem; the other verbs describe different operations.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The survey was intended to capture ordinary shopping habits, but recruiting participants only from a luxury store made the sample __________.",
+      "choices": [
+        "representative",
+        "unbiased",
+        "exhaustive",
+        "unrepresentative",
+        "random"
+      ],
+      "answer": [
+        3
+      ],
+      "explanation": "A luxury-store sample need not reflect ordinary shoppers. Unrepresentative describes this sampling limitation; exhaustive and random are unsupported.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Far from treating the apparent contradiction as an embarrassment, the researcher regarded it as a __________ for further investigation.",
+      "choices": [
+        "deterrent",
+        "pretext",
+        "substitute",
+        "catalyst",
+        "verdict"
+      ],
+      "answer": [
+        3
+      ],
+      "explanation": "The researcher uses the contradiction to stimulate investigation. Catalyst means something that prompts activity; a substitute would replace investigation rather than encourage it.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The author consistently distinguishes what the documents establish from what they merely suggest, a practice that gives the argument unusual __________.",
+      "choices": [
+        "sensationalism",
+        "precision",
+        "urgency",
+        "novelty",
+        "brevity"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Carefully distinguishing established facts from suggestions makes an argument precise. It does not necessarily make it new, short, urgent, or sensational.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Public confidence improved after the agency began publishing unsuccessful trials alongside successful ones; acknowledging failure proved more __________ than presenting an uninterrupted record of success.",
+      "choices": [
+        "credible",
+        "expedient",
+        "decorative",
+        "evasive",
+        "profitable"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "The stated outcome concerns confidence. An account that acknowledges failures can be more credible, or believable; profitability and convenience are not established.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The two accounts agree on the sequence of events but __________ sharply on the motives of the participants.",
+      "choices": [
+        "converge",
+        "diverge",
+        "elaborate",
+        "depend",
+        "settle"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Agreement about events contrasts with disagreement about motives. Diverge means differ or move apart.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The city had ample funds to build the facility; the obstacle was __________, since no department had authority to approve its operation.",
+      "choices": [
+        "financial",
+        "technical",
+        "climatic",
+        "administrative",
+        "aesthetic"
+      ],
+      "answer": [
+        3
+      ],
+      "explanation": "The obstacle concerns departmental authority rather than money, technology, climate, or appearance. It is administrative.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Despite its ambitious title, the report offers a __________ account, examining only one small district over a single year.",
+      "choices": [
+        "sweeping",
+        "definitive",
+        "restricted",
+        "comparative",
+        "speculative"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "The limited place and time indicate restricted scope. The passage says nothing about comparison or speculation.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The critic praises the novel without ignoring its weaknesses; her assessment is enthusiastic but not __________.",
+      "choices": [
+        "uncritical",
+        "informed",
+        "detailed",
+        "favorable",
+        "coherent"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "She notices weaknesses, so her enthusiasm is not uncritical. An assessment can be favorable while still identifying flaws.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Repeated measurements produced nearly identical values, but all were far from the known value, demonstrating that consistency does not guarantee __________.",
+      "choices": [
+        "precision",
+        "accuracy",
+        "frequency",
+        "simplicity",
+        "resolution"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Agreement among measurements shows consistency; agreement with the known value concerns accuracy. The sentence deliberately distinguishes the two.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The proposed explanation is __________: it accounts for the new observations without requiring the abandonment of principles already supported by independent evidence.",
+      "choices": [
+        "compatible with existing knowledge",
+        "immune to revision",
+        "contradicted by the evidence",
+        "irrelevant to the observations",
+        "dependent on public approval"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "The explanation fits new observations while preserving independently supported principles. That makes it compatible with existing knowledge, but not immune to revision.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The policy initially appeared to reduce traffic, but the return of congestion after a few weeks suggested that the improvement was __________.",
+      "choices": [
+        "permanent",
+        "transitory",
+        "unprecedented",
+        "predictable",
+        "equitable"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "An improvement that disappears after a few weeks is transitory, or temporary. Nothing establishes predictability or fairness.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "A claim does not become __________ merely because it is repeated frequently; repetition adds no independent evidence.",
+      "choices": [
+        "familiar",
+        "persuasive",
+        "audible",
+        "widespread",
+        "memorable"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "The second clause concerns evidence, so the issue is whether repetition makes a claim convincing or persuasive. Repetition can indeed make it familiar or memorable.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The editor removed several anecdotes that were entertaining but __________ to the central argument.",
+      "choices": [
+        "integral",
+        "incidental",
+        "hostile",
+        "identical",
+        "indispensable"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "The anecdotes entertain but are not central to the argument. Incidental means peripheral; integral and indispensable mean essential.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Rather than __________ all disagreement, the chair asked members to state precisely where their interpretations differed.",
+      "choices": [
+        "expose",
+        "document",
+        "suppress",
+        "clarify",
+        "acknowledge"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Inviting members to specify disagreements contrasts with suppressing them. The other choices are consistent with bringing disagreement into the open.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The new evidence __________ the original interpretation: it revealed a circumstance that the interpretation had explicitly assumed was absent.",
+      "choices": [
+        "corroborates",
+        "undermines",
+        "summarizes",
+        "popularizes",
+        "duplicates"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Evidence contradicting an explicit assumption weakens, or undermines, the interpretation. It does not merely restate or duplicate it.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Her willingness to revise the model was a sign of intellectual __________, not an indication that she had never considered its assumptions.",
+      "choices": [
+        "rigidity",
+        "flexibility",
+        "vanity",
+        "indifference",
+        "carelessness"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Revising a model when appropriate suggests flexibility. The second clause rules out the inference that she was careless about assumptions.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The archive contains many official accounts but few private letters, so conclusions about everyday personal experience must remain __________.",
+      "choices": [
+        "categorical",
+        "tentative",
+        "redundant",
+        "impersonal",
+        "unanimous"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Limited evidence about personal experience requires provisional or tentative conclusions rather than categorical ones.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The claim that the method is entirely new is __________ by the discovery of a substantially similar procedure in a much earlier manual.",
+      "choices": [
+        "belied",
+        "reinforced",
+        "explained",
+        "repeated",
+        "anticipated"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "An earlier substantially similar procedure contradicts the claim of complete novelty. Belied means shown to be false or misleading.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "By using the same definition throughout, the researcher avoided the __________ that arises when a term changes meaning midway through an argument.",
+      "choices": [
+        "equivocation",
+        "corroboration",
+        "replication",
+        "concession",
+        "quantification"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Equivocation involves shifting or exploiting meanings of a term. A stable definition avoids that problem.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The small study was valuable as an exploratory investigation, but the authors resisted __________ its findings to populations they had not examined.",
+      "choices": [
+        "restricting",
+        "generalizing",
+        "attributing",
+        "concealing",
+        "reducing"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Applying findings beyond the sampled population is generalizing. The authors caution against extending the result beyond the evidence.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The committee retained the rule provisionally, making its continued use __________ on a review of the following year’s results.",
+      "choices": [
+        "irrelevant",
+        "contingent",
+        "opposed",
+        "incidental",
+        "immune"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "The rule’s continuation depends on the review. Contingent on means dependent on; immune to would remove that dependency.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The account is difficult to evaluate because it offers conclusions without identifying the observations on which those conclusions are __________.",
+      "choices": [
+        "predicated",
+        "imposed",
+        "discarded",
+        "reversed",
+        "embellished"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Conclusions are predicated on, or based on, observations. The missing evidential basis is the problem.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The manager’s apparent decisiveness was __________: each firm announcement was followed within hours by a contradictory instruction.",
+      "choices": [
+        "illusory",
+        "constructive",
+        "excessive",
+        "judicious",
+        "irreversible"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Rapid contradictions show that the appearance of firmness was misleading. Illusory means apparent rather than real.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The reviewer calls the theory useful but __________, since it explains a limited range of cases and leaves several important patterns unresolved.",
+      "choices": [
+        "comprehensive",
+        "incomplete",
+        "superfluous",
+        "unintelligible",
+        "conclusive"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "The theory leaves important patterns unexplained, making it incomplete. Being incomplete does not make it useless or unintelligible.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The distinction is more than __________; applying one category rather than the other changes which applicants qualify for assistance.",
+      "choices": [
+        "consequential",
+        "substantive",
+        "semantic",
+        "practical",
+        "decisive"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Because the distinction affects eligibility, it is more than a difference in words or labels. Semantic is the only choice that the consequence clearly exceeds.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The author’s initial skepticism gradually __________ as independent teams obtained the same result using different instruments.",
+      "choices": [
+        "abated",
+        "intensified",
+        "proliferated",
+        "hardened",
+        "recurred"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Independent replication provides a reason for skepticism to diminish. Abated means became less intense.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The publication’s corrections policy is designed to make errors __________ rather than to suggest that errors never occur.",
+      "choices": [
+        "invisible",
+        "irrelevant",
+        "traceable",
+        "inevitable",
+        "acceptable"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Corrections allow readers to identify and follow errors. Traceable fits that purpose without implying that mistakes are acceptable or unavoidable.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "Because the translator preserved the uncertainty of the original phrasing, the translation avoids giving a misleading impression of __________.",
+      "choices": [
+        "ambiguity",
+        "certainty",
+        "complexity",
+        "antiquity",
+        "informality"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Preserving uncertainty avoids implying unwarranted certainty. Ambiguity would repeat uncertainty rather than identify the misleading impression.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The proposal won support through __________ rather than compulsion: members were persuaded of its merits and remained free to reject it.",
+      "choices": [
+        "coercion",
+        "reasoned argument",
+        "financial penalty",
+        "mandatory compliance",
+        "concealment"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "Persuasion through merits, with freedom to refuse, indicates reasoned argument. The other options involve coercion or deception.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The observation is __________ with the hypothesis but does not uniquely support it, since several competing hypotheses predict the same result.",
+      "choices": [
+        "incompatible",
+        "consistent",
+        "synonymous",
+        "identical",
+        "interchangeable"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "A hypothesis that predicts an observation is consistent with it, even if rival explanations make the same prediction. Consistency is weaker than exclusive confirmation.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The historian treats the absence of records cautiously, recognizing that an event’s being undocumented is not __________ to its never having occurred.",
+      "choices": [
+        "equivalent",
+        "hostile",
+        "subsequent",
+        "preferable",
+        "responsive"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "The sentence distinguishes lack of documentation from proof of nonoccurrence. Those claims are not equivalent.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The instructions leave no discretion about the deadline but are __________ about how the required work should be organized.",
+      "choices": [
+        "inflexible",
+        "prescriptive",
+        "noncommittal",
+        "contradictory",
+        "exhaustive"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "The contrast is between a fixed deadline and no specified arrangement of the work. Noncommittal means not taking a definite position.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The researchers described the result as a __________ rather than a refutation: it restricted the theory’s scope without showing that the theory failed in every case.",
+      "choices": [
+        "qualification",
+        "duplication",
+        "fabrication",
+        "vindication",
+        "digression"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Restricting a theory’s scope qualifies its claim. Refuting it entirely would go further than the evidence described.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The report’s brevity is not evidence of __________; its authors had removed repetition while retaining every necessary step in the explanation.",
+      "choices": [
+        "economy",
+        "clarity",
+        "superficiality",
+        "discipline",
+        "precision"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Keeping every necessary step while removing repetition can make a report brief without making it shallow or superficial.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The two measurements cannot be compared directly because they were obtained under __________ conditions, with one instrument operating indoors and the other outdoors.",
+      "choices": [
+        "identical",
+        "equivalent",
+        "disparate",
+        "controlled",
+        "constant"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Indoors and outdoors are different conditions. Disparate means markedly different; controlled or constant conditions are not established.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The speaker’s concession was __________: she accepted the narrow factual point while maintaining her broader objection to the proposed policy.",
+      "choices": [
+        "limited",
+        "unconditional",
+        "comprehensive",
+        "incoherent",
+        "irrelevant"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Accepting only a narrow point while maintaining the main objection is a limited concession. It is not an unconditional acceptance.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "tc1",
+      "stem": "The finding should prompt __________ of the estimate, since the new records reveal that one of its major inputs was substantially understated.",
+      "choices": [
+        "recalculation",
+        "celebration",
+        "concealment",
+        "abandonment of measurement",
+        "unqualified acceptance"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "An understated input calls for computing the estimate again with corrected information. It does not justify accepting the old estimate without qualification.",
+      "difficulty": "medium"
+    }
+  ],
+  "tc2": [
+    {
+      "type": "tc2",
+      "stem": "The committee’s public statement was (i) __________, but its internal memorandum was remarkably (ii) __________, listing precise objections to each proposal.",
+      "groups": [
+        [
+          "equivocal",
+          "explicit",
+          "concise"
+        ],
+        [
+          "candid",
+          "evasive",
+          "repetitive"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "The contrast is between an ambiguous public statement and a forthright internal one. Precise objections support candid; the first blank must supply a contrast, so equivocal fits.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "A hypothesis that (i) __________ every possible observation gains little support from any one result, because the result cannot (ii) __________ it from competing explanations.",
+      "groups": [
+        [
+          "accommodates",
+          "excludes",
+          "predicts uniquely"
+        ],
+        [
+          "distinguish",
+          "derive",
+          "protect"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "If every observation is compatible with the hypothesis, a single observation does not distinguish it. Excludes every observation would make it directly contradicted rather than hard to discriminate.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "Although the archive is (i) __________ in official correspondence, its shortage of private letters makes it (ii) __________ for studying everyday domestic life.",
+      "groups": [
+        [
+          "deficient",
+          "rich",
+          "uniform"
+        ],
+        [
+          "limited",
+          "ideal",
+          "conclusive"
+        ]
+      ],
+      "answer": [
+        1,
+        0
+      ],
+      "explanation": "The sentence contrasts abundant official correspondence with limited evidence about domestic life. Rich and limited satisfy both parts.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The study’s narrow sample does not make its results (i) __________, but it does make broad applications of them (ii) __________.",
+      "groups": [
+        [
+          "worthless",
+          "precise",
+          "preliminary"
+        ],
+        [
+          "unwarranted",
+          "inevitable",
+          "unnecessary"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "A narrow study can still have value. The qualification concerns extending it broadly without sufficient support, which is unwarranted.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "By acknowledging an exception rather than (i) __________ it, the author makes the argument more (ii) __________: readers can see exactly where the claim ceases to apply.",
+      "groups": [
+        [
+          "concealing",
+          "documenting",
+          "examining"
+        ],
+        [
+          "transparent",
+          "universal",
+          "dogmatic"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "Openly recognizing rather than hiding an exception clarifies the argument’s limits. That increases transparency rather than universality.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The first explanation attributes the change to individual choices, whereas the second regards those choices as (i) __________ by conditions beyond any individual’s control; the difference is therefore (ii) __________.",
+      "groups": [
+        [
+          "constrained",
+          "liberated",
+          "ignored"
+        ],
+        [
+          "substantive",
+          "merely verbal",
+          "accidental"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "External constraints contrast with attributing the change to individuals alone. That is a difference in explanatory content, hence substantive.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The historian is (i) __________ about the date of the event but (ii) __________ about its cause, which the surviving records never address.",
+      "groups": [
+        [
+          "certain",
+          "evasive",
+          "skeptical"
+        ],
+        [
+          "agnostic",
+          "dogmatic",
+          "explicit"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "The contrast requires confidence about the date and suspension of judgment about the undocumented cause. Agnostic means withholding a conclusion here.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "Repeated use made the procedure (i) __________, yet familiarity should not be mistaken for (ii) __________; no comparison had established that it outperformed the alternatives.",
+      "groups": [
+        [
+          "routine",
+          "obsolete",
+          "novel"
+        ],
+        [
+          "superiority",
+          "frequency",
+          "tradition"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "Use can make a method routine without proving it better. The missing comparison specifically concerns superiority.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The researcher’s revision (i) __________ the original claim rather than abandoning it, limiting a supposed universal rule to a (ii) __________ set of circumstances.",
+      "groups": [
+        [
+          "qualifies",
+          "duplicates",
+          "popularizes"
+        ],
+        [
+          "restricted",
+          "boundless",
+          "random"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "Narrowing a universal claim qualifies it. A restricted set of circumstances describes the resulting scope.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The editor sought to preserve the account’s (i) __________ while removing its (ii) __________, retaining the necessary distinctions but deleting repeated explanations.",
+      "groups": [
+        [
+          "precision",
+          "length",
+          "obscurity"
+        ],
+        [
+          "redundancy",
+          "evidence",
+          "coherence"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "Necessary distinctions preserve precision, while repeated explanations are redundant. Removing evidence or coherence would not match the stated editing method.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The outcome is (i) __________ with the theory, but calling it a decisive confirmation would be (ii) __________ because several rival theories predict it as well.",
+      "groups": [
+        [
+          "consistent",
+          "incompatible",
+          "interchangeable"
+        ],
+        [
+          "premature",
+          "inevitable",
+          "restrained"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "A predicted result is consistent with the theory. Since rivals also predict it, calling it decisive confirmation is premature.",
+      "difficulty": "hard"
+    },
+    {
+      "type": "tc2",
+      "stem": "The policy’s language appears (i) __________, but its application is (ii) __________: officials have interpreted the same phrase in opposite ways.",
+      "groups": [
+        [
+          "unambiguous",
+          "tentative",
+          "figurative"
+        ],
+        [
+          "inconsistent",
+          "uniform",
+          "inevitable"
+        ]
+      ],
+      "answer": [
+        0,
+        0
+      ],
+      "explanation": "Clear-looking language contrasts with inconsistent application, demonstrated by opposite interpretations of the same phrase.",
+      "difficulty": "hard"
+    }
+  ],
+  "se": [
+    {
+      "type": "se",
+      "stem": "The report is deliberately __________: it states what the observations establish and declines to speculate beyond them.",
+      "choices": [
+        "circumspect",
+        "reckless",
+        "cautious",
+        "exhaustive",
+        "polemical",
+        "cryptic"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Circumspect and cautious both describe the restraint defined after the colon. Exhaustive means complete, and cryptic means obscure; neither follows from avoiding speculation.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The committee’s support was __________; it would continue only if an independent review confirmed the projected savings.",
+      "choices": [
+        "unequivocal",
+        "conditional",
+        "unanimous",
+        "provisional",
+        "enthusiastic",
+        "permanent"
+      ],
+      "answer": [
+        1,
+        3
+      ],
+      "explanation": "Conditional and provisional both express support subject to later confirmation. The sentence supplies no evidence about unanimity or enthusiasm.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "By presenting an ordinary delay as evidence of a sweeping conspiracy, the commentator offered an account that was plainly __________.",
+      "choices": [
+        "measured",
+        "overblown",
+        "empirical",
+        "exaggerated",
+        "detached",
+        "restrained"
+      ],
+      "answer": [
+        1,
+        3
+      ],
+      "explanation": "Overblown and exaggerated both describe the disproportionate interpretation. Measured and restrained are opposites.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The researcher’s explanation was __________, replacing an apparently complicated pattern with a single readily understood mechanism.",
+      "choices": [
+        "opaque",
+        "lucid",
+        "tendentious",
+        "clear",
+        "convoluted",
+        "equivocal"
+      ],
+      "answer": [
+        1,
+        3
+      ],
+      "explanation": "Lucid and clear both fit making the mechanism readily understood. The other choices imply obscurity, bias, or uncertainty.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The practice had become so __________ that few participants remembered that it had once been controversial.",
+      "choices": [
+        "entrenched",
+        "unusual",
+        "established",
+        "short-lived",
+        "unpopular",
+        "experimental"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Entrenched and established convey a practice firmly in place. The sentence does not imply that its merits have been demonstrated experimentally.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The unexpected result did not __________ the theory; it merely identified a condition under which the theory needed refinement.",
+      "choices": [
+        "invalidate",
+        "clarify",
+        "refute",
+        "extend",
+        "illustrate",
+        "popularize"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Invalidate and refute both mean show the theory to be wrong. The sentence contrasts complete rejection with limited refinement.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The author’s criticism is __________: she identifies weaknesses without questioning her opponents’ motives or intelligence.",
+      "choices": [
+        "vituperative",
+        "temperate",
+        "personal",
+        "moderate",
+        "vehement",
+        "dismissive"
+      ],
+      "answer": [
+        1,
+        3
+      ],
+      "explanation": "Temperate and moderate describe criticism delivered with restraint rather than personal attacks. Identifying weaknesses does not require dismissing all merit.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The agreement was __________, settling the immediate dispute while leaving the underlying allocation of authority unresolved.",
+      "choices": [
+        "definitive",
+        "temporary",
+        "interim",
+        "comprehensive",
+        "irrevocable",
+        "exhaustive"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Temporary and interim both express a settlement for the present. The unresolved authority issue rules out a comprehensive settlement.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The report’s confident language is __________, since its own appendix acknowledges that the evidence is too sparse to justify firm conclusions.",
+      "choices": [
+        "warranted",
+        "misleading",
+        "deceptive",
+        "precise",
+        "tentative",
+        "justified"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Misleading and deceptive both describe language that creates unwarranted confidence. Tentative language would acknowledge the uncertainty.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The archivist’s annotations are __________, supplying details essential to understanding references that otherwise would be obscure.",
+      "choices": [
+        "superfluous",
+        "indispensable",
+        "essential",
+        "ornamental",
+        "digressive",
+        "redundant"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Indispensable and essential both fit details needed for understanding. Ornamental or redundant material is not necessary in that way.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "Because it can accommodate mutually contradictory results without modification, the proposed explanation is difficult to __________.",
+      "choices": [
+        "evaluate",
+        "celebrate",
+        "assess",
+        "repeat",
+        "summarize",
+        "advertise"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Evaluate and assess both mean judge the explanation’s merits. The problem is that contrary results cannot discriminate in its favor or against it.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The passage is __________, acknowledging evidence for both interpretations before explaining why neither is conclusive.",
+      "choices": [
+        "partisan",
+        "balanced",
+        "evenhanded",
+        "credulous",
+        "dogmatic",
+        "evasive"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Balanced and evenhanded both describe fair consideration of both views. Finding neither conclusive is not inherently evasive.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The distinction between the two procedures is __________; it changes the outcome only in an unusual class of cases.",
+      "choices": [
+        "universal",
+        "subtle",
+        "obvious",
+        "fine",
+        "fundamental",
+        "unambiguous"
+      ],
+      "answer": [
+        1,
+        3
+      ],
+      "explanation": "Subtle and fine both convey a narrow distinction requiring careful attention. The sentence does not claim the distinction is impossible to state clearly.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The proposed change would __________ existing inequalities by directing the largest benefits to those already receiving the most assistance.",
+      "choices": [
+        "mitigate",
+        "exacerbate",
+        "aggravate",
+        "measure",
+        "conceal",
+        "alleviate"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Exacerbate and aggravate both mean make worse. Mitigate and alleviate would reverse the stated direction of the effect.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The initial estimate was __________, since it omitted several substantial costs that later calculations included.",
+      "choices": [
+        "inflated",
+        "understated",
+        "conservative",
+        "exact",
+        "comprehensive",
+        "exorbitant"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explanation": "Understated and conservative both describe an estimate on the low side in this context. Inflated and exorbitant imply too high a figure.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The scholar remained __________, refusing to endorse either account until additional documents became available.",
+      "choices": [
+        "noncommittal",
+        "dogmatic",
+        "undecided",
+        "credulous",
+        "partisan",
+        "certain"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Noncommittal and undecided both express withholding a choice between accounts. Partisan and dogmatic would imply commitment.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The apparent disagreement was largely __________: once the participants defined their terms, they discovered that they supported the same policy.",
+      "choices": [
+        "verbal",
+        "substantive",
+        "terminological",
+        "irreconcilable",
+        "strategic",
+        "fundamental"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Verbal and terminological identify a disagreement about language. Discovering agreement on policy weakens the interpretation of a substantive conflict.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The account is __________, repeatedly attributing to the evidence a certainty that the evidence itself does not support.",
+      "choices": [
+        "overconfident",
+        "diffident",
+        "presumptuous",
+        "tentative",
+        "reticent",
+        "meticulous"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Overconfident and presumptuous both fit claiming more than the evidence warrants. Diffident and tentative convey insufficient rather than excessive confidence.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The recommendation is __________, specifying a desired outcome while leaving institutions free to choose how to achieve it.",
+      "choices": [
+        "flexible",
+        "prescriptive",
+        "adaptable",
+        "mandatory",
+        "rigid",
+        "exacting"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Flexible and adaptable both fit freedom over implementation. The sentence does not determine whether the outcome itself is mandatory.",
+      "difficulty": "medium"
+    },
+    {
+      "type": "se",
+      "stem": "The discovery __________ the prevailing interpretation, supplying independent evidence for a claim previously supported by only one source.",
+      "choices": [
+        "corroborates",
+        "undermines",
+        "substantiates",
+        "complicates",
+        "supplants",
+        "obscures"
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explanation": "Corroborates and substantiates both mean provide supporting evidence. Additional support does not replace the interpretation.",
+      "difficulty": "medium"
+    }
+  ],
+  "rc": [
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A city replaced conventional water meters with devices that display hourly consumption. Households using the new meters consumed less water during the first summer. Officials attributed the reduction to the information provided by the displays. However, installation coincided with an unusually strict watering restriction. A second study compared households subject to the same restriction, some with displays activated and others with displays concealed. Consumption was lower in the activated group, but only among households that regularly checked the display. Because checking was voluntary, this association does not establish that checking itself caused the reduction: households already committed to conservation may have checked more often. The studies therefore support continued investigation of the displays while leaving the mechanism of their effect uncertain.",
+      "subs": [
+        {
+          "stem": "The passage primarily seeks to",
+          "choices": [
+            "establish that watering restrictions are ineffective",
+            "explain why displays should be removed",
+            "evaluate evidence about an intervention while identifying remaining uncertainty",
+            "prove that conservation attitudes cannot be measured",
+            "compare the costs of two meter technologies"
+          ],
+          "answer": 2,
+          "explanation": "The author reviews two studies, identifies alternative explanations, and preserves uncertainty about the mechanism. No cost comparison or recommendation to remove meters is given."
+        },
+        {
+          "stem": "Why does the author mention the watering restriction?",
+          "choices": [
+            "It may account for some of the first study’s reduction.",
+            "It explains why displays were concealed in every household.",
+            "It establishes that officials falsified their records.",
+            "It shows that water use could not be measured.",
+            "It proves the new meters increased consumption."
+          ],
+          "answer": 0,
+          "explanation": "The restriction occurred alongside installation, so it is a competing explanation for the first result."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "The first installation coincided with a watering restriction.",
+            "The second study proved that voluntary checking caused conservation.",
+            "Checking may have reflected preexisting commitment to conservation."
+          ],
+          "answer": [
+            0,
+            2
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A city replaced conventional water meters with devices that display hourly consumption.",
+            "Households using the new meters consumed less water during the first summer.",
+            "Officials attributed the reduction to the information provided by the displays.",
+            "However, installation coincided with an unusually strict watering restriction.",
+            "A second study compared households subject to the same restriction, some with displays activated and others with displays concealed.",
+            "Consumption was lower in the activated group, but only among households that regularly checked the display.",
+            "Because checking was voluntary, this association does not establish that checking itself caused the reduction: households already committed to conservation may have checked more often.",
+            "The studies therefore support continued investigation of the displays while leaving the mechanism of their effect uncertain."
+          ],
+          "answer": 7,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "An editor preparing a collection of a poet’s letters discovered two versions of several letters: a rough draft and a polished copy. Earlier editors had generally preferred the polished copies, assuming that a text prepared for a recipient best represented the poet’s intention. The new editor instead prints both versions. This decision does not imply that roughness is intrinsically more authentic. In some cases the drafts contain abandoned jokes; in others they disclose concerns omitted from the copies. The value of the drafts lies in the comparison they permit. Readers can see how a private formulation was adjusted for a particular audience. Treating either version as the poet’s unfiltered voice would obscure the purposeful choices revealed by the existence of two texts.",
+      "subs": [
+        {
+          "stem": "The passage primarily defends",
+          "choices": [
+            "publishing only rough drafts",
+            "discarding all earlier editions",
+            "publishing two versions to illuminate revision and audience",
+            "identifying the recipient of every letter",
+            "ranking polished prose above unfinished writing"
+          ],
+          "answer": 2,
+          "explanation": "Both versions make the process of adaptation visible. The author rejects treating either as an unfiltered voice."
+        },
+        {
+          "stem": "The new editor’s approach differs from the earlier editors’ approach chiefly by",
+          "choices": [
+            "regarding every draft as more authentic",
+            "preserving opportunities to compare versions",
+            "refusing to attribute intention to the poet",
+            "removing jokes from every letter",
+            "printing only previously unknown letters"
+          ],
+          "answer": 1,
+          "explanation": "Printing both texts permits comparison, rather than selecting the polished copy as the single preferred text."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "Earlier editors generally preferred polished copies.",
+            "The new editor assumes that roughness is always more authentic.",
+            "Comparing versions can reveal adjustments for an audience."
+          ],
+          "answer": [
+            0,
+            2
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "An editor preparing a collection of a poet’s letters discovered two versions of several letters: a rough draft and a polished copy.",
+            "Earlier editors had generally preferred the polished copies, assuming that a text prepared for a recipient best represented the poet’s intention.",
+            "The new editor instead prints both versions.",
+            "This decision does not imply that roughness is intrinsically more authentic.",
+            "In some cases the drafts contain abandoned jokes; in others they disclose concerns omitted from the copies.",
+            "The value of the drafts lies in the comparison they permit.",
+            "Readers can see how a private formulation was adjusted for a particular audience.",
+            "Treating either version as the poet’s unfiltered voice would obscure the purposeful choices revealed by the existence of two texts."
+          ],
+          "answer": 7,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A manufacturer reported that a new scheduling system increased output per worker. Its calculation divided completed units by the number of workers on each shift. Yet the new system also transferred routine maintenance to a separate contractor, whose labor was excluded from the denominator. An analyst recalculated productivity using the combined hours of employees and contractors. The increase became smaller but did not disappear. The analyst therefore rejected both the original claim that the full increase reflected greater efficiency and the opposing claim that the improvement was entirely an accounting artifact. The case illustrates how a change in the boundary of a measurement can exaggerate a real improvement without creating that improvement from nothing.",
+      "subs": [
+        {
+          "stem": "The passage primarily illustrates",
+          "choices": [
+            "why all productivity measurement is impossible",
+            "how a measurement boundary can overstate a genuine improvement",
+            "why contractors are always more productive than employees",
+            "how scheduling eliminates maintenance work",
+            "why completed units are an irrelevant measure"
+          ],
+          "answer": 1,
+          "explanation": "The corrected calculation retains an improvement but reduces its size, demonstrating exaggeration of a real change."
+        },
+        {
+          "stem": "What was omitted from the original productivity calculation?",
+          "choices": [
+            "Completed units from the new system",
+            "The number of shifts",
+            "Contractor labor used for routine maintenance",
+            "All employee labor",
+            "The cost of the scheduling software"
+          ],
+          "answer": 2,
+          "explanation": "The denominator excluded the maintenance contractor’s labor. The passage does not discuss software cost."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "The initial measure excluded contractor labor.",
+            "The corrected calculation eliminated every increase.",
+            "Some productivity increase survived the recalculation."
+          ],
+          "answer": [
+            0,
+            2
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A manufacturer reported that a new scheduling system increased output per worker.",
+            "Its calculation divided completed units by the number of workers on each shift.",
+            "Yet the new system also transferred routine maintenance to a separate contractor, whose labor was excluded from the denominator.",
+            "An analyst recalculated productivity using the combined hours of employees and contractors.",
+            "The increase became smaller but did not disappear.",
+            "The analyst therefore rejected both the original claim that the full increase reflected greater efficiency and the opposing claim that the improvement was entirely an accounting artifact.",
+            "The case illustrates how a change in the boundary of a measurement can exaggerate a real improvement without creating that improvement from nothing."
+          ],
+          "answer": 6,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A study of restored grasslands found more plant species on sites where grazing had resumed than on sites left ungrazed. The investigators proposed that grazing reduced the dominance of a few tall grasses, allowing shorter plants to persist. Critics noted that the grazed sites had also received a larger initial variety of seeds. To distinguish the explanations, a later experiment supplied the same seed mixture to matched plots and allowed grazing on only half. Grazing increased the number of shorter species but had little effect on the total number of species, because several tall species declined. The later result supports the proposed competitive mechanism more directly than the original comparison does, while weakening the broader expectation that grazing necessarily raises total richness.",
+      "subs": [
+        {
+          "stem": "The passage primarily discusses",
+          "choices": [
+            "a sequence of studies that narrows an ecological claim",
+            "proof that all restored grasslands need grazing",
+            "why seed mixtures never influence vegetation",
+            "the economic costs of livestock",
+            "a method for eliminating all tall grasses"
+          ],
+          "answer": 0,
+          "explanation": "The later controlled comparison supports a mechanism while qualifying the broad claim about total species richness."
+        },
+        {
+          "stem": "The larger initial seed variety is important because it",
+          "choices": [
+            "offers an alternative explanation for the original difference",
+            "shows that grazing was randomly assigned in the first study",
+            "proves grazing had no effect",
+            "makes the later experiment irrelevant",
+            "guarantees the survival of every species"
+          ],
+          "answer": 0,
+          "explanation": "The initial seed difference could account for higher richness independently of grazing."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "The first comparison involved different initial seed varieties.",
+            "The later experiment used the same seed mixture in matched plots.",
+            "Grazing increased every group of species in the later experiment."
+          ],
+          "answer": [
+            0,
+            1
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A study of restored grasslands found more plant species on sites where grazing had resumed than on sites left ungrazed.",
+            "The investigators proposed that grazing reduced the dominance of a few tall grasses, allowing shorter plants to persist.",
+            "Critics noted that the grazed sites had also received a larger initial variety of seeds.",
+            "To distinguish the explanations, a later experiment supplied the same seed mixture to matched plots and allowed grazing on only half.",
+            "Grazing increased the number of shorter species but had little effect on the total number of species, because several tall species declined.",
+            "The later result supports the proposed competitive mechanism more directly than the original comparison does, while weakening the broader expectation that grazing necessarily raises total richness."
+          ],
+          "answer": 5,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A museum introduced labels describing several possible interpretations of an ancient object rather than presenting a single account of its use. Some visitors reported greater uncertainty afterward, which administrators initially treated as evidence that the labels had failed. Interviews complicated that judgment. Visitors who read the new labels were more likely to distinguish an observation about the object from an inference about its purpose, and they could explain what additional evidence would favor one interpretation. If a museum’s purpose is merely to transmit a settled story, greater uncertainty may count as a drawback. If its purpose includes teaching how knowledge is constructed, however, a qualified understanding may be a better outcome than unjustified confidence.",
+      "subs": [
+        {
+          "stem": "The passage’s main argument is that",
+          "choices": [
+            "museum labels should never express uncertainty",
+            "the success of the new labels depends partly on the educational goal",
+            "all historical interpretations are equally plausible",
+            "visitors cannot understand evidential reasoning",
+            "a single account always produces accurate knowledge"
+          ],
+          "answer": 1,
+          "explanation": "The author evaluates uncertainty differently under two possible goals and describes evidential understanding as a possible benefit."
+        },
+        {
+          "stem": "The interviews indicated that readers of the new labels could",
+          "choices": [
+            "identify which interpretation was certainly true",
+            "distinguish observations from inferences",
+            "date the object precisely",
+            "recall every word on the labels",
+            "resolve all disagreements among administrators"
+          ],
+          "answer": 1,
+          "explanation": "The stated interview finding concerns distinguishing observation from inference and identifying relevant further evidence."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "Some visitors reported greater uncertainty.",
+            "The interviews found improved distinction between observation and inference.",
+            "The author concludes that every interpretation is equally well supported."
+          ],
+          "answer": [
+            0,
+            1
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A museum introduced labels describing several possible interpretations of an ancient object rather than presenting a single account of its use.",
+            "Some visitors reported greater uncertainty afterward, which administrators initially treated as evidence that the labels had failed.",
+            "Interviews complicated that judgment.",
+            "Visitors who read the new labels were more likely to distinguish an observation about the object from an inference about its purpose, and they could explain what additional evidence would favor one interpretation.",
+            "If a museum’s purpose is merely to transmit a settled story, greater uncertainty may count as a drawback.",
+            "If its purpose includes teaching how knowledge is constructed, however, a qualified understanding may be a better outcome than unjustified confidence."
+          ],
+          "answer": 5,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A transit agency evaluated a route change by comparing average journey times before and after implementation. The average improved, but complaints increased. A review showed that most riders gained a few minutes while a smaller group faced substantially less predictable connections. The original average captured changes in duration but concealed changes in reliability and their uneven distribution. This does not make average journey time a useless indicator. It shows that a summary designed to answer one question—how long journeys take on average—cannot by itself answer another question—how consistently different riders can arrive when expected. A more informative evaluation would retain the average while examining variation and identifying which groups bore the disruption.",
+      "subs": [
+        {
+          "stem": "The passage primarily recommends",
+          "choices": [
+            "replacing all measurements with complaints",
+            "supplementing an average with measures of variation and distribution",
+            "abandoning the route change without further analysis",
+            "measuring only the fastest journeys",
+            "assuming every complaint represents a longer journey"
+          ],
+          "answer": 1,
+          "explanation": "The author explicitly retains the average while calling for reliability and subgroup information."
+        },
+        {
+          "stem": "Why could complaints increase despite an improved average?",
+          "choices": [
+            "Every rider’s trip became longer.",
+            "Some riders experienced less predictable connections.",
+            "The agency stopped measuring journey duration.",
+            "No rider gained time.",
+            "The average necessarily excludes all complaints."
+          ],
+          "answer": 1,
+          "explanation": "The passage identifies a smaller group with substantially less reliable connections, even as most riders gained time."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "Most riders gained a few minutes.",
+            "All riders experienced more predictable journeys.",
+            "A smaller group experienced less predictable connections."
+          ],
+          "answer": [
+            0,
+            2
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A transit agency evaluated a route change by comparing average journey times before and after implementation.",
+            "The average improved, but complaints increased.",
+            "A review showed that most riders gained a few minutes while a smaller group faced substantially less predictable connections.",
+            "The original average captured changes in duration but concealed changes in reliability and their uneven distribution.",
+            "This does not make average journey time a useless indicator.",
+            "It shows that a summary designed to answer one question—how long journeys take on average—cannot by itself answer another question—how consistently different riders can arrive when expected.",
+            "A more informative evaluation would retain the average while examining variation and identifying which groups bore the disruption."
+          ],
+          "answer": 6,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    },
+    {
+      "type": "rc",
+      "difficulty": "medium",
+      "passage": "A researcher examining software adoption distinguished the initial decision to try a tool from its continued use. Training attendance predicted trial, but it did not predict sustained use once the analysis accounted for whether the tool fitted existing work routines. A manager concluded that training was unnecessary. The researcher objected that the analysis concerned different stages: training could help workers reach the trial stage even if compatibility with routines better explained what happened afterward. An intervention can be important early in a process without being the principal determinant at every later stage. The findings therefore suggest coordinating training with changes in work organization, rather than inferring that either factor alone is sufficient.",
+      "subs": [
+        {
+          "stem": "The passage primarily argues that",
+          "choices": [
+            "training guarantees permanent adoption",
+            "different stages of adoption may depend on different factors",
+            "work routines never change",
+            "continued use can be inferred from attendance alone",
+            "trial and sustained use are identical outcomes"
+          ],
+          "answer": 1,
+          "explanation": "The researcher distinguishes factors relevant to beginning use from factors associated with continued use."
+        },
+        {
+          "stem": "The manager’s conclusion is criticized because it",
+          "choices": [
+            "ignores training’s possible contribution to the trial stage",
+            "overstates the quality of the tool",
+            "assumes that all workers attended training",
+            "requires more statistical detail than any study can provide",
+            "confuses software with hardware"
+          ],
+          "answer": 0,
+          "explanation": "A weak association with continued use does not erase training’s reported association with initial trial."
+        },
+        {
+          "format": "multi",
+          "stem": "Select all statements supported by the passage.",
+          "choices": [
+            "Training attendance predicted initial trial.",
+            "Training alone was sufficient for sustained adoption.",
+            "Compatibility with routines was associated with continued use."
+          ],
+          "answer": [
+            0,
+            2
+          ],
+          "explanation": "The selected statements are explicitly stated in the passage. The remaining statement overstates or contradicts the reported result."
+        },
+        {
+          "format": "sentence",
+          "stem": "Select the sentence that states the author’s concluding assessment or recommendation.",
+          "choices": [
+            "A researcher examining software adoption distinguished the initial decision to try a tool from its continued use.",
+            "Training attendance predicted trial, but it did not predict sustained use once the analysis accounted for whether the tool fitted existing work routines.",
+            "A manager concluded that training was unnecessary.",
+            "The researcher objected that the analysis concerned different stages: training could help workers reach the trial stage even if compatibility with routines better explained what happened afterward.",
+            "An intervention can be important early in a process without being the principal determinant at every later stage.",
+            "The findings therefore suggest coordinating training with changes in work organization, rather than inferring that either factor alone is sufficient."
+          ],
+          "answer": 5,
+          "explanation": "The final sentence draws together the preceding evidence and states the author’s conclusion."
+        }
+      ]
+    }
+  ]
+}
