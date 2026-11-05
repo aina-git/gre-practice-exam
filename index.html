@@ -2374,7 +2374,8 @@ function explainMathStep(){ const l=MATH_LESSONS.find(x=>x.id===mathLesson.id); 
 function askOwnMathQuestion(){ const question=$('math-own-question').value.trim(); if(!question){ $('math-own-question').focus(); return; } openTeacher({math:true,question}); }
 function updateLearningStatus(){
   const ready=aiReady();
-  const status=ready&&S.aiConnection?.state==='connected'?'AI teacher connected · GPT-6.1 Terra · High':ready?'AI key added. Ask a question to check the connection.':'AI needs a connection. Worked lessons are ready to use.';
+  const model=S.settings.provider==='openai-server'?'GPT-6.1 Terra':S.settings.model;
+  const status=ready&&S.aiConnection?.state==='connected'?'AI teacher connected · '+model:ready?'AI selected: '+model+'. Ask a question to check this connection.':'AI needs a connection. Worked lessons are ready to use.';
   const home=$('learning-ai-status'); if(home) home.textContent=status;
   const math=$('math-ai-status'); if(math) math.textContent=status;
 }
