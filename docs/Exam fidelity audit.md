@@ -1,5 +1,9 @@
 # GRE General Test exam fidelity audit
 
+**November 5, 2026 update:** At the learner’s request, every practice mode now supports a genuine paused clock, including full simulation. Opening the teacher pauses the current question; closing or reloading saves a paused snapshot. Teaching is available before submission, and the learner can request hints, one-step instruction, or a full solution. The October 14 timing and no-pause observations below are historical and superseded by this change. Current checks cover repeated pause/resume through all five sections and preservation of completed work. The app is a learning and practice tool; pausable, assisted attempts do not reproduce uninterrupted test-day conditions.
+
+The bank now has 418 written verbal questions, 36 Issue prompts, and 80 maths generator templates. These counts are content inventory, not proof of equivalent ETS difficulty. A live GPT-6.1-Terra response remains unverified until API access is supplied.
+
 Reviewed against ETS public materials on October 14, 2026. This is an independent practice implementation. It is not affiliated with ETS. The authenticated POWERPREP application and paid tests were not accessed. Requirements below come from ETS's published pages and calculator guide, rather than inspection of proprietary software or source code.
 
 ## Published requirements and implementation

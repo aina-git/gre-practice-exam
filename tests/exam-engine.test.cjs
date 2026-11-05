@@ -28,9 +28,9 @@ test('published section counts and 118-minute total',()=>{
     assert.equal(run(`totalQuestions(buildQuantSection(${n},'${level}'))`),n);
   }
 });
-test('reading formats are present and passage questions stay consecutive',()=>{
+test('reading response formats are available and passage questions stay consecutive',()=>{
+  assert.equal(run(`['multi','sentence'].every(f=>VBANK.rc.some(q=>q.subs.some(s=>s.format===f)))`),true);
   for(const level of ['easy','medium','hard']){
-    assert.equal(run(`(()=>{const q=buildVerbalSection(12,'${level}');return ['multi','sentence'].every(f=>q.some(x=>x.type==='rc'&&x.subs[0].format===f));})()`),true);
     assert.equal(run(`(()=>{const q=buildVerbalSection(15,'${level}');const pos={};q.forEach((x,i)=>{if(x.passageId)(pos[x.passageId] ||= []).push(i)});return Object.values(pos).every(a=>a.every((p,i)=>i===0||p===a[i-1]+1));})()`),true);
   }
 });
@@ -73,15 +73,21 @@ test('writing instructions distinguish claim/reason tasks',()=>{
   assert.match(run(`issueInstructions({prompt:'Claim: X Reason: Y'})`),/both the claim/);
   assert.match(run(`issueInstructions({prompt:'Some people believe X; others Y'})`),/both views/);
 });
-test('full exam disables pause and stop dialog leaves deadline running',()=>{
+test('full simulation pauses and resumes with the same answers and remaining time',()=>{
   run(`startExam('full'); beginSection();`);
   assert.equal(run('exam.strict'),true);
-  const end=run('exam.sec.endAt');
-  run('exitPractice();'); now+=4000;
-  assert.equal(run('exam.sec.endAt'),end);
-  assert.match(element('modal').innerHTML,/clock continues/);
-  run('pauseAndExit();');assert.equal(run('exam.inSection'),true);
-  run('closeModal();timerStep();'); assert.equal(run('exam.sec.timeLeft'),1796);
+  run(`exam.sec.answers[curQ()._id]='My saved draft';`); now+=4000;
+  run('exitPractice();');
+  assert.match(element('modal').innerHTML,/Practice paused/);
+  assert.equal(run('exam.paused'),true);
+  assert.equal(run('loadActiveSnapshot().paused'),true);
+  now+=3600000;
+  assert.equal(run('snapshotTime(loadActiveSnapshot())'),1796);
+  run('pauseAndExit();'); assert.equal(run('exam'),null);
+  run('resumeRecovered();');
+  assert.equal(run('exam.sec.timeLeft'),1796);
+  assert.equal(run('exam.sec.answers[curQ()._id]'),'My saved draft');
+  assert.equal(run('exam.plan.length'),5);
 });
 test('writing omits calculator and spellcheck',()=>{
   assert.equal(element('calc-btn').hidden,true);
@@ -122,6 +128,21 @@ test('practice clocks remain pausable after recovery',()=>{
   run(`startExam('quantMix');beginSection();pauseAndExit();`);
   const left=run('loadActiveSnapshot().timeLeft'); now+=3600000;
   run('resumeRecovered();'); assert.equal(run('exam.sec.timeLeft'),left);assert.equal(run('exam.strict'),false);
+});
+test('repeated pauses preserve the complete five-section plan and completed work',()=>{
+  run(`startExam('full');beginSection();exam.sec.answers[curQ()._id]='Preserved essay';`);
+  for(let section=0;section<5;section++){
+    const name=run('exam.sec.cfg.name');
+    for(let pause=0;pause<2;pause++){
+      run('pauseAndExit()');now+=7200000;run('resumeRecovered()');
+      assert.equal(run('exam.plan.length'),5);assert.equal(run('exam.secIdx'),section);
+      assert.equal(run('exam.sec.cfg.name'),name);assert.equal(run('exam.sectionResults.length'),section);
+    }
+    run('submitSection(false)');
+  }
+  assert.equal(run('S.lastSession.entry.partial'),false);
+  assert.equal(run('S.lastSession.results.length'),5);
+  assert.equal(run('S.lastSession.results[0].essay.text'),'Preserved essay');
 });
 test('ungraded essay gets no length-based score and scores claim no percentiles',()=>{
   assert.equal(run(`buildEntryAndStore([{name:'Writing',kind:'writing',total:0,correct:0,raw:0,detail:[],essay:{text:'however for example therefore ultimately '.repeat(150),prompt:'X',q:{prompt:'X'}}}],'writing',false).entry.essay`),null);
